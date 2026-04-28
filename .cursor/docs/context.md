@@ -131,6 +131,31 @@ Imports típicos nas páginas: `@design/...`, `@shared/...`, `@client/components
 
 ---
 
+## Dev runner multi-shell (`run.sh`)
+
+Script na raiz do monorepo que lança em paralelo os processos de dev necessários para um cliente e expõe um TUI único onde se alterna entre as shells com as setas do teclado.
+
+### Uso
+
+```bash
+./run.sh --client:mecarvit   # frontend (cht-base CLIENT=mecarvit) + backend (cht-backend-mecarvit)
+./run.sh --client:dev        # apenas cht-base em modo dev (rotas de laboratório), sem backend
+./run.sh                     # equivalente a --client:dev
+```
+
+### Comportamento
+
+- Cada processo (`front-end`, `back-end`, ...) corre num **process group** próprio (`setsid`) com saída line-buffered (`stdbuf -oL -eL`) escrita para um log temporário em `/tmp/cht-run-XXXXXX/<i>.log`.
+- O TUI usa **alternate screen** (`tput smcup`) e input raw; renderiza um header tipo `[ X front-end ] / [ back-end ]` e o `tail` do log da shell ativa, redesenhando a cada ~300 ms.
+- Teclas: **`←` / `→`** (ou `h` / `l`) alternam a shell focada; **`q`** ou `Ctrl+C` encerra tudo (envia `SIGTERM` ao process group, `SIGKILL` se algum sobreviver).
+- Se o cliente escolhido não tem backend (caso de `dev`), só o front-end aparece.
+
+### Adicionar novos clientes
+
+Dentro do `case "$CLIENT"` em `run.sh`, acrescentar um bloco que faça `NAMES+=`, `DIRS+=` e `CMDS+=` para cada processo do cliente. O número de tabs ajusta-se automaticamente.
+
+---
+
 ## Ficheiros-chave para navegação rápida
 
 - `cht-base/vite.config.ts` — cliente ativo, alias `@client`, `__CLIENT_CONFIG__`.
@@ -141,3 +166,4 @@ Imports típicos nas páginas: `@design/...`, `@shared/...`, `@client/components
 - `cht-base/src/clientRouter.ts` — `buildClientPageChildren()` a partir de `pages/**/*.vue`.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.
 - `cht-base/src/main.ts` — plugins, título.
+- `run.sh` — dev runner multi-shell (frontend + backend por cliente, alternância com setas).
