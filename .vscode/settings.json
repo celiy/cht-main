@@ -1,0 +1,44 @@
+{
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+
+    "editor.codeActionsOnSave": {
+        "source.removeUnusedImports": "explicit",
+        "source.fixAll.eslint": "explicit"
+    },
+
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/dist/**": true,
+        "**/out/**": true
+    },
+
+    "search.useIgnoreFiles": false,
+    "search.useGlobalIgnoreFiles": false,
+
+    "files.trimFinalNewlines": true,
+    "files.insertFinalNewline": false,
+
+    "git.autoRepositoryDetection": "subFolders",
+    "git.repositoryScanMaxDepth": 10,
+    "git.openRepositoryInParentFolders": "always",
+    "git.scanRepositories": [
+        "cht-backend-mecarvit",
+        "cht-shared"
+    ],
+
+    "files.exclude": {
+        "**/*.map": true
+    },
+
+    "search.exclude": {
+        "**/dist/**": true,
+        "**/out/**": true,
+        "**/node_modules/**": true,
+        "**/*.map": true
+    }
+}

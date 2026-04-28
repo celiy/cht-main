@@ -1,0 +1,32 @@
+{
+    "recommendations": [
+        "aaron-bond.better-comments",
+        "apouuuuuuu.section-bloc",
+        "attilabuti.vscode-mjml",
+        "bierner.comment-tagged-templates",
+        "commita.lua-templates",
+        "dbaeumer.vscode-eslint",
+        "docker.docker",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "formulahendry.auto-complete-tag",
+        "formulahendry.auto-rename-tag",
+        "ghmcadams.lintlens",
+        "heybourn.headwind",
+        "lihui.vs-color-picker",
+        "mads-hartmann.bash-ide-vscode",
+        "mikestead.dotenv",
+        "mrmlnc.vscode-duplicate",
+        "ms-vscode.hexeditor",
+        "naumovs.color-highlight",
+        "pkief.material-icon-theme",
+        "shd101wyy.markdown-preview-enhanced",
+        "sukumo28.wav-preview",
+        "timonwong.shellcheck",
+        "vincaslt.highlight-matching-tag",
+        "voorjaar.windicss-intellisense",
+        "vue.volar",
+        "yinfei.luahelper",
+        "EditorConfig.EditorConfig"
+    ]
+}
