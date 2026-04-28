@@ -26,7 +26,15 @@
     "git.autoRepositoryDetection": "subFolders",
     "git.repositoryScanMaxDepth": 10,
     "git.openRepositoryInParentFolders": "always",
+    "git.enabled": true,
+    "git.decorations.enabled": true,
+    "explorer.decorations.colors": true,
+    "explorer.decorations.badges": true,
+    "scm.alwaysShowRepositories": true,
     "git.scanRepositories": [
+        "cht-base",
+        "cht-design-system",
+        "cht-client-mecarvit",
         "cht-backend-mecarvit",
         "cht-shared"
     ],
