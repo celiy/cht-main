@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "install": "bash install.sh",
+    "install:mecarvit": "bash install.sh --client:mecarvit",
     "dev": "bash run.sh",
     "dev:mecarvit": "bash run.sh --client:mecarvit",
     "sync:deps": "node sync-common-deps.mjs"
