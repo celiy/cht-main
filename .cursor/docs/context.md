@@ -6,6 +6,7 @@
 > - [context.md](./context.md) — Visão geral do workspace, mapa mental e arquitetura multi-cliente (`cht-base` + clientes).
 > - [code-guidelines.md](../rules/code-guidelines.md) — Regras de estilo e consistência de código.
 > - [document-guide.md](../rules/document-guide.md) — Guia de documentação.
+> - [deps_sync.md](./deps_sync.mdd) — Documentação sobre a sincronização de depenencias.
 
 ---
 

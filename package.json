@@ -1,0 +1,9 @@
+{
+  "name": "cht-main",
+  "private": true,
+  "scripts": {
+    "install": "bash install.sh",
+    "dev": "bash run.sh",
+    "sync:deps": "node sync-common-deps.mjs"
+  }
+}
