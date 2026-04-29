@@ -4,6 +4,7 @@
   "scripts": {
     "install": "bash install.sh",
     "dev": "bash run.sh",
+    "dev:mecarvit": "bash run.sh --client:mecarvit",
     "sync:deps": "node sync-common-deps.mjs"
   }
 }
