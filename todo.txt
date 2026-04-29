@@ -2,7 +2,7 @@ backend:
     - Senha tem que ter entre 6 e 24 caracteres.
     - Nome tem que conter apenas letras e letras com acentos.
     
-    Novas entidades que são incomuns como a do Usuário não devem vir da shared como por exemplo funcionários. 
+    Mover entidades do shared para backend
 
 Components:
     - ProgressBar: Componente que mostra o progresso de 0% a 100% em forma redonda ou horizontal. Mostrar uma "régua" com os numeros do max a min, mostrar uma label flutuante no centro do componente que mostra o valor atual,
@@ -20,7 +20,7 @@ Components:
         - automaticamente mandar forms do formato que aceita arquivos como midia;
         - Pressionar enter enquanto com um campo ativo no form da submit dele;
         - Opção de dar submit com Enter quando não há botões visiveis de submit dentro da tag do form;
-        - Enter do textarea não afeta submit;
+        - Enter do textarea não afeta submit mas insere nova linha;
     
 Custom components:
     - ConfirmationModal: Componente que é um botão que abre um modal com uma pergunta e return true ou false se usuário concorda ou não com modal. Fazer o mesmo mas também apenas para um alerta, confirmação que o usuário entendeu (Criar variantes destructive, success, warning e normal).
