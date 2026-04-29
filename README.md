@@ -58,6 +58,14 @@ npm run install
 
 Isso executa o `install.sh` para clonar repositórios necessários e rodar `npm i` em cada pasta com `package.json`.
 
+Para instalar também os repositórios do cliente Mecarvit (frontend e backend):
+
+```bash
+npm run install -- --client:mecarvit
+```
+
+Isso irá clonar além dos repositórios padrão, os específicos do cliente (`cht-client-mecarvit` e `cht-backend-mecarvit`), e instalar as dependências em todos eles.
+
 ### 2) Rodar ambiente de desenvolvimento
 
 Modo dev padrão:
@@ -88,4 +96,3 @@ node sync-common-deps.mjs
 
 - Se você editar manualmente `common-dependencies.json`, a próxima execução do sync respeita esse arquivo.
 - Para detalhes completos da sincronização de dependências, veja `DEPENDENCY_SYNC.md`.
-
