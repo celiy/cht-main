@@ -1,12 +1,8 @@
 backend:
     - Senha tem que ter entre 6 e 24 caracteres.
     - Nome tem que conter apenas letras e letras com acentos.
-    
-    Mover entidades do shared para backend
 
 Components:
-    - ProgressBar: Componente que mostra o progresso de 0% a 100% em forma redonda ou horizontal. Mostrar uma "régua" com os numeros do max a min, mostrar uma label flutuante no centro do componente que mostra o valor atual,
-
     - FormHandler: Da handle de ações de form e etc. É um wrapper para os inputs dentro dele.
         - Quando usuário da submit ele envia todos os inputs pelo seus id's junto com os seus valores, quando envia para o back e o back retorna um erro com o nome do campo e mensagem, ele pega o nome do campo que é o id do input e retorna o erro para o front-end. No caso ele deve emitir por @errors um valor que contém os campos e erros de cada.
         - Passar a rota que é para enviar para o back;
