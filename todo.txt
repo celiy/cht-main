@@ -19,8 +19,6 @@ Components:
         - Enter do textarea não afeta submit mas insere nova linha;
     
 Custom components:
-    - ConfirmationModal: Componente que é um botão que abre um modal com uma pergunta e return true ou false se usuário concorda ou não com modal. Fazer o mesmo mas também apenas para um alerta, confirmação que o usuário entendeu (Criar variantes destructive, success, warning e normal).
-
     - Select Search: Pesquisa local está pronta, apenas implementar pesquisa remota. Pesquisa remota muda o icone da lupa para o simbolo de loading.
 
     - Data Group: inclui o componente Data Table e Search Component, fazendo os dois trabalharem juntos; 
