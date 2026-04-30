@@ -5,6 +5,7 @@
     "scripts": {
         "install:repos": "bash install.sh",
         "dev": "bash run.sh",
+        "build": "bash build.sh",
         "sync:deps": "node sync-common-deps.mjs",
         "sync:tsconfig": "node scripts/sync-tsconfig.mjs"
     },

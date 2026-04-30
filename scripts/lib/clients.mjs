@@ -151,6 +151,17 @@ export function parseClientFlag(argv) {
     return { client, rest };
 }
 
+/**
+ * Parse a positional client argument, e.g.:
+ *   npm run build -- mecarvit
+ *   ./build.sh mecarvit
+ */
+export function parsePositionalClientArg(argv) {
+    const args = argv.filter((arg) => !!arg && !arg.startsWith("-"));
+
+    return args[0] || null;
+}
+
 export function buildProcessList(resolved) {
     const procs = [];
 

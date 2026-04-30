@@ -28,6 +28,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `clients.json`: fonte única de verdade do monorepo (lista de clientes + repositórios compartilhados).
 - `install.sh` / `scripts/install.mjs`: clona repositórios (shared + cliente) e instala dependências.
 - `run.sh` / `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
+- `build.sh` / `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
 - `sync-common-deps.mjs`: sincronizador de dependências comuns entre repos.
 - `common-dependencies.json`: arquivo-base de versões compartilhadas.
 
@@ -90,7 +91,22 @@ A sintaxe é genérica: para qualquer cliente declarado em `clients.json`, basta
 
 O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou `h`/`l`) para alternar tabs, `r` reinicia o processo ativo, `c` limpa o buffer, `q` (ou `Ctrl+C`) encerra. URLs detectados nos logs aparecem como hyperlinks clicáveis na status bar.
 
-### 3) Sincronizar dependências compartilhadas
+### 3) Build/export de frontend por cliente
+
+```bash
+./build.sh mecarvit
+# ou: npm run build -- mecarvit
+```
+
+O script executa o build do `cht-base` para o cliente informado e exporta o artefato em:
+
+```text
+builds/mecarvit/dist
+```
+
+Se `builds/<cliente>/dist` já existir, ele é removido e recriado (replace total).
+
+### 4) Sincronizar dependências compartilhadas
 
 ```bash
 npm run sync:deps
