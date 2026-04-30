@@ -17,12 +17,16 @@ const TSCONFIG_PATH = path.join(ROOT_DIR, "cht-base", "tsconfig.app.json");
 
 function buildClientPaths() {
     const names = listClientNames();
+    const paths = ["./src/devApp/*"];
 
     if (names.length === 0) {
-        return [`../cht-client-_/src/*`];
+        return paths;
     }
 
-    return names.map((name) => `../cht-client-${name}/src/*`);
+    return [
+        ...paths,
+        ...names.map((name) => `../cht-client-${name}/src/*`)
+    ];
 }
 
 function arraysEqual(a, b) {
