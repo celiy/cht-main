@@ -13,6 +13,9 @@
 #   ./run.sh --client:mecarvit   # cht-base (CLIENT=mecarvit) + cht-backend-mecarvit
 #   ./run.sh --client:dev        # only cht-base in plain dev mode (no backend)
 #   ./run.sh                     # same as --client:dev
+#
+# Before spawning, default Vite ports 5173 and 5174 are freed so stale dev
+# servers do not block startup (uses fuser when available, else lsof + kill).
 
 set -u
 
@@ -82,6 +85,28 @@ esac
 NUM=${#NAMES[@]}
 
 # ---------------------------------------------------------------------------
+# Free common Vite dev ports (5173 primary, 5174 strictPort / second instance)
+# ---------------------------------------------------------------------------
+
+free_default_vite_ports() {
+    local p pids
+
+    for p in 5173 5174; do
+        if command -v fuser >/dev/null 2>&1; then
+            fuser -k "${p}/tcp" 2>/dev/null || true
+        else
+            pids="$(lsof -t -i:"$p" 2>/dev/null || true)"
+            if [[ -n "$pids" ]]; then
+                # shellcheck disable=SC2086
+                kill $pids 2>/dev/null || true
+            fi
+        fi
+    done
+
+    sleep 0.15
+}
+
+# ---------------------------------------------------------------------------
 # Spawn processes
 #
 # Each child writes to its own log file so the TUI can show whichever one is
@@ -118,6 +143,8 @@ cleanup() {
 
 STTY_SAVED="$(stty -g)"
 trap cleanup INT TERM EXIT
+
+free_default_vite_ports
 
 for i in $(seq 0 $((NUM - 1))); do
     log_file="$LOG_DIR/$i.log"
