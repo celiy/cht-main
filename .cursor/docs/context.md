@@ -53,7 +53,7 @@ Ao adicionar um cliente novo: criar `configs/<nome>.ts` (com `sidebarNav`), impo
 
 ### TypeScript no base
 
-- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*` (o path de `@client` aponta para o cliente “default” usado no IDE, ex.: `../cht-client-mecarvit/src`; ao mudar de cliente foco, pode atualizar-se manualmente).
+- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir de `clients.json` por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro arquivo que existe no disco, listar todos os clientes conhecidos faz o IDE/`vue-tsc` "achar" automaticamente o cliente que estiver clonado, sem edição manual. O alias de runtime é resolvido separadamente via `process.env.CLIENT` em `vite.config.ts`.
 - `cht-base/tsconfig.node.json` — inclui `configs/**/*.ts` para typecheck do Vite/configs.
 - `cht-base/src/types/client-config.d.ts` — declara o global `__CLIENT_CONFIG__`.
 
@@ -192,7 +192,7 @@ scripts/
 1. Adicionar entry em [clients.json](../../clients.json) com `name`, `frontend.repo` e (se houver) `backend.repo`.
 2. Em `cht-base/package.json`, criar o script `cross-env CLIENT=<name> vite` com o nome do cliente (mantém a convenção `frontend.script = <name>`).
 3. Em `cht-base/configs/`, registrar `<name>.ts` com `siteTitle` + `sidebarNav` e adicionar no `registry` de `configs/index.ts`. `clientDir` é **opcional** — quando omitido, o build assume `cht-client-<name>` automaticamente.
-4. Pronto: `./run.sh --client:<name>` e `./install.sh --client:<name>` já funcionam sem mais edições.
+4. Pronto: `./run.sh --client:<name>` e `./install.sh --client:<name>` já funcionam sem mais edições. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npm run sync:tsconfig`), então o IDE encontra o novo cliente sem editar tsconfig à mão.
 
 ---
 

@@ -2,6 +2,7 @@ import React from "react";
 import { render } from "ink";
 import { parseClientFlag, resolveClient, buildProcessList, getVitePorts, listClientNames } from "../lib/clients.mjs";
 import { ProcessManager, freePorts } from "../lib/procManager.mjs";
+import { syncTsconfig } from "../sync-tsconfig.mjs";
 import { App } from "./App.jsx";
 
 function printHelp() {
@@ -26,6 +27,10 @@ async function main() {
     const { client } = parseClientFlag(argv);
     const resolved = resolveClient(client);
     const specs = buildProcessList(resolved);
+
+    // Keep cht-base/tsconfig.app.json in sync with clients.json before
+    // entering the alternate screen (silent unless something changes).
+    syncTsconfig({ silent: true });
 
     if (specs.length === 0) {
         console.error("No processes resolved for client.");

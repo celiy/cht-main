@@ -2,10 +2,8 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { getRootDir, getSharedRepos, parseClientFlag, resolveClient } from "./lib/clients.mjs";
-
-const HERE = path.dirname(fileURLToPath(import.meta.url));
+import { syncTsconfig } from "./sync-tsconfig.mjs";
 
 function repoNameFromUrl(url) {
     const last = url.split("/").pop() || "";
@@ -71,6 +69,8 @@ function main() {
             gitClone(resolved.backend.repo, root);
         }
     }
+
+    syncTsconfig();
 
     if (fs.existsSync(path.join(root, "package.json"))) {
         npmInstall(root);

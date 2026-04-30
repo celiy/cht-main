@@ -5,7 +5,8 @@
     "scripts": {
         "install:repos": "bash install.sh",
         "dev": "bash run.sh",
-        "sync:deps": "node sync-common-deps.mjs"
+        "sync:deps": "node sync-common-deps.mjs",
+        "sync:tsconfig": "node scripts/sync-tsconfig.mjs"
     },
     "dependencies": {
         "ink": "^7.0.1",
