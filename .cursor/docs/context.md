@@ -16,10 +16,10 @@ Pastas irmãs sob o mesmo diretório pai (ex.: `cht-project/`):
 
 | Pasta | Função |
 |-------|--------|
-| **cht-base** | Runner do front-end: Vite + Vue + `vue-router`, shell da app (`App.vue`), plugin de estado global (`$project`), roteamento file-based para clientes, integração com design system e shared. |
+| **cht-base** | Boot técnico do front-end: Vite + Vue + `vue-router` (criado em `main.ts`), plugins (`$project`, toast, etc.), integração com design system e shared. **Não** define rotas nem layout da app — isso vive no cliente (`@client/App.vue`, `@client/routes.ts`) ou no stub de dev (`src/devApp/`). |
 | **cht-design-system** | Componentes Vue reutilizáveis e tokens de UI. Consumido pelo base (e por páginas de cliente) via alias `@design/*`. |
 | **cht-shared** | Código partilhado (utilitários, validadores, etc.). Consumido via alias `@shared/*`. |
-| **cht-client-&lt;nome&gt;** | Um repositório por cliente: apenas páginas, componentes locais e `js` específicos. Não contém o servidor Vite; é importado pelo `cht-base` em tempo de build. |
+| **cht-client-&lt;nome&gt;** | App do cliente: `App.vue`, `routes.ts`, layouts, `pages/`, componentes e `js`. Não contém o servidor Vite; o `cht-base` importa `@client/*` em tempo de build. |
 
 Instalação de dependências em todos os pacotes com `package.json` no diretório pai: ver `cht-shared/install.sh` (percorre pastas irmãs e corre `npm i`).
 
@@ -29,57 +29,39 @@ Instalação de dependências em todos os pacotes com `package.json` no diretór
 
 ### Ideia
 
-- O **base** é o único ponto de entrada (`main.ts`, `vite.config.ts`, `Router.ts`).
-- Cada **cliente** é uma pasta irmã (`../<clientDir>`), tipicamente `cht-client-mecarvit`, com `src/pages`, `src/components`, `src/js`.
-- A variável de ambiente **`CLIENT`** escolhe qual config e qual pasta de código carregar (nome lógico do cliente, ex.: `mecarvit`).
-- Sem `CLIENT` (`npm run dev`), o base corre em **modo dev interno**: só as rotas de laboratório em `cht-base` (ex.: `/devDesign`, `/devForm`), definidas em `cht-base/src/Router.ts`.
+- O **base** é o ponto de entrada técnico (`main.ts`, `vite.config.ts`): monta a app Vue, regista plugins e cria o `vue-router` com as rotas importadas de **`@client/routes.ts`**.
+- Cada **cliente** é uma pasta irmã (`../<clientDir>/src`), tipicamente `cht-client-mecarvit`, com **`App.vue`** (raiz com `<RouterView />`), **`routes.ts`** (árvore de rotas explícita), layouts opcionais, `pages/`, `components/`, `js/`.
+- A variável de ambiente **`CLIENT`** escolhe qual `ClientConfig` carregar e para onde o alias **`@client`** aponta (pasta `src` do cliente).
+- Sem `CLIENT` (`npm run dev`), o alias **`@client`** aponta para **`cht-base/src/devApp/`** — um “cliente fictício” interno com as mesmas entradas obrigatórias (`App.vue`, `routes.ts`) e rotas de laboratório (`/`, `/devDesign`, `/devForm`) com sidebar definida em código (`devNav.ts`), não em config.
 
-### Configs (cliente e dev)
+### Configs (cliente — só metadados de build)
 
 - Local: `cht-base/configs/`.
-- `types.ts` — `ClientConfig` (`name`, `clientDir`, `siteTitle`, **`sidebarNav`**), `DevShellConfig` (modo dev), tipos `SidebarNavItem`, etc.
-- `dev.ts` — shell quando não há `CLIENT`: `siteTitle` e **`sidebarNav`** (rotas de laboratório, ex. `/devDesign`, `/devForm`).
-- Um ficheiro por cliente, ex.: `mecarvit.ts` — inclui **`sidebarNav`** além de `siteTitle` e `clientDir`.
-- `index.ts` — registo de clientes e `loadConfig(name)` usado em `vite.config.ts`; reexporta `devShellConfig`.
+- `types.ts` — `ClientConfig`: `name`, `siteTitle`, `clientDir?` (sem sidebar nem UI).
+- Um ficheiro por cliente, ex.: `mecarvit.ts` — `name` + `siteTitle` (+ `clientDir` opcional).
+- `index.ts` — registo e `loadConfig(name)` usado em `vite.config.ts` para resolver pasta do cliente e `import.meta.env.VITE_SITE_TITLE`.
 
-Ao adicionar um cliente novo: criar `configs/<nome>.ts` (com `sidebarNav`), importar e registar em `configs/index.ts`, e adicionar script npm em `cht-base/package.json` (`cross-env CLIENT=<nome> vite`).
+Ao adicionar um cliente novo: criar `configs/<nome>.ts`, importar e registar em `configs/index.ts`, e adicionar script npm em `cht-base/package.json` (`cross-env CLIENT=<nome> vite`).
 
 ### Build-time (Vite)
 
 - Ficheiro: `cht-base/vite.config.ts`.
-- Lê `process.env.CLIENT`, carrega o config correspondente, resolve o caminho físico do cliente: `path.resolve(__dirname, "..", clientDir, "src")`.
-- Alias **`@client`** → `../<clientDir>/src` quando há cliente ativo; se não houver cliente, aponta para um **stub** vazio (`cht-base/src/_clientStub`) para `import.meta.glob` continuar válido.
-- **`define`:** `__CLIENT_CONFIG__` — serialização JSON do config ativo ou `null` em modo dev puro.
+- Lê `process.env.CLIENT`, `loadConfig(clientName)`; resolve `clientDir` (convenção `cht-client-<name>` se omitido).
+- Alias **`@client`** → `../<clientDir>/src` quando há cliente; **sem** `CLIENT`, aponta para **`./src/devApp`** (mesma forma de import: `@client/App.vue`, `@client/routes.ts`).
+- **`define`:** `import.meta.env.VITE_SITE_TITLE` — string JSON do título (`siteTitle` do config do cliente ou `"cht-base dev"` no modo dev).
 
 ### TypeScript no base
 
-- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir de `clients.json` por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro arquivo que existe no disco, listar todos os clientes conhecidos faz o IDE/`vue-tsc` "achar" automaticamente o cliente que estiver clonado, sem edição manual. O alias de runtime é resolvido separadamente via `process.env.CLIENT` em `vite.config.ts`.
+- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir de `clients.json` por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro ficheiro que existe no disco, listar todos os clientes conhecidos ajuda o IDE. O alias de runtime continua a ser resolvido por `vite.config.ts` conforme `CLIENT`.
 - `cht-base/tsconfig.node.json` — inclui `configs/**/*.ts` para typecheck do Vite/configs.
-- `cht-base/src/types/client-config.d.ts` — declara o global `__CLIENT_CONFIG__`.
+- `cht-base/src/env.d.ts` — tipa `import.meta.env.VITE_SITE_TITLE` (entre outros `vite/client`).
 
-### Roteamento file-based (páginas do cliente)
+### Rotas e UI (responsabilidade do cliente)
 
-- Ficheiro: `cht-base/src/clientRouter.ts`.
-- Usa `import.meta.glob("@client/pages/**/*.vue")` e gera rotas `vue-router`.
-- Conversão de ficheiro → path HTTP:
-  - `pages/index.vue` → `/`
-  - `pages/rota.vue` → `/rota`
-  - `pages/rota/caminho.vue` → `/rota/caminho`
-  - `pages/rota/index.vue` → `/rota`
-  - `pages/[id].vue` → `/:id`
-  - `pages/[id]/product.vue` → `/:id/product`
-- `cht-base/src/Router.ts` — se `__CLIENT_CONFIG__` existir, monta rotas de cliente com layout; caso contrário, rotas de dev do base (ver secção **Layouts e sidebar**).
-- `cht-base/src/clientRouter.ts` — `buildClientPageChildren()` gera rotas **filhas** (paths relativos ao pai `/`) a partir de `pages/**/*.vue`.
-
-### Layouts e sidebar (rotas aninhadas)
-
-- **`App.vue`** contém apenas `<RouterView />` (raiz da app).
-- **`cht-base/src/layouts/AppShellWithSidebar.vue`** — envolve o conteúdo com `Sidebar` do design system e um `<RouterView />` interior: é o **pai** das rotas que devem mostrar sidebar.
-- **`cht-base/src/layouts/AppShellPlain.vue`** — `<main>` + `<RouterView />` **sem** sidebar; usar como `component` de um pai de rotas (ex.: login, ecrã full-width) quando não quiseres sidebar.
-- **Modo dev** (`npm run dev`): rota pai `path: '/'` + `AppShellWithSidebar`; filhos `devDesign` → `/devDesign`, `devForm` → `/devForm` (views `DevDesign.vue` / `DevForm.vue` no base). Itens da sidebar vêm de **`cht-base/configs/dev.ts`** (`sidebarNav`); `cht-base/src/nav/sidebar.ts` apenas expõe `getSidebarNav()` que lê essa config ou `__CLIENT_CONFIG__.sidebarNav`.
-- **Modo cliente**: rota pai `path: '/'` + `AppShellWithSidebar`; filhos gerados por `buildClientPageChildren()` (paths relativos: `''` → `/`, `'foo'` → `/foo`, `':id/product'` → `/:id/product`, etc.). Navegação lateral: campo **`sidebarNav`** em `cht-base/configs/<cliente>.ts` (ex. `mecarvit.ts`).
-
-Para uma rota **sem** sidebar, adicionar em `Router.ts` (ou equivalente) um ramo top-level com `AppShellPlain` e os seus `children` — o padrão é o mesmo: layout = componente pai, páginas = filhos.
+- O **cliente** exporta **`routes.ts`** (`RouteRecordRaw[]` por defeito) e define layouts livremente (ex.: `layouts/MainLayout.vue` com `<Sidebar>` do design system + `<RouterView />`).
+- O **design system** fornece `Sidebar` (`@design/components/custom/Sidebar.vue`); o cliente passa `nav-items` como dados ou composição Vue — **não** há `sidebarNav` em `configs/`.
+- Rotas **sem** sidebar: definir no `routes.ts` um ramo sem componente layout (ex.: `/login` ao nível raiz).
+- **Modo dev** (`npm run dev`): rotas em `cht-base/src/devApp/routes.ts` + layout `DevLayout.vue` que reutiliza o mesmo `Sidebar` e views em `cht-base/src/views/` (`index.vue`, `DevDesign.vue`, `DevForm.vue`).
 
 ### Estado global `$project`
 
@@ -90,14 +72,14 @@ Para uma rota **sem** sidebar, adicionar em `Router.ts` (ou equivalente) um ramo
 
 ### Aplicar título do site
 
-- Com cliente ativo, `cht-base/src/main.ts` lê `__CLIENT_CONFIG__`, chama `projectActions.setSiteTitle` e define `document.title`.
+- `cht-base/src/main.ts` usa `import.meta.env.VITE_SITE_TITLE` (injeado no `vite.config.ts` a partir de `loadConfig`), chama `projectActions.setSiteTitle` e define `document.title`.
 
 ### Scripts npm (`cht-base/package.json`)
 
 | Script | Comportamento |
 |--------|----------------|
-| `npm run dev` | Vite sem `CLIENT` — modo dev do base (rotas `/devDesign`, `/devForm`). |
-| `npm run mecarvit` | `CLIENT=mecarvit` — rotas geradas a partir de `cht-client-mecarvit/src/pages`. |
+| `npm run dev` | Vite sem `CLIENT` — `@client` → `src/devApp` (rotas `/`, `/devDesign`, `/devForm`). |
+| `npm run mecarvit` | `CLIENT=mecarvit` — `@client` → `cht-client-mecarvit/src` (rotas definidas em `routes.ts` do cliente). |
 | `npm run build` / `build:mecarvit` | Build com ou sem cliente (alinhado ao plano). |
 
 Usa-se **`cross-env`** para `CLIENT=...` em ambientes Windows/Linux.
@@ -110,15 +92,19 @@ Usa-se **`cross-env`** para `CLIENT=...` em ambientes Windows/Linux.
 cht-client-mecarvit/
   package.json          # devDeps mínimas (TypeScript, Vue, tipos) para IDE e resolução de tsconfig
   tsconfig.json
-  tsconfig.app.json     # paths: @design, @shared, @client → ./src/*
+  tsconfig.app.json     # paths: @design, @shared, @base, @/* → ./src/* (aliases locais do cliente)
   src/
     env.d.ts
-    pages/              # única pasta escaneada pelo router file-based do base
+    App.vue             # raiz: normalmente só <RouterView />
+    routes.ts           # export default RouteRecordRaw[] — rotas explícitas
+    layouts/            # opcional: shells com Sidebar, múltiplos layouts por área, etc.
+    nav/                # opcional: itens passados ao Sidebar (dados ou lógica Vue)
+    pages/              # views importadas em routes.ts (não há scan automático pelo base)
     components/
     js/
 ```
 
-Imports típicos nas páginas: `@design/...`, `@shared/...`, `@client/components/...`, `@client/js/...`.
+Imports típicos: `@design/...`, `@shared/...`, `@client/components/...`, `@client/js/...`.
 
 ---
 
@@ -128,7 +114,7 @@ Imports típicos nas páginas: `@design/...`, `@shared/...`, `@client/components
 |-------|----------------------|
 | `@design/*` | `cht-design-system/src/*` |
 | `@shared/*` | `cht-shared/src/*` |
-| `@client/*` | `cht-client-<nome>/src/*` (definido pelo Vite conforme `CLIENT` + `clientDir` no config) |
+| `@client/*` | `cht-client-<nome>/src/*` com `CLIENT`; sem `CLIENT`, `cht-base/src/devApp/*` |
 
 ---
 
@@ -191,19 +177,17 @@ scripts/
 
 1. Adicionar entry em [clients.json](../../clients.json) com `name`, `frontend.repo` e (se houver) `backend.repo`.
 2. Em `cht-base/package.json`, criar o script `cross-env CLIENT=<name> vite` com o nome do cliente (mantém a convenção `frontend.script = <name>`).
-3. Em `cht-base/configs/`, registrar `<name>.ts` com `siteTitle` + `sidebarNav` e adicionar no `registry` de `configs/index.ts`. `clientDir` é **opcional** — quando omitido, o build assume `cht-client-<name>` automaticamente.
+3. Em `cht-base/configs/`, registrar `<name>.ts` com `siteTitle` (e `clientDir` opcional) e adicionar no `registry` de `configs/index.ts`. No repositório do cliente, criar `src/App.vue`, `src/routes.ts` e layouts/nav como precisares.
 4. Pronto: `./run.sh --client:<name>` e `./install.sh --client:<name>` já funcionam sem mais edições. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npm run sync:tsconfig`), então o IDE encontra o novo cliente sem editar tsconfig à mão.
 
 ---
 
 ## Ficheiros-chave para navegação rápida
 
-- `cht-base/vite.config.ts` — cliente ativo, alias `@client`, `__CLIENT_CONFIG__`.
-- `cht-base/configs/*` — configs por cliente.
-- `cht-base/src/Router.ts` — dev vs cliente; árvore de layouts (sidebar / plain).
-- `cht-base/src/layouts/AppShellWithSidebar.vue` / `AppShellPlain.vue` — shells com ou sem sidebar.
-- `cht-base/src/nav/sidebar.ts` — `getSidebarNav()` (lê `configs/dev` ou `__CLIENT_CONFIG__`).
-- `cht-base/src/clientRouter.ts` — `buildClientPageChildren()` a partir de `pages/**/*.vue`.
+- `cht-base/vite.config.ts` — `CLIENT`, alias `@client`, `VITE_SITE_TITLE`.
+- `cht-base/configs/*` — metadados por cliente (`name`, `siteTitle`, `clientDir?`).
+- `cht-base/src/devApp/*` — “cliente” interno para modo dev (`App.vue`, `routes.ts`, `DevLayout.vue`, `devNav.ts`).
+- `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.
-- `cht-base/src/main.ts` — plugins, título.
+- `cht-base/src/main.ts` — cria router a partir de `@client/routes`, monta `@client/App.vue`, plugins, título.
 - `run.sh` — dev runner multi-shell (frontend + backend por cliente, alternância com setas).

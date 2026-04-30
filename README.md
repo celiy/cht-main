@@ -20,7 +20,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 
 ## Estrutura do workspace
 
-- `cht-base`: app base Vue + Vite, roteamento e seleção de cliente.
+- `cht-base`: boot Vue + Vite + router; o cliente (`cht-client-*`) fornece `App.vue`, `routes.ts` e layouts; sem `CLIENT`, usa `cht-base/src/devApp` para laboratório.
 - `cht-design-system`: componentes e padrões visuais reutilizáveis.
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
 - `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
@@ -43,8 +43,8 @@ Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicio
 ## Como funciona (visão geral)
 
 1. `clients.json` define os clientes do monorepo (nome + repos opcionais). Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
-2. O `cht-base` funciona como shell principal e carrega o cliente ativo via `CLIENT=<name>`.
-3. O cliente define páginas/componentes específicos.
+2. O `cht-base` monta a app com o alias `@client` resolvido via `CLIENT=<name>` (ou `src/devApp` sem cliente).
+3. O cliente define rotas (`routes.ts`), layout e páginas/componentes específicos.
 4. O `run.sh` (wrapper para `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
 5. O `sync-common-deps.mjs` normaliza versões de dependências compartilhadas:
   - na primeira execução, gera `common-dependencies.json` com as versões mais recentes encontradas;
