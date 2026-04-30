@@ -3,6 +3,8 @@
 Workspace principal do template multi-cliente de Diogo Carvalho Viegas (Celi's Herstal Template).  
 Este repositório orquestra front-end base, clientes, backend(s), design system e código compartilhado.
 
+- <b>Painel do projeto no Netlify</b>: [cht-dev overview](https://app.netlify.com/projects/cht-dev/overview).
+
 ## O que o projeto faz
 
 O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente com uma base comum:
