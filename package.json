@@ -1,11 +1,18 @@
 {
-  "name": "cht-main",
-  "private": true,
-  "scripts": {
-    "install": "bash install.sh",
-    "install:mecarvit": "bash install.sh --client:mecarvit",
-    "dev": "bash run.sh",
-    "dev:mecarvit": "bash run.sh --client:mecarvit",
-    "sync:deps": "node sync-common-deps.mjs"
-  }
+    "name": "cht-main",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "install:repos": "bash install.sh",
+        "dev": "bash run.sh",
+        "sync:deps": "node sync-common-deps.mjs"
+    },
+    "dependencies": {
+        "ink": "^7.0.1",
+        "ink-spinner": "^5.0.0",
+        "react": "^19.2.5"
+    },
+    "devDependencies": {
+        "tsx": "^4.21.0"
+    }
 }

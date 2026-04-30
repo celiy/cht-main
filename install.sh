@@ -1,27 +1,22 @@
-# Parse flags
-INCLUDE_CLIENT_MECARVIT=false
-for arg in "$@"; do
-  if [ "$arg" = "--client:mecarvit" ]; then
-    INCLUDE_CLIENT_MECARVIT=true
-  fi
-done
+#!/usr/bin/env bash
+# install.sh - Thin wrapper that delegates to scripts/install.mjs.
+#
+# The actual install logic (clone repos from clients.json, npm install
+# in every sibling repo) lives in scripts/install.mjs. This wrapper
+# only ensures Node is available and forwards arguments.
+#
+# Usage:
+#   ./install.sh                   # clone shared repos only
+#   ./install.sh --client:<name>   # also clone client repos
 
-# Always clone these repositories
-git clone https://github.com/celiy/cht-base.git || true
-git clone https://github.com/celiy/cht-design-system.git || true
-git clone https://github.com/celiy/cht-shared.git || true
+set -u
 
-# Conditionally clone these repositories if --client:mecarvit flag is set
-if [ "$INCLUDE_CLIENT_MECARVIT" = true ]; then
-  git clone https://github.com/celiy/cht-client-mecarvit.git || true
-  git clone https://github.com/celiy/cht-backend-mecarvit.git || true
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
+
+if ! command -v node >/dev/null 2>&1; then
+    echo "Error: node not found. Install Node.js (v20+) and try again." >&2
+    exit 1
 fi
 
-for dir in */ ; do
-  if [ -f "$dir/package.json" ]; then
-    echo "Installing dependencies in $dir"
-    cd "$dir"
-    npm i
-    cd ..
-  fi
-done
+exec node "$ROOT_DIR/scripts/install.mjs" "$@"

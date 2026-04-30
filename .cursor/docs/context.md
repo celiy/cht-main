@@ -132,9 +132,9 @@ Imports típicos nas páginas: `@design/...`, `@shared/...`, `@client/components
 
 ---
 
-## Dev runner multi-shell (`run.sh`)
+## Dev runner multi-shell (TUI estilo htop)
 
-Script na raiz do monorepo que lança em paralelo os processos de dev necessários para um cliente e expõe um TUI único onde se alterna entre as shells com as setas do teclado.
+Runner moderno baseado em **Node + Ink (React no terminal)**: blocos com bordas, cores por status, hyperlinks clicáveis (OSC 8) e troca de tabs por teclado. O `run.sh` na raiz é apenas um wrapper fino que delega para `scripts/runner/index.jsx`.
 
 ### Uso
 
@@ -144,16 +144,55 @@ Script na raiz do monorepo que lança em paralelo os processos de dev necessári
 ./run.sh                     # equivalente a --client:dev
 ```
 
+Equivalente via npm: `npm run dev -- --client:mecarvit`.
+
+### Fonte única: `clients.json`
+
+A lista de clientes do monorepo vive em [clients.json](../../clients.json) na raiz. É lida pelo runner, pelo `scripts/install.mjs` e (indiretamente) pelos configs do `cht-base`. Convenções aplicadas automaticamente:
+
+- `frontend.dir` ⇒ default `cht-base` (a app shell). Pode ser sobrescrito.
+- `frontend.script` ⇒ default `<name>` (script npm em `cht-base/package.json`).
+- `frontend.clientDir` ⇒ default `cht-client-<name>` (pasta irmã do código do cliente).
+- `backend.dir` ⇒ default `cht-backend-<name>`. Cliente sem backend: omitir o bloco.
+- `backend.script` ⇒ default `dev`.
+- `shared.repos` ⇒ URLs sempre clonados pelo `install`.
+- `shared.vitePorts` ⇒ portas liberadas antes do dev (default `[5173, 5174]`).
+
+### Estrutura do código
+
+```
+scripts/
+  lib/
+    clients.mjs         # resolveClient, parseClientFlag, getSharedRepos, ...
+    procManager.mjs     # ProcessManager: spawn setsid + ring buffer + kill tree
+    ansiUtils.mjs       # stripAnsi, findUrls, osc8Link
+  runner/
+    index.jsx           # entrypoint: parse args, spawn, render Ink App
+    App.jsx             # layout (header + log pane + status bar)
+    components/
+      Header.jsx, ProcessTab.jsx, LogPane.jsx, StatusBar.jsx
+    hooks/
+      useProcesses.js, useKeyboard.js
+  install.mjs           # clona shared.repos + repos do cliente, npm i recursivo
+```
+
 ### Comportamento
 
-- Cada processo (`front-end`, `back-end`, ...) corre num **process group** próprio (`setsid`) com saída line-buffered (`stdbuf -oL -eL`) escrita para um log temporário em `/tmp/cht-run-XXXXXX/<i>.log`.
-- O TUI usa **alternate screen** (`tput smcup`) e input raw; renderiza um header tipo `[ X front-end ] / [ back-end ]` e o `tail` do log da shell ativa, redesenhando a cada ~300 ms.
-- Teclas: **`←` / `→`** (ou `h` / `l`) alternam a shell focada; **`q`** ou `Ctrl+C` encerra tudo (envia `SIGTERM` ao process group, `SIGKILL` se algum sobreviver).
-- Se o cliente escolhido não tem backend (caso de `dev`), só o front-end aparece.
+- Cada processo corre num **process group** próprio (`setsid`) com saída line-buffered (`stdbuf -oL -eL` quando disponível). Logs ficam em buffers em memória (~5000 linhas por processo) — sem arquivos temporários.
+- Cores ANSI dos processos (Vite, tsx, etc.) são preservadas com `FORCE_COLOR=1`.
+- URLs nos logs (`http(s)://...`) são detectados, deduplicados e renderizados como hyperlinks OSC 8 clicáveis na status bar (em terminais que suportam).
+- Teclas:
+  - **`←` / `→`** ou **`h` / `l`** — alterna a tab focada.
+  - **`r`** — restart do processo da tab ativa.
+  - **`c`** — limpa o buffer da tab ativa.
+  - **`q`** ou **`Ctrl+C`** — encerra tudo (SIGTERM no PGID, SIGKILL nos sobreviventes após 200 ms).
 
-### Adicionar novos clientes
+### Adicionar um cliente novo
 
-Dentro do `case "$CLIENT"` em `run.sh`, acrescentar um bloco que faça `NAMES+=`, `DIRS+=` e `CMDS+=` para cada processo do cliente. O número de tabs ajusta-se automaticamente.
+1. Adicionar entry em [clients.json](../../clients.json) com `name`, `frontend.repo` e (se houver) `backend.repo`.
+2. Em `cht-base/package.json`, criar o script `cross-env CLIENT=<name> vite` com o nome do cliente (mantém a convenção `frontend.script = <name>`).
+3. Em `cht-base/configs/`, registrar `<name>.ts` com `siteTitle` + `sidebarNav` e adicionar no `registry` de `configs/index.ts`. `clientDir` é **opcional** — quando omitido, o build assume `cht-client-<name>` automaticamente.
+4. Pronto: `./run.sh --client:<name>` e `./install.sh --client:<name>` já funcionam sem mais edições.
 
 ---
 

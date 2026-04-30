@@ -1,0 +1,22 @@
+{
+    "clients": [
+        {
+            "name": "mecarvit",
+            "siteTitle": "Mecarvit",
+            "frontend": {
+                "repo": "https://github.com/celiy/cht-client-mecarvit.git"
+            },
+            "backend": {
+                "repo": "https://github.com/celiy/cht-backend-mecarvit.git"
+            }
+        }
+    ],
+    "shared": {
+        "repos": [
+            "https://github.com/celiy/cht-base.git",
+            "https://github.com/celiy/cht-design-system.git",
+            "https://github.com/celiy/cht-shared.git"
+        ],
+        "vitePorts": [5173, 5174]
+    }
+}

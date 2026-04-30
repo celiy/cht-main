@@ -25,24 +25,28 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
 - `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
 - `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
-- `install.sh`: clona repositórios e instala dependências.
-- `run.sh`: runner de desenvolvimento com UI de múltiplos processos.
+- `clients.json`: fonte única de verdade do monorepo (lista de clientes + repositórios compartilhados).
+- `install.sh` / `scripts/install.mjs`: clona repositórios (shared + cliente) e instala dependências.
+- `run.sh` / `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `sync-common-deps.mjs`: sincronizador de dependências comuns entre repos.
 - `common-dependencies.json`: arquivo-base de versões compartilhadas.
 
 ## Clientes
 
-Atualmente, este workspace está preparado para:
+A lista de clientes vive em [`clients.json`](./clients.json). Atualmente:
 
 - **mecarvit**: frontend (`cht-client-mecarvit`) + backend (`cht-backend-mecarvit`)
-- **dev**: modo de desenvolvimento interno do `cht-base` (sem backend de cliente)
+- **dev**: modo de desenvolvimento interno do `cht-base` (cliente virtual, sem backend)
+
+Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicionar um cliente novo".
 
 ## Como funciona (visão geral)
 
-1. O `cht-base` funciona como shell principal e carrega o cliente ativo.
-2. O cliente define páginas/componentes específicos.
-3. O `run.sh` inicia os processos necessários conforme o cliente escolhido.
-4. O `sync-common-deps.mjs` normaliza versões de dependências compartilhadas:
+1. `clients.json` define os clientes do monorepo (nome + repos opcionais). Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
+2. O `cht-base` funciona como shell principal e carrega o cliente ativo via `CLIENT=<name>`.
+3. O cliente define páginas/componentes específicos.
+4. O `run.sh` (wrapper para `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
+5. O `sync-common-deps.mjs` normaliza versões de dependências compartilhadas:
   - na primeira execução, gera `common-dependencies.json` com as versões mais recentes encontradas;
   - nas próximas execuções, usa sempre esse arquivo como fonte da verdade.
 
@@ -52,33 +56,39 @@ No diretório raiz `cht-main`:
 
 ### 1) Instalar / preparar ambiente
 
-```bash
-npm run install
-```
-
-Isso executa o `install.sh` para clonar repositórios necessários e rodar `npm i` em cada pasta com `package.json`.
-
-Para instalar também os repositórios do cliente Mecarvit (frontend e backend):
+Apenas repositórios compartilhados:
 
 ```bash
-npm run install:mecarvit
+./install.sh
 ```
 
-Isso irá clonar além dos repositórios padrão, os específicos do cliente (`cht-client-mecarvit` e `cht-backend-mecarvit`), e instalar as dependências em todos eles.
+Incluindo repositórios de um cliente específico (ex.: mecarvit):
+
+```bash
+./install.sh --client:mecarvit
+```
+
+O `install.sh` é um wrapper para `scripts/install.mjs`. Ele lê `clients.json`, clona o que faltar (`|| skip` para repos já existentes) e roda `npm install` em cada pasta irmã com `package.json` (e na raiz, para preparar o runner).
 
 ### 2) Rodar ambiente de desenvolvimento
 
-Modo dev padrão:
+Modo dev padrão (apenas `cht-base`, sem backend):
 
 ```bash
-npm run dev
+./run.sh
+# ou: npm run dev
 ```
 
-Cliente Mecarvit:
+Cliente específico:
 
 ```bash
-npm run dev:mecarvit
+./run.sh --client:mecarvit
+# ou: npm run dev -- --client:mecarvit
 ```
+
+A sintaxe é genérica: para qualquer cliente declarado em `clients.json`, basta `--client:<name>`. Não há scripts hardcoded por cliente no `package.json` raiz.
+
+O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou `h`/`l`) para alternar tabs, `r` reinicia o processo ativo, `c` limpa o buffer, `q` (ou `Ctrl+C`) encerra. URLs detectados nos logs aparecem como hyperlinks clicáveis na status bar.
 
 ### 3) Sincronizar dependências compartilhadas
 
