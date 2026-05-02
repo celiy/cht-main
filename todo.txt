@@ -1,3 +1,14 @@
+Fazer a página de home mais bonita.
+Criar uma mini wiki que contém todo os componentes e variações estilo StoryBook.
+Renomear Dev design para Dev Playground
+Renomear Dev form para Form Renderer
+
+Navigator:
+    Estilo btn group bordered mas com dropdown ou botão normal com função para navbar
+
+Accordion:
+    Remover a parte de baixo da borda e fazer uma separada que fica colado com header clicavel, fazer a setinha de abrir e fechar reagir com estado instantaneo.
+
 backend:
     - Senha tem que ter entre 6 e 24 caracteres.
     - Nome tem que conter apenas letras e letras com acentos.
