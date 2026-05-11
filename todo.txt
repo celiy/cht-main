@@ -9,11 +9,22 @@ Navigator:
 Accordion:
     Remover a parte de baixo da borda e fazer uma separada que fica colado com header clicavel, fazer a setinha de abrir e fechar reagir com estado instantaneo.
 
+Table:
+    Revisar como a data é fornecida, pois no modelo atual, ele não disponibiliza muita liberdade e manipulação como por exemplo: um select com opções dentro de uma célula.
+
+Charts:
+    Os charts atual recebem uma data e valores e dão sort a partir destes valores com datas, fazer de forma mais genérica, onde os valores são passados mas invés de receber uma data e dar sort por isso, ele usa a ordem da array, de primeiro para ultimo e da sort por grupo, no caso os valores tem group, e group é o agrupamento que segue similar ao sort por data que viria algo como [{data: 123, group: 'jan'}, {data: 20, group: 'Jan'}, {data: 123, group: 'fev'} ] mostraria nos charts como duas barras, uma com valor 143 e a label embaixo que antes era de uma data mas agora "Jan". Fazer o mesmo para o wave chart. Mas, manter a lógica do dar sort por data, se a data vier com uma data e não group, ele irá manter a lógica existen de labels e sort por data.
+
 backend:
     - Senha tem que ter entre 6 e 24 caracteres.
     - Nome tem que conter apenas letras e letras com acentos.
 
 Components:
+    - Loader: Barra com sliding infinito de loading.
+    - Item: Mini card que tem mesmo estilo do select e radio em formato de card mas com ícone e cores diferentes.
+    - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
+    - Avatar: Avatar de perfil, imagem redonda, opção para vários perfis com +[num] caso tenha mais que o desejado e status de online, away, etc.
+
     - FormHandler: Da handle de ações de form e etc. É um wrapper para os inputs dentro dele.
         - Quando usuário da submit ele envia todos os inputs pelo seus id's junto com os seus valores, quando envia para o back e o back retorna um erro com o nome do campo e mensagem, ele pega o nome do campo que é o id do input e retorna o erro para o front-end. No caso ele deve emitir por @errors um valor que contém os campos e erros de cada.
         - Passar a rota que é para enviar para o back;
