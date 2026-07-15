@@ -3,6 +3,15 @@ Criar uma mini wiki que contém todo os componentes e variações estilo StoryBo
 Renomear Dev design para Dev Playground
 Renomear Dev form para Form Renderer
 
+Keybinds:
+    Keybinds devem ser apenas executadas quando estiverem no contexto certo. Por exemplo o usuário pode pressionar "s" para fechar a sidebar mas só se ele não estiver em um input ou textarea.
+
+    Usar "esc" para fechar um modal.
+    Usar "s" para abrir e fechar sidebar
+    Usar "enter" para dar submit em forms
+    Usar "tab" para navegar entre inputs
+    Usar "shift + tab" para navegar entre inputs de trás para frente
+
 Navigator:
     Estilo btn group bordered mas com dropdown ou botão normal com função para navbar
 
@@ -39,11 +48,11 @@ Components:
         - Pressionar enter enquanto com um campo ativo no form da submit dele;
         - Opção de dar submit com Enter quando não há botões visiveis de submit dentro da tag do form;
         - Enter do textarea não afeta submit mas insere nova linha;
-    
+
 Custom components:
     - Select Search: Pesquisa local está pronta, apenas implementar pesquisa remota. Pesquisa remota muda o icone da lupa para o simbolo de loading.
 
-    - Data Group: inclui o componente Data Table e Search Component, fazendo os dois trabalharem juntos; 
+    - Data Group: inclui o componente Data Table e Search Component, fazendo os dois trabalharem juntos;
         - Data Table: Componente que recebe uma array de objetos, que é os dados a serem mostrados e uma outra array de objetos que é como será visualmente. Clicar em uma coluna da tabela ordena aquela tabela entre decrescente e crescente. Este componente inclui o componente Pagination e seleção de quantos items devem ser mostrados por página.
 
         - Search Component: Componente que é um input para pesquisa, botão de pesquisa, botão de reload e botão para selecionar filtros. Os filtros são passados como uma array de objetos e retorna uma array de strings que é os filtros usados.
