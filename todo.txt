@@ -12,6 +12,13 @@ Keybinds:
     Usar "tab" para navegar entre inputs
     Usar "shift + tab" para navegar entre inputs de trás para frente
 
+Input:
+    Variante "compact":
+
+    /- Label -----------\
+    | Text on the input |
+    \___________________/
+
 Navigator:
     Estilo btn group bordered mas com dropdown ou botão normal com função para navbar
 
