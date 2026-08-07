@@ -31,6 +31,10 @@ Table:
 Charts:
     Os charts atual recebem uma data e valores e dão sort a partir destes valores com datas, fazer de forma mais genérica, onde os valores são passados mas invés de receber uma data e dar sort por isso, ele usa a ordem da array, de primeiro para ultimo e da sort por grupo, no caso os valores tem group, e group é o agrupamento que segue similar ao sort por data que viria algo como [{data: 123, group: 'jan'}, {data: 20, group: 'Jan'}, {data: 123, group: 'fev'} ] mostraria nos charts como duas barras, uma com valor 143 e a label embaixo que antes era de uma data mas agora "Jan". Fazer o mesmo para o wave chart. Mas, manter a lógica do dar sort por data, se a data vier com uma data e não group, ele irá manter a lógica existen de labels e sort por data.
 
+Select:
+    Tooltip: um item poder ter um Tooltip
+    InHelperText: Helper text que fica dentro do painel flutuante do select (na parte de baixo)
+
 backend:
     - Senha tem que ter entre 6 e 24 caracteres.
     - Nome tem que conter apenas letras e letras com acentos.
