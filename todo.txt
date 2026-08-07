@@ -3,6 +3,8 @@ Criar uma mini wiki que contém todo os componentes e variações estilo StoryBo
 Renomear Dev design para Dev Playground
 Renomear Dev form para Form Renderer
 
+Invés do cht ter um arquivo de configuração para repos que já existem, cada repo tipo cht-client-[nome] terá o arquivo o configuração dentro do root do projeto, e as repos que constroem e dão watch procuram por pastas de cht-client-[nome] com esses nomes e arquivos dentro.
+
 Keybinds:
     Keybinds devem ser apenas executadas quando estiverem no contexto certo. Por exemplo o usuário pode pressionar "s" para fechar a sidebar mas só se ele não estiver em um input ou textarea.
 
@@ -13,7 +15,11 @@ Keybinds:
     Usar "shift + tab" para navegar entre inputs de trás para frente
 
 Input:
-    Variante "compact":
+    Variante "FloatingLabel":
+
+    /-------------------\
+    | Label             |
+    \___________________/
 
     /- Label -----------\
     | Text on the input |
@@ -32,7 +38,7 @@ Charts:
     Os charts atual recebem uma data e valores e dão sort a partir destes valores com datas, fazer de forma mais genérica, onde os valores são passados mas invés de receber uma data e dar sort por isso, ele usa a ordem da array, de primeiro para ultimo e da sort por grupo, no caso os valores tem group, e group é o agrupamento que segue similar ao sort por data que viria algo como [{data: 123, group: 'jan'}, {data: 20, group: 'Jan'}, {data: 123, group: 'fev'} ] mostraria nos charts como duas barras, uma com valor 143 e a label embaixo que antes era de uma data mas agora "Jan". Fazer o mesmo para o wave chart. Mas, manter a lógica do dar sort por data, se a data vier com uma data e não group, ele irá manter a lógica existen de labels e sort por data.
 
 Select:
-    Tooltip: um item poder ter um Tooltip
+    Tooltip: um item no select poder ter um Tooltip
     InHelperText: Helper text que fica dentro do painel flutuante do select (na parte de baixo)
 
 backend:
