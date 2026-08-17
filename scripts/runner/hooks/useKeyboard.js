@@ -1,7 +1,41 @@
 import { useInput } from "ink";
 
-export function useKeyboard({ onPrev, onNext, onQuit, onRestart, onClear }) {
+export function useKeyboard({
+    onPrev,
+    onNext,
+    onQuit,
+    onRestart,
+    onClear,
+    onScrollUp,
+    onScrollDown,
+    onScrollPageUp,
+    onScrollPageDown
+}) {
     useInput((input, key) => {
+        if (key.upArrow || input === "k" || input === "K") {
+            onScrollUp();
+
+            return;
+        }
+
+        if (key.downArrow || input === "j" || input === "J") {
+            onScrollDown();
+
+            return;
+        }
+
+        if (key.pageUp) {
+            onScrollPageUp();
+
+            return;
+        }
+
+        if (key.pageDown) {
+            onScrollPageDown();
+
+            return;
+        }
+
         if (key.leftArrow || input === "h" || input === "H") {
             onPrev();
 

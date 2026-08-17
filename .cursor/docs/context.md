@@ -34,14 +34,14 @@ Instalação de dependências em todos os pacotes com `package.json` no diretór
 - A variável de ambiente **`CLIENT`** escolhe qual `ClientConfig` carregar e para onde o alias **`@client`** aponta (pasta `src` do cliente).
 - Sem `CLIENT` (`npm run dev`), o alias **`@client`** aponta para **`cht-base/src/devApp/`** — um “cliente fictício” interno com as mesmas entradas obrigatórias (`App.vue`, `routes.ts`) e rotas de laboratório (`/`, `/devDesign`, `/devForm`) com sidebar definida em código (`devNav.ts`), não em config.
 
-### Configs (cliente — só metadados de build)
+### Configs (cliente — metadados de build)
 
-- Local: `cht-base/configs/`.
-- `types.ts` — `ClientConfig`: `name`, `siteTitle`, `clientDir?` (sem sidebar nem UI).
-- Um ficheiro por cliente, ex.: `mecarvit.ts` — `name` + `siteTitle` (+ `clientDir` opcional).
-- `index.ts` — registo e `loadConfig(name)` usado em `vite.config.ts` para resolver pasta do cliente e `import.meta.env.VITE_SITE_TITLE`.
+- Cada pasta `cht-client-<name>` leva `cht.config.json` na raiz (`name`, `siteTitle`, `frontend.repo`, `backend?`).
+- O runner, o install, o build e o `cht-base` **descobrem** clientes varrendo pastas `cht-client-*` que contenham esse ficheiro. Não há lista central de clientes existentes.
+- `cht-base/configs/types.ts` — `ClientConfig`.
+- `cht-base/configs/index.ts` — `loadConfig(name)` lê `../cht-client-<name>/cht.config.json` (usado em `vite.config.ts` para o alias `@client` e `VITE_SITE_TITLE`).
 
-Ao adicionar um cliente novo: criar `configs/<nome>.ts`, importar e registar em `configs/index.ts`, e adicionar script npm em `cht-base/package.json` (`cross-env CLIENT=<nome> vite`).
+Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.json`, `src/App.vue` e `src/routes.ts`. Não é preciso editar `cht-base/package.json` nem um registry.
 
 ### Build-time (Vite)
 
@@ -52,7 +52,7 @@ Ao adicionar um cliente novo: criar `configs/<nome>.ts`, importar e registar em 
 
 ### TypeScript no base
 
-- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir de `clients.json` por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro ficheiro que existe no disco, listar todos os clientes conhecidos ajuda o IDE. O alias de runtime continua a ser resolvido por `vite.config.ts` conforme `CLIENT`.
+- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir das pastas `cht-client-*` descobertas por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro ficheiro que existe no disco, listar todos os clientes conhecidos ajuda o IDE. O alias de runtime continua a ser resolvido por `vite.config.ts` conforme `CLIENT`.
 - `cht-base/tsconfig.node.json` — inclui `configs/**/*.ts` para typecheck do Vite/configs.
 - `cht-base/src/env.d.ts` — tipa `import.meta.env.VITE_SITE_TITLE` (entre outros `vite/client`).
 
@@ -79,8 +79,8 @@ Ao adicionar um cliente novo: criar `configs/<nome>.ts`, importar e registar em 
 | Script | Comportamento |
 |--------|----------------|
 | `npm run dev` | Vite sem `CLIENT` — `@client` → `src/devApp` (rotas `/`, `/devDesign`, `/devForm`). |
-| `npm run mecarvit` | `CLIENT=mecarvit` — `@client` → `cht-client-mecarvit/src` (rotas definidas em `routes.ts` do cliente). |
-| `npm run build` / `build:mecarvit` | Build com ou sem cliente (alinhado ao plano). |
+| `npm run dev:client` | Vite com `CLIENT` no ambiente — `@client` → `cht-client-<name>/src`. O runner passa `CLIENT=<name>`. |
+| `npm run build` / `build:client` | Build sem cliente (devApp) ou com `CLIENT=<name>`. |
 
 Usa-se **`cross-env`** para `CLIENT=...` em ambientes Windows/Linux.
 
@@ -90,6 +90,7 @@ Usa-se **`cross-env`** para `CLIENT=...` em ambientes Windows/Linux.
 
 ```
 cht-client-mecarvit/
+  cht.config.json       # name, siteTitle, frontend.repo, backend?
   package.json          # devDeps mínimas (TypeScript, Vue, tipos) para IDE e resolução de tsconfig
   tsconfig.json
   tsconfig.app.json     # paths: @design, @shared, @base, @/* → ./src/* (aliases locais do cliente)
@@ -132,14 +133,15 @@ Runner moderno baseado em **Node + Ink (React no terminal)**: blocos com bordas,
 
 Equivalente via npm: `npm run dev -- --client:mecarvit`.
 
-### Fonte única: `clients.json`
+### Discovery: `cht-client-*/cht.config.json` + `clients.json` (shared)
 
-A lista de clientes do monorepo vive em [clients.json](../../clients.json) na raiz. É lida pelo runner, pelo `scripts/install.mjs` e (indiretamente) pelos configs do `cht-base`. Convenções aplicadas automaticamente:
+Clientes existentes são descobertos no disco: pastas `cht-client-<name>` com `cht.config.json` na raiz. O [clients.json](../../clients.json) na raiz guarda só infra compartilhada (`shared.repos`, `shared.vitePorts`). Convenções:
 
-- `frontend.dir` ⇒ default `cht-base` (a app shell). Pode ser sobrescrito.
-- `frontend.script` ⇒ default `<name>` (script npm em `cht-base/package.json`).
-- `frontend.clientDir` ⇒ default `cht-client-<name>` (pasta irmã do código do cliente).
-- `backend.dir` ⇒ default `cht-backend-<name>`. Cliente sem backend: omitir o bloco.
+- `cht.config.json` ⇒ `name`, `siteTitle`, `frontend.repo`, `backend.repo` / `backend.script` (opcional).
+- `frontend.dir` ⇒ `cht-base` (a app shell).
+- `frontend.cmd` ⇒ `dev:client` com `CLIENT=<name>`.
+- `frontend.clientDir` ⇒ `cht-client-<name>`.
+- `backend.dir` ⇒ default `cht-backend-<name>`. Cliente sem backend: omitir o bloco `backend`.
 - `backend.script` ⇒ default `dev`.
 - `shared.repos` ⇒ URLs sempre clonados pelo `install`.
 - `shared.vitePorts` ⇒ portas liberadas antes do dev (default `[5173, 5174]`).
@@ -159,7 +161,7 @@ scripts/
       Header.jsx, ProcessTab.jsx, LogPane.jsx, StatusBar.jsx
     hooks/
       useProcesses.js, useKeyboard.js
-  install.mjs           # clona shared.repos + repos do cliente, npm i recursivo
+  install.mjs           # clona shared.repos + backend.repo do config do cliente, npm i recursivo
   build.mjs             # build/export do front para builds/<cliente>/dist
 ```
 
@@ -170,16 +172,16 @@ scripts/
 - URLs nos logs (`http(s)://...`) são detectados, deduplicados e renderizados como hyperlinks OSC 8 clicáveis na status bar (em terminais que suportam).
 - Teclas:
   - **`←` / `→`** ou **`h` / `l`** — alterna a tab focada.
+  - **`↑` / `↓`** ou **`k` / `j`** — scroll do log da tab ativa. **PgUp** / **PgDn** pagina. A roda do mouse envia as mesmas setas (modo alternate-scroll).
   - **`r`** — restart do processo da tab ativa.
   - **`c`** — limpa o buffer da tab ativa.
   - **`q`** ou **`Ctrl+C`** — encerra tudo (SIGTERM no PGID, SIGKILL nos sobreviventes após 200 ms).
 
 ### Adicionar um cliente novo
 
-1. Adicionar entry em [clients.json](../../clients.json) com `name`, `frontend.repo` e (se houver) `backend.repo`.
-2. Em `cht-base/package.json`, criar o script `cross-env CLIENT=<name> vite` com o nome do cliente (mantém a convenção `frontend.script = <name>`).
-3. Em `cht-base/configs/`, registrar `<name>.ts` com `siteTitle` (e `clientDir` opcional) e adicionar no `registry` de `configs/index.ts`. No repositório do cliente, criar `src/App.vue`, `src/routes.ts` e layouts/nav como precisares.
-4. Pronto: `./run.sh --client:<name>` e `./install.sh --client:<name>` já funcionam sem mais edições. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npm run sync:tsconfig`), então o IDE encontra o novo cliente sem editar tsconfig à mão.
+1. Clonar ou criar a pasta `cht-client-<name>` com `cht.config.json` (`name`, `siteTitle`, `frontend.repo`, e `backend` se houver), mais `src/App.vue` e `src/routes.ts`.
+2. `./install.sh --client:<name>` clona o backend a partir de `backend.repo` (a pasta do frontend já tem de existir para ler o config).
+3. Pronto: `./run.sh --client:<name>` já funciona. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npm run sync:tsconfig`).
 
 ### Export de build (artefato web)
 
@@ -193,7 +195,8 @@ scripts/
 ## Ficheiros-chave para navegação rápida
 
 - `cht-base/vite.config.ts` — `CLIENT`, alias `@client`, `VITE_SITE_TITLE`.
-- `cht-base/configs/*` — metadados por cliente (`name`, `siteTitle`, `clientDir?`).
+- `cht-client-<nome>/cht.config.json` — metadados do cliente (`name`, `siteTitle`, repos).
+- `cht-base/configs/*` — loader (`loadConfig`) e tipo `ClientConfig`.
 - `cht-base/src/devApp/*` — “cliente” interno para modo dev (`App.vue`, `routes.ts`, `DevLayout.vue`, `devNav.ts`).
 - `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.

@@ -66,18 +66,12 @@ function main() {
         process.exit(2);
     }
 
-    const basePkg = JSON.parse(fs.readFileSync(path.join(baseDir, "package.json"), "utf8"));
-    const scripts = basePkg?.scripts || {};
-    const namedBuildScript = `build:${client}`;
-
     console.log(`[build] Building client "${client}" in cht-base...`);
 
     if (client === "dev") {
         run("npm", ["run", "build"], baseDir);
-    } else if (scripts[namedBuildScript]) {
-        run("npm", ["run", namedBuildScript], baseDir);
     } else {
-        run("npm", ["run", "build"], baseDir, { CLIENT: client });
+        run("npm", ["run", "build:client"], baseDir, { CLIENT: client });
     }
 
     const distSrc = path.join(baseDir, "dist");

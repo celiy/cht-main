@@ -27,8 +27,8 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
 - `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
 - `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
-- `clients.json`: fonte única de verdade do monorepo (lista de clientes + repositórios compartilhados).
-- `install.sh` / `scripts/install.mjs`: clona repositórios (shared + cliente) e instala dependências.
+- `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`). Clientes existentes são descobertos por pastas `cht-client-*` com `cht.config.json`.
+- `install.sh` / `scripts/install.mjs`: clona repositórios shared (+ backend do cliente se `--client:`) e instala dependências.
 - `run.sh` / `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `build.sh` / `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
 - `sync-common-deps.mjs`: sincronizador de dependências comuns entre repos.
@@ -36,7 +36,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 
 ## Clientes
 
-A lista de clientes vive em [`clients.json`](./clients.json). Atualmente:
+Clientes existentes são pastas `cht-client-<name>` com [`cht.config.json`](./cht-client-mecarvit/cht.config.json) na raiz. [`clients.json`](./clients.json) guarda só os repositórios shared. Atualmente:
 
 - **mecarvit**: frontend (`cht-client-mecarvit`) + backend (`cht-backend-mecarvit`)
 - **dev**: modo de desenvolvimento interno do `cht-base` (cliente virtual, sem backend)
@@ -45,7 +45,7 @@ Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicio
 
 ## Como funciona (visão geral)
 
-1. `clients.json` define os clientes do monorepo (nome + repos opcionais). Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
+1. Pastas `cht-client-<name>` com `cht.config.json` definem os clientes. `clients.json` guarda só shared (`repos` + `vitePorts`). Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
 2. O `cht-base` monta a app com o alias `@client` resolvido via `CLIENT=<name>` (ou `src/devApp` sem cliente).
 3. O cliente define rotas (`routes.ts`), layout e páginas/componentes específicos.
 4. O `run.sh` (wrapper para `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
@@ -71,7 +71,7 @@ Incluindo repositórios de um cliente específico (ex.: mecarvit):
 ./install.sh --client:mecarvit
 ```
 
-O `install.sh` é um wrapper para `scripts/install.mjs`. Ele lê `clients.json`, clona o que faltar (`|| skip` para repos já existentes) e roda `npm install` em cada pasta irmã com `package.json` (e na raiz, para preparar o runner).
+O `install.sh` é um wrapper para `scripts/install.mjs`. Ele clona `shared.repos`, e com `--client:<name>` lê `cht-client-<name>/cht.config.json` (a pasta do frontend já tem de existir) para clonar o backend. Depois roda `npm install` em cada pasta irmã com `package.json` (e na raiz, para preparar o runner).
 
 ### 2) Rodar ambiente de desenvolvimento
 
@@ -89,9 +89,9 @@ Cliente específico:
 # ou: npm run dev -- --client:mecarvit
 ```
 
-A sintaxe é genérica: para qualquer cliente declarado em `clients.json`, basta `--client:<name>`. Não há scripts hardcoded por cliente no `package.json` raiz.
+A sintaxe é genérica: para qualquer pasta `cht-client-<name>` com `cht.config.json`, basta `--client:<name>`. Não há scripts hardcoded por cliente no `package.json` raiz.
 
-O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou `h`/`l`) para alternar tabs, `r` reinicia o processo ativo, `c` limpa o buffer, `q` (ou `Ctrl+C`) encerra. URLs detectados nos logs aparecem como hyperlinks clicáveis na status bar.
+O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou `h`/`l`) para alternar tabs, `↑`/`↓` (ou `k`/`j`) e PgUp/PgDn para scroll do console, `r` reinicia o processo ativo, `c` limpa o buffer, `q` (ou `Ctrl+C`) encerra. URLs detectados nos logs aparecem como hyperlinks clicáveis na status bar.
 
 ### 3) Build/export de frontend por cliente
 

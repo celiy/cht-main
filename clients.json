@@ -1,16 +1,4 @@
 {
-    "clients": [
-        {
-            "name": "mecarvit",
-            "siteTitle": "Mecarvit",
-            "frontend": {
-                "repo": "https://github.com/celiy/cht-client-mecarvit.git"
-            },
-            "backend": {
-                "repo": "https://github.com/celiy/cht-backend-mecarvit.git"
-            }
-        }
-    ],
     "shared": {
         "repos": [
             "https://github.com/celiy/cht-base.git",

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Regenerate the `@client/*` path array in cht-base/tsconfig.app.json from
-// clients.json. This is purely for IDE / vue-tsc support: the runtime alias
-// is already dynamic via vite.config.ts (CLIENT env -> resolveClientDir).
+// discovered `cht-client-*` folders that contain `cht.config.json`. This is
+// purely for IDE / vue-tsc support: the runtime alias is already dynamic via
+// vite.config.ts (CLIENT env -> resolveClientDir).
 //
 // TypeScript resolves `paths` to the first entry that exists on disk, so
 // listing every known client makes the IDE pick whichever client repo is

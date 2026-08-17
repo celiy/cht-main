@@ -16,6 +16,7 @@ export function StatusBar({ urls }) {
         <Box flexDirection="column" paddingX={1}>
             <Box flexDirection="row" flexWrap="wrap">
                 <Hint keyLabel="←/→" action="switch tab" />
+                <Hint keyLabel="↑/↓" action="scroll" />
                 <Hint keyLabel="r" action="restart" />
                 <Hint keyLabel="c" action="clear" />
                 <Hint keyLabel="q" action="quit" />

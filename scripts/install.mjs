@@ -61,10 +61,6 @@ function main() {
     if (client && client !== "dev") {
         const resolved = resolveClient(client);
 
-        if (resolved.frontend.repo) {
-            gitClone(resolved.frontend.repo, root);
-        }
-
         if (resolved.backend && resolved.backend.repo) {
             gitClone(resolved.backend.repo, root);
         }

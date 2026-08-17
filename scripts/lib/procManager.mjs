@@ -156,6 +156,19 @@ export class ManagedProcess extends EventEmitter {
         return this.lines.slice(this.lines.length - n);
     }
 
+    /**
+     * Slice a window of log lines starting at `start`.
+     *
+     * @param {number} start First line index
+     * @param {number} count Maximum number of lines
+     * @returns {string[]}
+     */
+    getWindow(start, count) {
+        const from = Math.max(0, start);
+
+        return this.lines.slice(from, from + Math.max(0, count));
+    }
+
     isAlive() {
         if (!this.child || this.child.pid == null) {
             return false;

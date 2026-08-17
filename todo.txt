@@ -1,29 +1,5 @@
 Fazer a página de home mais bonita.
-Criar uma mini wiki que contém todo os componentes e variações estilo StoryBook.
 Renomear Dev design para Dev Playground
-Renomear Dev form para Form Renderer
-
-Invés do cht ter um arquivo de configuração para repos que já existem, cada repo tipo cht-client-[nome] terá o arquivo o configuração dentro do root do projeto, e as repos que constroem e dão watch procuram por pastas de cht-client-[nome] com esses nomes e arquivos dentro.
-
-Keybinds:
-    Keybinds devem ser apenas executadas quando estiverem no contexto certo. Por exemplo o usuário pode pressionar "s" para fechar a sidebar mas só se ele não estiver em um input ou textarea.
-
-    Usar "esc" para fechar um modal.
-    Usar "s" para abrir e fechar sidebar
-    Usar "enter" para dar submit em forms
-    Usar "tab" para navegar entre inputs
-    Usar "shift + tab" para navegar entre inputs de trás para frente
-
-Input:
-    Variante "FloatingLabel":
-
-    /-------------------\
-    | Label             |
-    \___________________/
-
-    /- Label -----------\
-    | Text on the input |
-    \___________________/
 
 Navigator:
     Estilo btn group bordered mas com dropdown ou botão normal com função para navbar
@@ -31,40 +7,16 @@ Navigator:
 Accordion:
     Remover a parte de baixo da borda e fazer uma separada que fica colado com header clicavel, fazer a setinha de abrir e fechar reagir com estado instantaneo.
 
-Table:
-    Revisar como a data é fornecida, pois no modelo atual, ele não disponibiliza muita liberdade e manipulação como por exemplo: um select com opções dentro de uma célula.
-
-Charts:
-    Os charts atual recebem uma data e valores e dão sort a partir destes valores com datas, fazer de forma mais genérica, onde os valores são passados mas invés de receber uma data e dar sort por isso, ele usa a ordem da array, de primeiro para ultimo e da sort por grupo, no caso os valores tem group, e group é o agrupamento que segue similar ao sort por data que viria algo como [{data: 123, group: 'jan'}, {data: 20, group: 'Jan'}, {data: 123, group: 'fev'} ] mostraria nos charts como duas barras, uma com valor 143 e a label embaixo que antes era de uma data mas agora "Jan". Fazer o mesmo para o wave chart. Mas, manter a lógica do dar sort por data, se a data vier com uma data e não group, ele irá manter a lógica existen de labels e sort por data.
-
-Select:
-    Tooltip: um item no select poder ter um Tooltip
-    InHelperText: Helper text que fica dentro do painel flutuante do select (na parte de baixo)
-
 backend:
     - Senha tem que ter entre 6 e 24 caracteres.
     - Nome tem que conter apenas letras e letras com acentos.
 
 Components:
-    - Loader: Barra com sliding infinito de loading.
     - Item: Mini card que tem mesmo estilo do select e radio em formato de card mas com ícone e cores diferentes.
-    - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
-    - Avatar: Avatar de perfil, imagem redonda, opção para vários perfis com +[num] caso tenha mais que o desejado e status de online, away, etc.
 
-    - FormHandler: Da handle de ações de form e etc. É um wrapper para os inputs dentro dele.
-        - Quando usuário da submit ele envia todos os inputs pelo seus id's junto com os seus valores, quando envia para o back e o back retorna um erro com o nome do campo e mensagem, ele pega o nome do campo que é o id do input e retorna o erro para o front-end. No caso ele deve emitir por @errors um valor que contém os campos e erros de cada.
-        - Passar a rota que é para enviar para o back;
-        - Passar a ação: PUT, POST e etc;
-        - Fazer automaticamente a ação de enviar os dados para o backend e outros afins relacionados com form;
-        - @success;
-        - @cancel;
-        - @failure;
-        - @errors;
-        - Botão de submit e cancelar padrão. Usuário pode optar por usar botões padrões ou passar via slot. Se usar os botões padrões, o botão de cancelar padrão irá emitir @cancel.
-        - automaticamente mandar forms do formato que aceita arquivos como midia;
-        - Pressionar enter enquanto com um campo ativo no form da submit dele;
-        - Opção de dar submit com Enter quando não há botões visiveis de submit dentro da tag do form;
-        - Enter do textarea não afeta submit mas insere nova linha;
+    - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
+
+    - Avatar: Avatar de perfil, imagem redonda, opção para vários perfis com +[num] caso tenha mais que o desejado e status de online, away, etc.
 
 Custom components:
     - Select Search: Pesquisa local está pronta, apenas implementar pesquisa remota. Pesquisa remota muda o icone da lupa para o simbolo de loading.
@@ -77,37 +29,3 @@ Custom components:
         Data Group usa os filtros do Search Component e pode clicar nos headers do DataTable ordena por ordem alfabetica ou min para max juntamente com o filtro de pesquisa do Search.
 
 Mecarvit:
-
-    Terminal de ponto:
-        Area do funcionário:
-
-        Area do dono:
-            A area do dono mostra os funcionários cadastrados, a partir das horas trabalhadas no mês, as horas extras e se o funcionário trabalhou menos do que no seu contrato, horas em formato negativo. Ao clicar em um funcionário, será possível ver o seu histórico de pontos que terá uma visualização assim:
-
-                Visualização: Geral (Mostra uma lista de mesês com o resumo das horas trabalhadas), por mês (selecionar mês e ver só sobre ele)
-
-                Geral:
-                    Janeiro (clicar num mês mostra a visualização Por mês dele)
-                    Normais: 120 hrs , Extras: 0hrs , Faltas(dias): 2 / Total: 120hrs
-
-                    Fevereiro
-                    Normais: 120 hrs , Extras: 20hrs , Faltas(dias): 4 / Total: 140hrs
-
-                    [Paginação]
-
-                Por mês:
-
-                    Mês: Janeiro (Seletor para selecionar o mês)
-
-                    Horas normais: 16
-                    Horas extras: 2
-                    Total neste mês: 18hrs
-                    Total de faltas: 2 (Dias onde nenhum ponto foi registrado)
-
-                    11 / Segunda-feira                  Total
-                    8:00 , 12:00 , 13:00 , 18:00 /  8 hrs
-
-                    12 / Terça-feira                    Total
-                    7:00 , 12:00 , 13:00 , 19:00 /  8 + 2 hrs
-
-                    [Paginação]

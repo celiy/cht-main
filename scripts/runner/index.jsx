@@ -28,8 +28,8 @@ async function main() {
     const resolved = resolveClient(client);
     const specs = buildProcessList(resolved);
 
-    // Keep cht-base/tsconfig.app.json in sync with clients.json before
-    // entering the alternate screen (silent unless something changes).
+    // Keep cht-base/tsconfig.app.json in sync with discovered cht-client-*
+    // folders before entering the alternate screen (silent unless something changes).
     syncTsconfig({ silent: true });
 
     if (specs.length === 0) {
