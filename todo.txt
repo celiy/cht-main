@@ -1,6 +1,12 @@
 Fazer a página de home mais bonita.
 Renomear Dev design para Dev Playground
 
+Charts:
+    Prop para esconder a label em cima das bars
+
+SideBar:
+    Novo variante igual ao do shadcn, minimalist, fundo igual ao backgroung, sem scroll bar e sem a barra  de abrir e fechar
+
 Navigator:
     Estilo btn group bordered mas com dropdown ou botão normal com função para navbar
 
