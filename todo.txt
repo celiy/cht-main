@@ -1,25 +1,6 @@
 Fazer a página de home mais bonita.
-Renomear Dev design para Dev Playground
-
-Charts:
-    Prop para esconder a label em cima das bars
-
-SideBar:
-    Novo variante igual ao do shadcn, minimalist, fundo igual ao backgroung, sem scroll bar e sem a barra  de abrir e fechar
-
-Navigator:
-    Estilo btn group bordered mas com dropdown ou botão normal com função para navbar
-
-Accordion:
-    Remover a parte de baixo da borda e fazer uma separada que fica colado com header clicavel, fazer a setinha de abrir e fechar reagir com estado instantaneo.
-
-backend:
-    - Senha tem que ter entre 6 e 24 caracteres.
-    - Nome tem que conter apenas letras e letras com acentos.
 
 Components:
-    - Item: Mini card que tem mesmo estilo do select e radio em formato de card mas com ícone e cores diferentes.
-
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
 
     - Avatar: Avatar de perfil, imagem redonda, opção para vários perfis com +[num] caso tenha mais que o desejado e status de online, away, etc.
