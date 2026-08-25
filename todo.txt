@@ -1,6 +1,24 @@
 Fazer a página de home mais bonita.
 
+Fazer o carousel aceitar conteúdo normal invés de só imagens
+
 No deploy do netlify, ao acessar uma página pelo side bar, o sidebar responde com o click mas demora para a página trocar. No caso isso só acontece quando um deploy com cache zerado é feito, então ao acessar aquela pagina novamente, é instantaneo, diferente de paginas que não foram acessadas antes. Achar uma forma de indicar um loading de página quando ela ainda não foi cacheada ou carregada
+
+Revisar o componente de data table, tem espaçamento e estilos errados e revisar a sua escabilidade
+    Implementar um estado de loading
+
+Implementar:
+    Chat
+    Avatar
+    Toast
+    ContextMenu = Menu onde o usuário clica com direito ou segura no mobile para abrir um popover
+    Marker = Separator, Separator com texto, icone e texto muted pequeno
+    Skeleton
+
+
+REVISAR O TAMANHO DOS COMPONENETES.
+    Eu sinto que alguns componentes como input, button, tabs e tal tem um tamanho não uniforme com o resto dos outros componentes. Usar o inspecionar elemento para medir e achar um padrão que seja consistente.
+
 
 Components:
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
