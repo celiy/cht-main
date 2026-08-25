@@ -109,3 +109,10 @@ if (value) action();
 | Blocos | Linhas em branco entre trechos lógicos |
 | `if`/`for` | Sempre `{}` |
 | Idioma | Código e nomes em inglês |
+| Timers | Limpar timeout/interval/listener no unmount |
+
+---
+
+## Timers e listeners
+
+`setTimeout`, `setInterval`, `requestAnimationFrame` e `addEventListener` criados num componente Vue (ou módulo com ciclo de vida) **devem** ser cancelados no unmount (`beforeUnmount` / `onBeforeUnmount`). Guardar o id, ter um método de limpeza, e chamar essa limpeza também antes de reagendar. Ver `.cursor/rules/cleanup-timers.mdc`.

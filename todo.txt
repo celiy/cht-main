@@ -9,16 +9,17 @@ Revisar o componente de data table, tem espaçamento e estilos errados e revisar
 
 Implementar:
     Chat
-    Avatar
-    Toast
+    Toast = Novo toast custom do 0
     ContextMenu = Menu onde o usuário clica com direito ou segura no mobile para abrir um popover
     Marker = Separator, Separator com texto, icone e texto muted pequeno
-    Skeleton
+
+Itens das docs na navbar não estão em ordem alfabetica
 
 Revisar o Pagination
+Revisar a estruturação e documentos no .cursor
 
 Select/dropdown search:
-    Fazer o input do search levar foco quando o dropdown/select é aberto, o primeiro item da lista sempre é pré selecionado com efeito visual e setinhas de cima pra baixo do teclado alteram entre opções
+    Fazer o input do search levar foco quando o dropdown/select é aberto, o primeiro item da lista sempre é pré selecionado com efeito visual como ja existe do hover e setinhas de cima pra baixo do teclado alteram entre opções
 
 Components:
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.

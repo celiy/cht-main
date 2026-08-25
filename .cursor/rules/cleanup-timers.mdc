@@ -1,0 +1,47 @@
+---
+description: Limpar timeouts, intervals, RAF e listeners no unmount para evitar memory leaks
+globs: "**/*.{vue,ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Timers e subscriptions
+
+Quaisquer `setTimeout`, `setInterval`, `requestAnimationFrame`, `addEventListener` ou observers criados num componente **têm** de ser cancelados quando o componente desmonta. Guardar o id/handle e limpar em `beforeUnmount` (Options API) ou no `onBeforeUnmount` / retorno do `onMounted` (Composition API). Antes de agendar de novo, limpar o anterior.
+
+```ts
+// Correto
+data() {
+    return {
+        loadTimer: null as number | null
+    };
+},
+
+beforeUnmount() {
+    this.clearLoadTimer();
+},
+
+methods: {
+    clearLoadTimer() {
+        if (this.loadTimer == null) {
+            return;
+        }
+
+        window.clearTimeout(this.loadTimer);
+        this.loadTimer = null;
+    },
+
+    loadImage() {
+        this.clearLoadTimer();
+        this.loadTimer = window.setTimeout(() => {
+            this.loadTimer = null;
+        }, 2000);
+    }
+}
+```
+
+```ts
+// Evitar — o callback corre depois do unmount
+this.loadTimer = window.setTimeout(() => { /* ... */ }, 2000);
+```
+
+O mesmo para `clearInterval`, `cancelAnimationFrame`, `removeEventListener`, `AbortController.abort()`, `observer.disconnect()` e `unsubscribe()`.
