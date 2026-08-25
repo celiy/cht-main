@@ -15,9 +15,7 @@ Implementar:
     Marker = Separator, Separator com texto, icone e texto muted pequeno
     Skeleton
 
-
-REVISAR O TAMANHO DOS COMPONENETES.
-    Eu sinto que alguns componentes como input, button, tabs e tal tem um tamanho não uniforme com o resto dos outros componentes. Usar o inspecionar elemento para medir e achar um padrão que seja consistente.
+Revisar o Pagination
 
 Select/dropdown search:
     Fazer o input do search levar foco quando o dropdown/select é aberto, o primeiro item da lista sempre é pré selecionado com efeito visual e setinhas de cima pra baixo do teclado alteram entre opções
