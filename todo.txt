@@ -5,12 +5,9 @@ No deploy do netlify, ao acessar uma página pelo side bar, o sidebar responde c
 Implementar:
     Chat
     Toast = Novo toast custom do 0
-    ContextMenu = Menu onde o usuário clica com direito ou segura no mobile para abrir um popover
 
 Revisar o Pagination, fazer os tamanhos não alterarem tanto ao trocar de pagina para melhor usabilidade
 Revisar a estruturação e documentos no .cursor
-Criar novo componente "Steps" que é o exemplo da area de trabalho, usar o Marker para numeração e label dos steps
-Criar novo componente que é um container mas ele pode levar resize e aplicar isso a Sidebar
 
 Components:
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
