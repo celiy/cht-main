@@ -1,5 +1,3 @@
-Fazer a página de home mais bonita.
-
 Revisar o Pagination, fazer os tamanhos não alterarem tanto ao trocar de pagina para melhor usabilidade
 
 Mudar <main></main> por <article></article> nos docs
