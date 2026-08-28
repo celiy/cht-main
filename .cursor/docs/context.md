@@ -76,6 +76,8 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 - Ficheiro principal: `cht-base/src/project.ts`.
 - **`$project.url.query`** — snapshot reativo da querystring (parâmetros `?a=b`).
 - **`$project.url.params`** — snapshot reativo dos **params da rota** (ex.: rota `/:id` → `params.id`). Não é a querystring.
+- **`$project.device.viewportWidth` / `viewportHeight`** — tamanho da janela; atualizado no `resize`. Usar para posicionar overlays no centro do ecrã (`<ViewportCenter>`).
+- **`$project.route.isLoading`** — `true` enquanto uma navegação espera o chunk lazy da rota (atraso de 150 ms para não piscar em páginas já em cache). O layout de docs mostra barra + overlay.
 - Sincronização em `initProjectRouter` + `router.afterEach`; utilitários em `cht-base/src/js/utils/routeUtils.ts` (`syncReactiveQuerySnapshot`, `syncReactiveParamsSnapshot`).
 
 ### Aplicar título do site
