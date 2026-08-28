@@ -1,0 +1,41 @@
+---
+description: Estilo e consistência de código (Vue/TS) neste monorepo
+alwaysApply: true
+---
+
+# Diretrizes de código
+
+Código (identificadores, comentários técnicos) em **inglês**. Strings de UI no idioma do produto (português neste projeto).
+
+## Aspas e pontuação
+
+- Preferir aspas duplas (`"`). Aspas simples só quando necessário.
+- Usar `;` no fim de instruções em JavaScript/TypeScript.
+- Encadeamento: cada chamada na sua linha; `;` só na última.
+
+## Vue: ordem de atributos
+
+1. Estruturais: `v-if`, `v-for`, `v-show`, `key`, `ref`
+2. Estáticos: `class`, `id`, `type`, …
+3. Props dinâmicas: `:prop`, `v-model`
+4. Eventos: `@click`, …
+
+Grupos separados por linha em branco quando o elemento tem vários atributos.
+
+## Espaçamento e fluxo
+
+- Linha em branco entre blocos lógicos e entre funções.
+- Sempre `{}` em `if` / `for` / `while` / `else`.
+
+## Nomenclatura
+
+- `camelCase` para identificadores.
+- Constantes globais imutáveis: `UPPER_SNAKE_CASE` quando for convenção.
+
+## TypeScript
+
+- `noUncheckedIndexedAccess`: `array[i]` é `T | undefined`. Não indexar sem guarda.
+
+## Timers e listeners
+
+`setTimeout`, `setInterval`, `requestAnimationFrame`, `addEventListener`, `ResizeObserver` e subscriptions (`$toast.on`, etc.) **devem** ser limpos no unmount. Ver `cleanup-timers.mdc`.

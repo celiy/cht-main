@@ -1,0 +1,39 @@
+---
+description: Quando e como documentar (JSDoc, props Vue). Não documentar o óbvio.
+alwaysApply: false
+---
+
+# Guia de documentação
+
+Referência técnica (JSDoc, READMEs de módulo) em **inglês**. Cópia de UI no idioma do produto.
+
+## Quando documentar
+
+- O que for **não óbvio**, **sensível a erro** ou **contraintuitivo**.
+- APIs públicas de plugins (`$toast`, `$project`): tipos TypeScript são a fonte da verdade; JSDoc só se o contrato não for claro pelos tipos.
+- **Não** documentar cada método trivial, cada campo de `data()`, nem linhas que já se leem sozinhas.
+
+O ficheiro antigo `code-docs.md` pedia JSDoc em todas as funções. **Não seguir isso.** Este guia prevalece.
+
+## JSDoc (quando fizer falta)
+
+```ts
+/**
+ * Short description.
+ *
+ * @param value Description of the value
+ * @returns Description of the return value
+ */
+```
+
+- Preferir `@returns` (não “Returns - …”).
+- Sem hífens longos (`—`) nem descrições entre parênteses sem necessidade.
+
+## Vue
+
+| Área | Orientação |
+|------|------------|
+| `props` | JSDoc só se o nome não for autoexplicativo |
+| `data()` | Não documentar campo a campo |
+| `emits`, `components`, `name` | Normalmente sem JSDoc |
+| `methods` / `computed` | Só trechos não triviais |

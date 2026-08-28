@@ -1,0 +1,35 @@
+---
+description: Convenções Vue e design system (Options API, Tailwind 4, hosts, plugins)
+globs: "**/*.{vue,ts}"
+alwaysApply: false
+---
+
+# Vue e design system
+
+## Onde vive o quê
+
+- Primitivos: `cht-design-system/src/components/*.vue` (Button, Card, Toast, …).
+- Compostos: `cht-design-system/src/components/custom/*.vue` (Chat, Sidebar, Resizable, …).
+- Docs do DS: `cht-base/src/devApp/pages/docs/` + rota em `devApp/routes.ts` + item em `devApp/ts/componentsNav.ts`.
+- Import: `@design/components/...` ou `@design/components/custom/...`.
+
+## Componentes
+
+- Preferir **Options API** nos componentes do design system (padrão atual).
+- Hosts globais (Toast, futuros overlays) montam-se **uma vez no layout** (`DevAppLayout` ou layout do cliente), não em cada página.
+- Tokens de cor: `success`, `info`, `warning`, `destructive` (e `*-foreground`) em `cht-base/src/css/style.css`. Ícones: Font Awesome `fa-solid`.
+
+## Tailwind 4
+
+- Em `<style scoped>` de Vue, **não** usar `@apply` sem `@reference "tailwindcss";` no topo do bloco.
+- Preferir classes utilitárias no template quando bastar.
+
+## Plugins Vue
+
+- Instalar com objeto `{ install(app, options?) { ... } }` **sem** anotar como `Plugin` / `Plugin<T>`. O `app.use` do Vue 3.5 falha nessas anotações (união FunctionPlugin vs ObjectPlugin).
+- Expor API em `app.config.globalProperties` e tipos em `cht-base/src/env.d.ts` + `cht-design-system/src/types/vue-globals.d.ts`.
+- Toast: ver `.cursor/docs/toast.md`.
+
+## UI
+
+- Mudanças visuais: verificar no browser (fluxo real, não só screenshot).

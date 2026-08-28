@@ -1,12 +1,14 @@
 # Celi Herstal's Template project context
 
-> **AI NOTICE:** Whenever `context.md` is invoked, cited, or used as reference, the AI must read this file and **every file linked in this index**, treating them as mandatory imports before answering, suggesting commands, or acting on the workspace.
->
-> **Documentation index:**
-> - [context.md](./context.md) — Visão geral do workspace, mapa mental e arquitetura multi-cliente (`cht-base` + clientes).
-> - [code-guidelines.md](../rules/code-guidelines.md) — Regras de estilo e consistência de código.
-> - [document-guide.md](../rules/document-guide.md) — Guia de documentação.
-> - [deps_sync.md](./deps_sync.mdd) — Documentação sobre a sincronização de depenencias.
+Índice de arquitetura. Ler este ficheiro ao trabalhar em clientes, runner, aliases ou `cht-base`. Estilo de código: `.cursor/rules/`. Toast: `.cursor/docs/toast.md`.
+
+**Documentação:**
+
+- [context.md](./context.md) — este ficheiro
+- [toast.md](./toast.md) — `$toast` e `<Toast>`
+- [deps_sync.md](./deps_sync.md) — sincronização de dependências
+- [code-guidelines.mdc](../rules/code-guidelines.mdc)
+- [document-guide.mdc](../rules/document-guide.mdc)
 
 ---
 
@@ -16,7 +18,7 @@ Pastas irmãs sob o mesmo diretório pai (ex.: `cht-project/`):
 
 | Pasta | Função |
 |-------|--------|
-| **cht-base** | Boot técnico do front-end: Vite + Vue + `vue-router` (criado em `main.ts`), plugins (`$project`, toast, etc.), integração com design system e shared. **Não** define rotas nem layout da app — isso vive no cliente (`@client/App.vue`, `@client/routes.ts`) ou no stub de dev (`src/devApp/`). |
+| **cht-base** | Boot técnico: Vite + Vue + `vue-router` em `main.ts`, plugins (`$project`, `$toast`), design system e shared. Rotas e layout da app vêm do cliente (`@client/App.vue`, `@client/routes.ts`) ou do stub `src/devApp/`. |
 | **cht-design-system** | Componentes Vue reutilizáveis e tokens de UI. Consumido pelo base (e por páginas de cliente) via alias `@design/*`. |
 | **cht-shared** | Código partilhado (utilitários, validadores, etc.). Consumido via alias `@shared/*`. |
 | **cht-client-&lt;nome&gt;** | App do cliente: `App.vue`, `routes.ts`, layouts, `pages/`, componentes e `js`. Não contém o servidor Vite; o `cht-base` importa `@client/*` em tempo de build. |
@@ -32,7 +34,7 @@ Instalação de dependências em todos os pacotes com `package.json` no diretór
 - O **base** é o ponto de entrada técnico (`main.ts`, `vite.config.ts`): monta a app Vue, regista plugins e cria o `vue-router` com as rotas importadas de **`@client/routes.ts`**.
 - Cada **cliente** é uma pasta irmã (`../<clientDir>/src`), tipicamente `cht-client-mecarvit`, com **`App.vue`** (raiz com `<RouterView />`), **`routes.ts`** (árvore de rotas explícita), layouts opcionais, `pages/`, `components/`, `js/`.
 - A variável de ambiente **`CLIENT`** escolhe qual `ClientConfig` carregar e para onde o alias **`@client`** aponta (pasta `src` do cliente).
-- Sem `CLIENT` (`npm run dev`), o alias **`@client`** aponta para **`cht-base/src/devApp/`** — um “cliente fictício” interno com as mesmas entradas obrigatórias (`App.vue`, `routes.ts`) e rotas de laboratório (`/`, `/devDesign`, `/devForm`) com sidebar definida em código (`devNav.ts`), não em config.
+- Sem `CLIENT` (`npm run dev`), o alias **`@client`** aponta para **`cht-base/src/devApp/`** — cliente interno com `App.vue`, `routes.ts` e docs em `/docs` (layout `DevAppLayout.vue`, nav em `ts/componentsNav.ts`).
 
 ### Configs (cliente — metadados de build)
 
@@ -61,7 +63,13 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 - O **cliente** exporta **`routes.ts`** (`RouteRecordRaw[]` por defeito) e define layouts livremente (ex.: `layouts/MainLayout.vue` com `<Sidebar>` do design system + `<RouterView />`).
 - O **design system** fornece `Sidebar` (`@design/components/custom/Sidebar.vue`); o cliente passa `nav-items` como dados ou composição Vue — **não** há `sidebarNav` em `configs/`.
 - Rotas **sem** sidebar: definir no `routes.ts` um ramo sem componente layout (ex.: `/login` ao nível raiz).
-- **Modo dev** (`npm run dev`): rotas em `cht-base/src/devApp/routes.ts` + layout `DevLayout.vue` que reutiliza o mesmo `Sidebar` e views em `cht-base/src/views/` (`index.vue`, `DevDesign.vue`, `DevForm.vue`).
+- **Modo dev** (`npm run dev`): `cht-base/src/devApp/routes.ts` + `DevAppLayout.vue` (Navigator, Sidebar nas rotas `/docs`, host `<Toast />`).
+
+### Toast (`$toast`)
+
+- Plugin próprio em `cht-design-system/src/toast/` (substitui `vue-toastification`).
+- `cht-base/src/main.ts` faz `app.use(toastPlugin, { timeout: 4000 })`.
+- O layout monta `<Toast position width />`. Contrato: `.cursor/docs/toast.md`.
 
 ### Estado global `$project`
 
@@ -197,7 +205,7 @@ scripts/
 - `cht-base/vite.config.ts` — `CLIENT`, alias `@client`, `VITE_SITE_TITLE`.
 - `cht-client-<nome>/cht.config.json` — metadados do cliente (`name`, `siteTitle`, repos).
 - `cht-base/configs/*` — loader (`loadConfig`) e tipo `ClientConfig`.
-- `cht-base/src/devApp/*` — “cliente” interno para modo dev (`App.vue`, `routes.ts`, `DevLayout.vue`, `devNav.ts`).
+- `cht-base/src/devApp/*` — cliente interno (`App.vue`, `routes.ts`, `DevAppLayout.vue`, `ts/componentsNav.ts`).
 - `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.
 - `cht-base/src/main.ts` — cria router a partir de `@client/routes`, monta `@client/App.vue`, plugins, título.
