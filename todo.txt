@@ -1,7 +1,5 @@
 Fazer a página de home mais bonita.
 
-No deploy do netlify, ao acessar uma página pelo side bar, o sidebar responde com o click mas demora para a página trocar. No caso isso só acontece quando um deploy com cache zerado é feito, então ao acessar aquela pagina novamente, é instantaneo, diferente de paginas que não foram acessadas antes. Achar uma forma de indicar um loading de página quando ela ainda não foi cacheada ou carregada.
-
 Revisar o Pagination, fazer os tamanhos não alterarem tanto ao trocar de pagina para melhor usabilidade
 
 Components:
