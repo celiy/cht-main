@@ -12,7 +12,10 @@ description: >-
 
 - Primitive (Button, Card, Toast): `cht-design-system/src/components/Name.vue`
 - Composite (Chat, Sidebar, Resizable): `cht-design-system/src/components/custom/Name.vue`
-- Import from apps: `@design/components/Name.vue` or `@design/components/custom/Name.vue`
+- Apps use them without import (`designSystemPlugin` glob-registers `components/*.vue`, `custom/*.vue`, `custom/charts/*.vue`).
+- Add `name` matching the filename (`Button`, `Sidebar`). If a custom file would collide with a primitive, use `CustomName` (see `CustomAvatar`).
+- Update `cht-base/src/global-components.d.ts` so Volar knows the tag.
+- Internal helpers (`components/internal`) stay local imports.
 
 ## Implementation
 

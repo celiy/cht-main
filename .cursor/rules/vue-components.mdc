@@ -11,7 +11,7 @@ alwaysApply: false
 - Primitivos: `cht-design-system/src/components/*.vue` (Button, Card, Toast, …).
 - Compostos: `cht-design-system/src/components/custom/*.vue` (Chat, Sidebar, Resizable, …).
 - Docs do DS: `cht-base/src/devApp/pages/docs/` + rota em `devApp/routes.ts` + item em `devApp/ts/componentsNav.ts`.
-- Import: `@design/components/...` ou `@design/components/custom/...`.
+- Templates: primitivos e custom são globais (`designSystemPlugin` em `main.ts`). `components/internal` continua com import local (`@design/components/internal/...`).
 
 ## Componentes
 

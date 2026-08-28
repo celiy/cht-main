@@ -2,6 +2,9 @@ Fazer a página de home mais bonita.
 
 Revisar o Pagination, fazer os tamanhos não alterarem tanto ao trocar de pagina para melhor usabilidade
 
+Mudar <main></main> por <article></article> nos docs
+Fazer docs de tudo
+
 Components:
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
 

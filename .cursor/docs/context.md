@@ -65,6 +65,12 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 - Rotas **sem** sidebar: definir no `routes.ts` um ramo sem componente layout (ex.: `/login` ao nível raiz).
 - **Modo dev** (`npm run dev`): `cht-base/src/devApp/routes.ts` + `DevAppLayout.vue` (Navigator, Sidebar nas rotas `/docs`, host `<Toast />`).
 
+### Componentes globais do design system
+
+- Plugin: `cht-design-system/src/plugin.ts`, instalado em `cht-base/src/main.ts` (`app.use(designSystemPlugin)`). **Não** anotar como `Plugin`.
+- Regista automaticamente os `.vue` em `components/`, `components/custom/` e `components/custom/charts/` (nome = `defineComponent.name` ou o ficheiro). `components/internal/` não entra.
+- Tipos Volar/vue-tsc: `cht-base/src/global-components.d.ts` (augmenta `vue` e `@vue/runtime-core` com os SFCs via `@design/...`). `vueCompilerOptions.strictTemplates` no `tsconfig.app.json`.
+
 ### Toast (`$toast`)
 
 - Plugin próprio em `cht-design-system/src/toast/` (substitui `vue-toastification`).
