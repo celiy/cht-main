@@ -1,7 +1,21 @@
 Revisar o Pagination, fazer os tamanhos não alterarem tanto ao trocar de pagina para melhor usabilidade
 
 Mudar <main></main> por <article></article> nos docs
-Fazer docs de tudo
+Fazer docs de tudo no código
+
+Novo variante do modal: "blank", similar ao Card onde se o usuário só inserir <template #body> apenas o conteudo aparece em cima de um card sem footer e header, no modal atual sem ser o preview, o corpo do modal é afetado pelo o botão de fechar e tal. O blank deve mostrar apenas o cardzinho simples visual do modal com padding 4 e nada mais.
+    Fazer que no mobile por padrão o dropdown e select abrem um modal com as opções, pode ser desabilitado via prop e também isso pode ser uma opção que o usuario pode forçar a abrir em desktop, usar o modal blank.
+
+No Chat, ao clicar em qualquer imagem abre o carousel das imagens de uma mensagem, não só das que estão escondidas
+
+Nova opções para carousel:
+    Esconder os botões de ir pro lado
+    Clicar no extremo lado direito ou esquerdo age como o botão de troca de items
+    Variante para o steps viewer (bolinhas que ficam na parte de baixo que mostram qual imagem está ativa):
+        Atual: Simplified em cima da imagem na parte de baixo, novo: Advanced: estilo igual ao input, rounded com border e bg-input, mostra um chevron pro lado esquerdo, uma caixinha que mostra a o item atual n / n de itens, chevron pra direita, os chevrons são botões de troca de item. Esse variante deve ficar em baixo dos itens e não em cima dela. 
+    Emitir quando o usuário clica fora da imagem/item mas ainda dentro do container do carousel
+
+Verificar o desktop para ideias que tirei print
 
 Components:
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
