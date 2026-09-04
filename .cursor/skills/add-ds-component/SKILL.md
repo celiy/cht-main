@@ -1,9 +1,9 @@
 ---
 name: add-ds-component
 description: >-
-  Add or extend a CHT design-system Vue component and its docs page.
-  Use when creating a primitive or custom component under cht-design-system,
-  wiring docs in cht-base/src/devApp, routes, or componentsNav.
+    Add or extend a CHT design-system Vue component and its docs page.
+    Use when creating a primitive or custom component under cht-design-system,
+    wiring docs in cht-base/src/devApp, routes, or componentsNav.
 ---
 
 # Add a design-system component

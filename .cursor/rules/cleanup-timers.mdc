@@ -41,7 +41,9 @@ methods: {
 
 ```ts
 // Evitar — o callback corre depois do unmount
-this.loadTimer = window.setTimeout(() => { /* ... */ }, 2000);
+this.loadTimer = window.setTimeout(() => {
+    /* ... */
+}, 2000);
 ```
 
 O mesmo para `clearInterval`, `cancelAnimationFrame`, `removeEventListener`, `AbortController.abort()`, `observer.disconnect()` e `unsubscribe()`.

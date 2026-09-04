@@ -31,9 +31,9 @@ O ficheiro antigo `code-docs.md` pedia JSDoc em todas as funções. **Não segui
 
 ## Vue
 
-| Área | Orientação |
-|------|------------|
-| `props` | JSDoc só se o nome não for autoexplicativo |
-| `data()` | Não documentar campo a campo |
-| `emits`, `components`, `name` | Normalmente sem JSDoc |
-| `methods` / `computed` | Só trechos não triviais |
+| Área                          | Orientação                                 |
+| ----------------------------- | ------------------------------------------ |
+| `props`                       | JSDoc só se o nome não for autoexplicativo |
+| `data()`                      | Não documentar campo a campo               |
+| `emits`, `components`, `name` | Normalmente sem JSDoc                      |
+| `methods` / `computed`        | Só trechos não triviais                    |

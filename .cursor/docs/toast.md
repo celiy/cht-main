@@ -29,7 +29,9 @@ $toast.off(handler)
 - `event?: string | Record<string, unknown>` — só no clique do botão Fechar, não no timeout/swipe
 
 ```ts
-const stop = this.$toast.on((payload, item) => { /* ... */ });
+const stop = this.$toast.on((payload, item) => {
+    /* ... */
+});
 // beforeUnmount: stop()
 ```
 

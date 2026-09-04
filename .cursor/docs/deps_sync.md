@@ -19,18 +19,18 @@ No diretorio raiz `cht-main`:
 
 1. O script busca subpastas com `package.json` no raiz.
 2. Lê as secoes:
-   - `dependencies`
-   - `devDependencies`
-   - `peerDependencies`
-   - `optionalDependencies`
+    - `dependencies`
+    - `devDependencies`
+    - `peerDependencies`
+    - `optionalDependencies`
 3. Considera apenas dependencias em comum (presentes em 2 ou mais repositorios).
 
 ### Primeira execucao (sem arquivo-base)
 
 - Se `common-dependencies.json` nao existir, o script:
-  - identifica as dependencias em comum;
-  - escolhe a versao mais recente encontrada entre as repos;
-  - cria `common-dependencies.json`.
+    - identifica as dependencias em comum;
+    - escolhe a versao mais recente encontrada entre as repos;
+    - cria `common-dependencies.json`.
 
 ### Execucoes seguintes
 
@@ -46,12 +46,12 @@ Exemplo:
 
 ```json
 {
-  "generatedAt": "2026-04-29T16:04:26.841Z",
-  "description": "Shared dependencies across repositories. This file is the source of truth for version normalization.",
-  "dependencies": {
-    "typescript": "~5.9.3",
-    "vue": "^3.5.25"
-  }
+    "generatedAt": "2026-04-29T16:04:26.841Z",
+    "description": "Shared dependencies across repositories. This file is the source of truth for version normalization.",
+    "dependencies": {
+        "typescript": "~5.9.3",
+        "vue": "^3.5.25"
+    }
 }
 ```
 
@@ -63,4 +63,3 @@ Ao rodar, o script informa:
 - quantidade de dependencias base;
 - quantidade de `package.json` atualizados;
 - total de versoes normalizadas.
-

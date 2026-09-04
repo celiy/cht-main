@@ -9,6 +9,7 @@
         "docker.docker",
         "eamodio.gitlens",
         "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
         "formulahendry.auto-complete-tag",
         "formulahendry.auto-rename-tag",
         "ghmcadams.lintlens",

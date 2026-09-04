@@ -7,7 +7,11 @@
         "dev": "bash run.sh",
         "build": "bash build.sh",
         "sync:deps": "node sync-common-deps.mjs",
-        "sync:tsconfig": "node scripts/sync-tsconfig.mjs"
+        "sync:tsconfig": "node scripts/sync-tsconfig.mjs",
+        "lint": "eslint cht-base cht-design-system cht-shared",
+        "lint:fix": "npm run lint -- --fix",
+        "format": "prettier --write \"cht-base/**/*.{vue,ts,js,css,json,md}\" \"cht-design-system/**/*.{vue,ts}\" \"cht-shared/**/*.{ts,js,json,md}\" \".cursor/**/*.{md,mdc}\"",
+        "format:check": "prettier --check \"cht-base/**/*.{vue,ts,js,css,json,md}\" \"cht-design-system/**/*.{vue,ts}\" \"cht-shared/**/*.{ts,js,json,md}\" \".cursor/**/*.{md,mdc}\""
     },
     "dependencies": {
         "ink": "^7.0.1",
@@ -15,6 +19,14 @@
         "react": "^19.2.5"
     },
     "devDependencies": {
-        "tsx": "^4.21.0"
+        "@eslint/js": "^9.39.1",
+        "eslint": "^9.39.1",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-vue": "^10.5.1",
+        "globals": "^16.4.0",
+        "prettier": "^3.9.6",
+        "prettier-plugin-tailwindcss": "^0.7.1",
+        "tsx": "^4.21.0",
+        "typescript-eslint": "^8.46.2"
     }
 }

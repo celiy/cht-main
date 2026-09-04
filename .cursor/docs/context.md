@@ -16,12 +16,12 @@
 
 Pastas irmãs sob o mesmo diretório pai (ex.: `cht-project/`):
 
-| Pasta | Função |
-|-------|--------|
-| **cht-base** | Boot técnico: Vite + Vue + `vue-router` em `main.ts`, plugins (`$project`, `$toast`), design system e shared. Rotas e layout da app vêm do cliente (`@client/App.vue`, `@client/routes.ts`) ou do stub `src/devApp/`. |
-| **cht-design-system** | Componentes Vue reutilizáveis e tokens de UI. Consumido pelo base (e por páginas de cliente) via alias `@design/*`. |
-| **cht-shared** | Código partilhado (utilitários, validadores, etc.). Consumido via alias `@shared/*`. |
-| **cht-client-&lt;nome&gt;** | App do cliente: `App.vue`, `routes.ts`, layouts, `pages/`, componentes e `js`. Não contém o servidor Vite; o `cht-base` importa `@client/*` em tempo de build. |
+| Pasta                       | Função                                                                                                                                                                                                                |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **cht-base**                | Boot técnico: Vite + Vue + `vue-router` em `main.ts`, plugins (`$project`, `$toast`), design system e shared. Rotas e layout da app vêm do cliente (`@client/App.vue`, `@client/routes.ts`) ou do stub `src/devApp/`. |
+| **cht-design-system**       | Componentes Vue reutilizáveis e tokens de UI. Consumido pelo base (e por páginas de cliente) via alias `@design/*`.                                                                                                   |
+| **cht-shared**              | Código partilhado (utilitários, validadores, etc.). Consumido via alias `@shared/*`.                                                                                                                                  |
+| **cht-client-&lt;nome&gt;** | App do cliente: `App.vue`, `routes.ts`, layouts, `pages/`, componentes e `js`. Não contém o servidor Vite; o `cht-base` importa `@client/*` em tempo de build.                                                        |
 
 Instalação de dependências em todos os pacotes com `package.json` no diretório pai: ver `cht-shared/install.sh` (percorre pastas irmãs e corre `npm i`).
 
@@ -92,11 +92,11 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 
 ### Scripts npm (`cht-base/package.json`)
 
-| Script | Comportamento |
-|--------|----------------|
-| `npm run dev` | Vite sem `CLIENT` — `@client` → `src/devApp` (rotas `/`, `/devDesign`, `/devForm`). |
-| `npm run dev:client` | Vite com `CLIENT` no ambiente — `@client` → `cht-client-<name>/src`. O runner passa `CLIENT=<name>`. |
-| `npm run build` / `build:client` | Build sem cliente (devApp) ou com `CLIENT=<name>`. |
+| Script                           | Comportamento                                                                                        |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm run dev`                    | Vite sem `CLIENT` — `@client` → `src/devApp` (rotas `/`, `/devDesign`, `/devForm`).                  |
+| `npm run dev:client`             | Vite com `CLIENT` no ambiente — `@client` → `cht-client-<name>/src`. O runner passa `CLIENT=<name>`. |
+| `npm run build` / `build:client` | Build sem cliente (devApp) ou com `CLIENT=<name>`.                                                   |
 
 Usa-se **`cross-env`** para `CLIENT=...` em ambientes Windows/Linux.
 
@@ -127,10 +127,10 @@ Imports típicos: `@design/...`, `@shared/...`, `@client/components/...`, `@clie
 
 ## Aliases resumidos
 
-| Alias | Resolução (conceito) |
-|-------|----------------------|
-| `@design/*` | `cht-design-system/src/*` |
-| `@shared/*` | `cht-shared/src/*` |
+| Alias       | Resolução (conceito)                                                          |
+| ----------- | ----------------------------------------------------------------------------- |
+| `@design/*` | `cht-design-system/src/*`                                                     |
+| `@shared/*` | `cht-shared/src/*`                                                            |
 | `@client/*` | `cht-client-<nome>/src/*` com `CLIENT`; sem `CLIENT`, `cht-base/src/devApp/*` |
 
 ---
@@ -187,11 +187,11 @@ scripts/
 - Cores ANSI dos processos (Vite, tsx, etc.) são preservadas com `FORCE_COLOR=1`.
 - URLs nos logs (`http(s)://...`) são detectados, deduplicados e renderizados como hyperlinks OSC 8 clicáveis na status bar (em terminais que suportam).
 - Teclas:
-  - **`←` / `→`** ou **`h` / `l`** — alterna a tab focada.
-  - **`↑` / `↓`** ou **`k` / `j`** — scroll do log da tab ativa. **PgUp** / **PgDn** pagina. A roda do mouse envia as mesmas setas (modo alternate-scroll).
-  - **`r`** — restart do processo da tab ativa.
-  - **`c`** — limpa o buffer da tab ativa.
-  - **`q`** ou **`Ctrl+C`** — encerra tudo (SIGTERM no PGID, SIGKILL nos sobreviventes após 200 ms).
+    - **`←` / `→`** ou **`h` / `l`** — alterna a tab focada.
+    - **`↑` / `↓`** ou **`k` / `j`** — scroll do log da tab ativa. **PgUp** / **PgDn** pagina. A roda do mouse envia as mesmas setas (modo alternate-scroll).
+    - **`r`** — restart do processo da tab ativa.
+    - **`c`** — limpa o buffer da tab ativa.
+    - **`q`** ou **`Ctrl+C`** — encerra tudo (SIGTERM no PGID, SIGKILL nos sobreviventes após 200 ms).
 
 ### Adicionar um cliente novo
 
