@@ -8,6 +8,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
 
     "[vue]": {
+        "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[typescript]": {
@@ -31,11 +32,13 @@
         "source.removeUnusedImports": "explicit"
     },
 
+    "vue.format.template.enabled": false,
+    "vue.format.script.enabled": false,
+    "vue.format.style.enabled": false,
+
     "eslint.useFlatConfig": true,
-    "eslint.workingDirectories": [
-        { "pattern": "cht-*" },
-        { "pattern": "cht-main" }
-    ],
+    "eslint.format.enable": false,
+    "eslint.workingDirectories": [{ "mode": "auto" }],
 
     "files.watcherExclude": {
         "**/.git/objects/**": true,
