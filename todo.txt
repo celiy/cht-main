@@ -1,5 +1,6 @@
 Mudar <main></main> por <article></article> nos docs
 Fazer docs de tudo no código
+Otimizar o text-contrast, no profiler de performance ele é bem prominente
 
 Components:
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
