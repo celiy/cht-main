@@ -1,9 +1,9 @@
 ---
 name: code-review
 description: >-
-  Review git-modified files in the workspace for breaking changes.
-  Use when the user asks for a code review, /code-review, breaking-change check,
-  or to review local/staged/uncommitted changes before commit or PR.
+    Review git-modified files in the workspace for breaking changes.
+    Use when the user asks for a code review, /code-review, breaking-change check,
+    or to review local/staged/uncommitted changes before commit or PR.
 ---
 
 # Code review (breaking changes)
@@ -17,10 +17,12 @@ Do not review style, naming, or unrelated quality unless the user asks.
 ## Workflow
 
 1. **Collect changes** from every git repository under the workspace root (not only `cht-main`):
-   ```bash
-   bash .cursor/skills/code-review/scripts/collect-git-changes.sh
-   ```
-   Run from the workspace root. The script scans repos up to depth 2 (`cht-main`, `cht-base`, `cht-design-system`, `cht-shared`, `cht-client-*`, …).
+
+    ```bash
+    bash .cursor/skills/code-review/scripts/collect-git-changes.sh
+    ```
+
+    Run from the workspace root. The script scans repos up to depth 2 (`cht-main`, `cht-base`, `cht-design-system`, `cht-shared`, `cht-client-*`, …).
 
 2. **If the script reports no changes**, stop and tell the user there is nothing to review.
 
@@ -75,19 +77,23 @@ Flag a finding when a change can break a consumer that relied on the previous be
 # Code review — breaking changes
 
 ## Resumo
+
 [Uma frase: nenhuma breaking change / N breaking change(s) encontrada(s).]
 
 ## Alterações revistas
+
 - `repo/path` — [breve descrição do que mudou]
 
 ## Breaking changes
+
 [Se nenhuma: escrever "Nenhuma."]
 
-| Severidade | Local | O que quebra | Quem é afetado |
-|------------|-------|--------------|----------------|
-| Alta | `path:linha` | … | … |
+| Severidade | Local        | O que quebra | Quem é afetado |
+| ---------- | ------------ | ------------ | -------------- |
+| Alta       | `path:linha` | …            | …              |
 
 ## Risco residual
+
 [Opcional: incerteza que o diff não resolveu, sem inventar problemas.]
 ```
 
