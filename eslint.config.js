@@ -11,6 +11,7 @@ export default tseslint.config(
             "**/node_modules/**",
             "**/builds/**",
             "**/out/**",
+            "**/electron-dist/**",
             "**/*.d.ts"
         ]
     },
@@ -59,6 +60,20 @@ export default tseslint.config(
                     alphabetical: false
                 }
             ]
+        }
+    },
+    {
+        files: ["**/*.{mjs,cjs}"],
+        languageOptions: {
+            sourceType: "module",
+            globals: globals.node
+        }
+    },
+    {
+        files: ["**/*.cjs"],
+        languageOptions: {
+            sourceType: "commonjs",
+            globals: globals.node
         }
     },
     {

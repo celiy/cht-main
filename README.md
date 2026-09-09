@@ -31,6 +31,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `install.sh` / `scripts/install.mjs`: clona repositórios shared (+ backend do cliente se `--client:`) e instala dependências.
 - `run.sh` / `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `build.sh` / `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
+- `electron.sh` / `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop para Linux.
 - `sync-common-deps.mjs`: sincronizador de dependências comuns entre repos.
 - `common-dependencies.json`: arquivo-base de versões compartilhadas.
 
@@ -108,7 +109,24 @@ builds/mecarvit/dist
 
 Se `builds/<cliente>/dist` já existir, ele é removido e recriado (replace total).
 
-### 4) Sincronizar dependências compartilhadas
+### 4) App desktop (Electron)
+
+Modo desenvolvimento (abre a janela imediatamente; o frontend mostra loading até o backend responder em `/health`):
+
+```bash
+./electron.sh mecarvit
+# ou: npm run electron -- mecarvit
+```
+
+Empacotar para Linux (`AppImage`, `deb` e diretório `dir`):
+
+```bash
+./electron.sh build mecarvit
+```
+
+Os artefatos saem em `builds/<cliente>/desktop`. O empacotamento está preparado para Windows (`nsis`/`portable`) e macOS (`dmg`/`zip`) quando o build rodar nesses sistemas.
+
+### 5) Sincronizar dependências compartilhadas
 
 ```bash
 npm run sync:deps

@@ -83,7 +83,8 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 - **`$project.url.query`** — snapshot reativo da querystring (parâmetros `?a=b`).
 - **`$project.url.params`** — snapshot reativo dos **params da rota** (ex.: rota `/:id` → `params.id`). Não é a querystring.
 - **`$project.device.viewportWidth` / `viewportHeight`** — tamanho da janela; atualizado no `resize`. Usar para posicionar overlays no centro do ecrã (`<ViewportCenter>`).
-- **`$project.route.isLoading`** — `true` enquanto uma navegação espera o chunk lazy da rota (atraso de 150 ms para não piscar em páginas já em cache). O layout de docs mostra barra + overlay.
+- **`$project.route.isLoading`** — `true` enquanto uma navegação espera o chunk lazy da rota. O layout de docs mostra barra + overlay.
+- **`$project.electron`** — `isElectron`, `hasBackend`, `backendReady` e status do backend local quando a app corre no Electron.
 - Sincronização em `initProjectRouter` + `router.afterEach`; utilitários em `cht-base/src/js/utils/routeUtils.ts` (`syncReactiveQuerySnapshot`, `syncReactiveParamsSnapshot`).
 
 ### Aplicar título do site
@@ -97,6 +98,9 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 | `npm run dev`                    | Vite sem `CLIENT` — `@client` → `src/devApp` (rotas `/`, `/devDesign`, `/devForm`).                  |
 | `npm run dev:client`             | Vite com `CLIENT` no ambiente — `@client` → `cht-client-<name>/src`. O runner passa `CLIENT=<name>`. |
 | `npm run build` / `build:client` | Build sem cliente (devApp) ou com `CLIENT=<name>`.                                                   |
+| `npm run electron:compile`       | Compila `electron/main.ts` e `preload.ts` para `electron-dist/`.                                     |
+
+O launcher do monorepo é `./electron.sh <client>` (dev) e `./electron.sh build <client>` (pacote Linux).
 
 Usa-se **`cross-env`** para `CLIENT=...` em ambientes Windows/Linux.
 
