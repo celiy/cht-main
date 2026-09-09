@@ -13,6 +13,7 @@
         "formulahendry.auto-complete-tag",
         "formulahendry.auto-rename-tag",
         "ghmcadams.lintlens",
+        "bradlc.vscode-tailwindcss",
         "heybourn.headwind",
         "lihui.vs-color-picker",
         "mads-hartmann.bash-ide-vscode",
@@ -25,7 +26,6 @@
         "sukumo28.wav-preview",
         "timonwong.shellcheck",
         "vincaslt.highlight-matching-tag",
-        "voorjaar.windicss-intellisense",
         "vue.volar",
         "yinfei.luahelper",
         "EditorConfig.EditorConfig"

@@ -7,9 +7,20 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
 
+    "editor.quickSuggestions": {
+        "strings": "on",
+        "other": "on",
+        "comments": "off"
+    },
+
     "[vue]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.quickSuggestions": {
+            "strings": "on",
+            "other": "on",
+            "comments": "off"
+        }
     },
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -79,5 +90,22 @@
         "**/out/**": true,
         "**/node_modules/**": true,
         "**/*.map": true
-    }
+    },
+
+    "tailwindCSS.experimental.configFile": {
+        "cht-client-mecarvit/src/css/style.css": "cht-client-mecarvit/**",
+        "cht-base/src/css/style.prettier.css": "{cht-base,cht-design-system,cht-shared}/**"
+    },
+    "tailwindCSS.includeLanguages": {
+        "vue": "html",
+        "vue-html": "html"
+    },
+    "tailwindCSS.emmetCompletions": true,
+    "tailwindCSS.classAttributes": [
+        "class",
+        "className",
+        "ngClass",
+        "class:list",
+        ":class"
+    ]
 }
