@@ -4,6 +4,10 @@ Fazer docs de tudo no código
 Efeito de click que faz o container ir pra baixo similar ao button para
     Accordion
 
+LeftIcon para itens da sidebar
+Container dos botões na navbar do devapp devem ser o routerlink
+Select com multiplas opções tem um prop que por default é true que se for true ele mostra uma array string do label dentro do select, se for false mostra o placeholder mesmo
+
 Components:
     - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
 
@@ -18,3 +22,4 @@ Custom components:
         Data Group usa os filtros do Search Component e pode clicar nos headers do DataTable ordena por ordem alfabetica ou min para max juntamente com o filtro de pesquisa do Search.
 
 Mecarvit:
+    O backend pode mandar entidades tipo cliente ou funcionarios via API se tiver um filtro explicito dizendo que pode
