@@ -23,3 +23,5 @@ Custom components:
 
 Mecarvit:
     O backend pode mandar entidades tipo cliente ou funcionarios via API se tiver um filtro explicito dizendo que pode
+
+    implementar os campos de criadoEm, modificadoEm
