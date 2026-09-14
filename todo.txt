@@ -7,19 +7,8 @@ Efeito de click que faz o container ir pra baixo similar ao button para
 LeftIcon para itens da sidebar
 Container dos botões na navbar do devapp devem ser o routerlink
 Select com multiplas opções tem um prop que por default é true que se for true ele mostra uma array string do label dentro do select, se for false mostra o placeholder mesmo
-
-Components:
-    - OptionDrodown: Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece infinitamente.
-
-Custom components:
-    - Select Search: Pesquisa local está pronta, apenas implementar pesquisa remota. Pesquisa remota muda o icone da lupa para o simbolo de loading.
-
-    - Data Group: inclui o componente Data Table e Search Component, fazendo os dois trabalharem juntos;
-        - Data Table: Componente que recebe uma array de objetos, que é os dados a serem mostrados e uma outra array de objetos que é como será visualmente. Clicar em uma coluna da tabela ordena aquela tabela entre decrescente e crescente. Este componente inclui o componente Pagination e seleção de quantos items devem ser mostrados por página.
-
-        - Search Component: Componente que é um input para pesquisa, botão de pesquisa, botão de reload e botão para selecionar filtros. Os filtros são passados como uma array de objetos e retorna uma array de strings que é os filtros usados.
-
-        Data Group usa os filtros do Search Component e pode clicar nos headers do DataTable ordena por ordem alfabetica ou min para max juntamente com o filtro de pesquisa do Search.
+OptionDrodown: 
+    Dentro do dropdown normal e select, uma opção que pode spawnar com click ou hover um dropdown do lado com mais opções e isso acontece recursivamente infinitamente.
 
 Mecarvit:
     O backend pode mandar entidades tipo cliente ou funcionarios via API se tiver um filtro explicito dizendo que pode
