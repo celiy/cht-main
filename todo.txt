@@ -1,22 +1,14 @@
-Mudar <main></main> por <article></article> nos docs
 Fazer docs de tudo no código
-Nos docs, invés de colocar códigos no <script/>, colocar eles dentro do proprio template. Invés de <Componente :data="item" /> <script> data() { return { item: valor }} </script>, fazer: <Componente :data="item: valor" /> diretamente.
-
-Efeito de click que faz o container ir pra baixo similar ao button para
-    Accordion
-
-FloatingLabel para input
-Nova seção no docs sobre estilização:
-    Incluir as classes de css customizadas geradas automaticamente para simplicidade como a rounded, container, container-center e etc.
-LeftIcon para itens da sidebar
-Container dos botões na navbar do devapp devem ser o routerlink
-Select com multiplas opções tem um prop que por default é true que se for true ele mostra uma array de strings do label dentro do select que terminam em ... se forem maiores que o botão do select, se for false mostra o placeholder da logica de antes. No caso o placeholder de antes mostra se não tiver uma opção pré selecionada
-OptionDrodown:
-    Dentro do dropdown e select, uma opção que pode spawnar com click ou hover um floatingpanel do lado com mais opções.
 
 Mecarvit:
-    O backend pode mandar entidades tipo cliente ou funcionarios via API se tiver um filtro explicito dizendo que pode enviar mesmo se estiver inativo
+    implementar o resto das paginas usando a do funcionario como base. No caso implementar a de clientes, veiculos, ordens de serviço e entradas e saidas. Analisar o funcionarios.vue atual, e decidir quais pedaços do código podem ser componentizados para evitar repetição, a partir disso aplicar essa componentização ao funcionarios.vue e seguir esta base nos outros.
+        Ordens de serviço tem um form customizado do 0 sem ser o form renderer. Por enquanto um form simples com só uns 4 campos funcionais.
+        entradas e saidas são uma pagina só, usar o #entradas e #saidas para dar auto scroll a tabela de visualização da opção selecionada
+        ?cadastrar=true da rota ao clicar em cadastrar na sidebar abre a pagina normal mas automaticamente abre o modal de cadastro do item selecionado.
+        A area de veiculos ao cadastrar o usuário seleciona qual cliente é o dono, o dono pode ser alterado na edição.
 
-    implementar os campos de criadoEm, modificadoEm
-    Campo confirmar senha no frontend
+    Form das ordens de serviço:
+        Select de cliente o botão de + cadastrar cliente tem tooltip
+
+    implementar os campos de criadoEm, modificadoEm no front
     Estado de loading na tela de cadastro/login
