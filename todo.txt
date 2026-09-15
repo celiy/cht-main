@@ -1,4 +1,4 @@
-Fazer docs de tudo no código
+Clicar em alguns inputs dependendo do lugar não mostra o ring
 
 Mecarvit:
     implementar o resto das paginas usando a do funcionario como base. No caso implementar a de clientes, veiculos, ordens de serviço e entradas e saidas. Analisar o funcionarios.vue atual, e decidir quais pedaços do código podem ser componentizados para evitar repetição, a partir disso aplicar essa componentização ao funcionarios.vue e seguir esta base nos outros.
