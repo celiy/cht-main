@@ -1,16 +1,7 @@
-Clicar em alguns inputs dependendo do lugar não mostra o ring
-Se for em uma pagina com varios select/dropdown, pressionar enter no vazio ou quando um botão de dropdown/select está highlighted pelo tab, invés do botão enter abrir o dropdown/select, ele seleciona uma opção e isso seleciona uma opção em todo os dropdown/select da pagina.
-Usar as setas e enter no select multiplo também tem o mesmo efeito e seleciona mais de uma opção por vez
+Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
 
 Mecarvit:
-    implementar o resto das paginas usando a do funcionario como base. No caso implementar a de clientes, veiculos, ordens de serviço e entradas e saidas. Analisar o funcionarios.vue atual, e decidir quais pedaços do código podem ser componentizados para evitar repetição, a partir disso aplicar essa componentização ao funcionarios.vue e seguir esta base nos outros.
-        Ordens de serviço tem um form customizado do 0 sem ser o form renderer. Por enquanto um form simples com só uns 4 campos funcionais.
-        entradas e saidas são uma pagina só, usar o #entradas e #saidas para dar auto scroll a tabela de visualização da opção selecionada
-        ?cadastrar=true da rota ao clicar em cadastrar na sidebar abre a pagina normal mas automaticamente abre o modal de cadastro do item selecionado.
-        A area de veiculos ao cadastrar o usuário seleciona qual cliente é o dono, o dono pode ser alterado na edição.
-
-    Form das ordens de serviço:
-        Select de cliente o botão de + cadastrar cliente tem tooltip
-
     implementar os campos de criadoEm, modificadoEm no front
-    Estado de loading na tela de cadastro/login
+
+DevApp
+    Revisar o novo Select, Dropdown, Badge com custom color
