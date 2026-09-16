@@ -60,6 +60,8 @@ No diretório raiz `cht-main`:
 
 ### 1) Instalar / preparar ambiente
 
+**Node:** a raiz tem [`.nvmrc`](./.nvmrc) (hoje **24** LTS, alinhado ao Vitest no backend). Com [nvm](https://github.com/nvm-sh/nvm) instalado, `./install.sh`, `./run.sh`, `./build.sh` e `./electron.sh` rodam `nvm install` + `nvm use` antes de chamar o npm/Node — a versão certa do npm vem junto com essa instalação do Node. Sem nvm, use manualmente a mesma major do `.nvmrc`.
+
 Apenas repositórios compartilhados:
 
 ```bash
@@ -72,7 +74,7 @@ Incluindo repositórios de um cliente específico (ex.: mecarvit):
 ./install.sh --client:mecarvit
 ```
 
-O `install.sh` é um wrapper para `scripts/install.mjs`. Ele clona `shared.repos`, e com `--client:<name>` lê `cht-client-<name>/cht.config.json` (a pasta do frontend já tem de existir) para clonar o backend. Depois roda `npm install` em cada pasta irmã com `package.json` (e na raiz, para preparar o runner).
+O `install.sh` é um wrapper para `scripts/install.mjs`. Com [nvm](https://github.com/nvm-sh/nvm), alinha o Node ao [`.nvmrc`](./.nvmrc) antes do npm. Ele faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios shared, nos clientes descobertos em `cht-client-*/cht.config.json` e, com `--client:<name>`, restringe os extras desse cliente. Depois roda `npm install` em cada pasta irmã com `package.json` (e na raiz, para preparar o runner).
 
 ### 2) Rodar ambiente de desenvolvimento
 

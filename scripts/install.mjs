@@ -2,7 +2,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { getRootDir, getSharedRepos, parseClientFlag, resolveClient } from "./lib/clients.mjs";
+import { getRootDir, getSharedRepos, listClientNames, parseClientFlag, resolveClient } from "./lib/clients.mjs";
 import { syncTsconfig } from "./sync-tsconfig.mjs";
 
 function repoNameFromUrl(url) {
@@ -11,12 +11,30 @@ function repoNameFromUrl(url) {
     return last.replace(/\.git$/, "");
 }
 
-function gitClone(url, cwd) {
+function isGitRepo(dir) {
+    return fs.existsSync(path.join(dir, ".git"));
+}
+
+function gitPull(dir, label) {
+    console.log(`[install] git pull in ${label}`);
+
+    const result = spawnSync("git", ["pull"], { cwd: dir, stdio: "inherit" });
+
+    if (result.status !== 0) {
+        console.warn(`[install] git pull failed in ${label} (continuing)`);
+    }
+}
+
+function gitSyncFromUrl(url, cwd) {
     const name = repoNameFromUrl(url);
     const dest = path.join(cwd, name);
 
     if (fs.existsSync(dest)) {
-        console.log(`[install] skip clone (exists): ${name}`);
+        if (isGitRepo(dest)) {
+            gitPull(dest, name);
+        } else {
+            console.warn(`[install] skip pull (not a git repo): ${name}`);
+        }
 
         return;
     }
@@ -28,6 +46,41 @@ function gitClone(url, cwd) {
     if (result.status !== 0) {
         console.warn(`[install] git clone failed for ${url} (continuing)`);
     }
+}
+
+/**
+ * @param {string | null} client From `--client:<name>`; when set, only that client's repos are added beyond shared.
+ */
+function collectInstallRepoUrls(client) {
+    const urls = new Set(getSharedRepos());
+
+    if (client && client !== "dev") {
+        const resolved = resolveClient(client);
+
+        if (resolved.frontend?.repo) {
+            urls.add(resolved.frontend.repo);
+        }
+
+        if (resolved.backend?.repo) {
+            urls.add(resolved.backend.repo);
+        }
+
+        return [...urls];
+    }
+
+    for (const name of listClientNames()) {
+        const resolved = resolveClient(name);
+
+        if (resolved.frontend?.repo) {
+            urls.add(resolved.frontend.repo);
+        }
+
+        if (resolved.backend?.repo) {
+            urls.add(resolved.backend.repo);
+        }
+    }
+
+    return [...urls];
 }
 
 function npmInstall(dir) {
@@ -54,16 +107,14 @@ function main() {
     const { client } = parseClientFlag(argv);
     const root = getRootDir();
 
-    for (const url of getSharedRepos()) {
-        gitClone(url, root);
+    if (isGitRepo(root)) {
+        gitPull(root, path.basename(root) || ".");
     }
 
-    if (client && client !== "dev") {
-        const resolved = resolveClient(client);
+    const repoUrls = collectInstallRepoUrls(client);
 
-        if (resolved.backend && resolved.backend.repo) {
-            gitClone(resolved.backend.repo, root);
-        }
+    for (const url of repoUrls) {
+        gitSyncFromUrl(url, root);
     }
 
     syncTsconfig();
