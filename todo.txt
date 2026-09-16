@@ -1,7 +1,20 @@
 Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
 
 Mecarvit:
-    implementar os campos de criadoEm, modificadoEm no front
+    Deletar os seguintes campos e deixar eles vazios, ao salvar e visualizar de novo, os campos que antes estavam vazios no submit estão com os valores de antes, então apagar no form não apaga no backend:
+        No form da OS:
+            Celular do cliente, quilometragem, tipo, diagnostico do cliente e mecanico e observações.
+        No form do cliente:
+            Celular, email, observação
+        No form do veiculos:
+            Tipo
 
-DevApp
-    Revisar o novo Select, Dropdown, Badge com custom color
+    Ao criar/editar uma OS, ao adicionar um serviço nada acontece, remover funciona normalmente, alterar um serviço que já existe também.
+
+    Se a OS estiver marcada como concluída, não dá pra alterar o status dela pra outro status se tiver algum pagamento vinculado a ela.
+
+    Select search para filtrar por Clientes na pagina de veiculos
+
+    Form do cliente onde é visivel o documento, o documento deve ter a formatação de acordo se for cpf ou cnpj
+
+    Form do veiculo não deve mostrar o CPF do cliente ao lado
