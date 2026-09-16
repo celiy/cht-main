@@ -97,17 +97,11 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
     if (resolved.backend) {
         const host = backendEntry?.host || DEFAULT_BACKEND_HOST;
         const port = Number(backendEntry?.port) || DEFAULT_BACKEND_PORT;
-        const backendDir = packaged
-            ? "backend"
-            : path.join(root, resolved.backend.dir);
+        const backendDir = packaged ? "backend" : path.join(root, resolved.backend.dir);
 
         backend = {
             dir: backendDir,
-            cmd: backendStartCmd(
-                path.join(root, resolved.backend.dir),
-                backendEntry,
-                packaged
-            ),
+            cmd: backendStartCmd(path.join(root, resolved.backend.dir), backendEntry, packaged),
             healthUrl: healthUrl(host, port, backendEntry?.healthPath || DEFAULT_HEALTH_PATH),
             host,
             port,
@@ -183,7 +177,16 @@ function waitForHttp(url, timeoutMs) {
 }
 
 function spawnVite(baseDir, client, port) {
-    const args = ["vite", "--host", "127.0.0.1", "--port", String(port), "--strictPort", "--clearScreen", "false"];
+    const args = [
+        "vite",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        String(port),
+        "--strictPort",
+        "--clearScreen",
+        "false"
+    ];
     const env = { ...process.env };
 
     if (client !== "dev") {
@@ -369,9 +372,7 @@ function runBuild(client) {
     compileElectron(baseDir);
     writeRuntimeConfig(baseDir, runtimeConfig);
 
-    const backendAbsDir = resolved.backend
-        ? path.join(root, resolved.backend.dir)
-        : null;
+    const backendAbsDir = resolved.backend ? path.join(root, resolved.backend.dir) : null;
 
     if (backendAbsDir && !fs.existsSync(backendAbsDir)) {
         throw new Error(`[electron] Backend directory not found: ${backendAbsDir}`);

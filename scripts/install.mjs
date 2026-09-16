@@ -83,6 +83,44 @@ function collectInstallRepoUrls(client) {
     return [...urls];
 }
 
+const NATIVE_ADDON_PACKAGES = ["better-sqlite3", "bcrypt"];
+
+function packageJsonUsesNativeAddons(dir) {
+    const pkgPath = path.join(dir, "package.json");
+
+    if (!fs.existsSync(pkgPath)) {
+        return false;
+    }
+
+    let pkg;
+
+    try {
+        pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    } catch {
+        return false;
+    }
+
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+
+    return NATIVE_ADDON_PACKAGES.some((name) => name in deps);
+}
+
+function npmRebuildNativeAddons(dir) {
+    if (!packageJsonUsesNativeAddons(dir)) {
+        return;
+    }
+
+    const label = path.relative(getRootDir(), dir) || ".";
+
+    console.log(`[install] npm rebuild (native addons) in ${label}`);
+
+    const result = spawnSync("npm", ["rebuild"], { cwd: dir, stdio: "inherit" });
+
+    if (result.status !== 0) {
+        throw new Error(`npm rebuild failed in ${dir}`);
+    }
+}
+
 function npmInstall(dir) {
     console.log(`[install] npm install in ${path.relative(getRootDir(), dir) || "."}`);
 
@@ -91,6 +129,8 @@ function npmInstall(dir) {
     if (result.status !== 0) {
         throw new Error(`npm install failed in ${dir}`);
     }
+
+    npmRebuildNativeAddons(dir);
 }
 
 function listSubReposWithPackageJson(rootDir) {

@@ -97,7 +97,8 @@ export class ManagedProcess extends EventEmitter {
         this.child.on("exit", (code, signal) => {
             this.flushPartial();
             this.exitCode = code;
-            this.status = signal && code === null ? `signal:${signal}` : (code === 0 ? "exited" : "crashed");
+            this.status =
+                signal && code === null ? `signal:${signal}` : code === 0 ? "exited" : "crashed";
             this.bumpVersion();
             this.emit("status", this);
         });
