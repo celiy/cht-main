@@ -21,3 +21,5 @@ Mecarvit:
         Investigar o caso de uso que quando eu fiz o mock e tentei cadastrar uma OS em uma conta não mock, deu erro.
 
         Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
+
+Revisar se o que foi implementado no sistema bate com o documento.
