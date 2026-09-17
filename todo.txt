@@ -1,3 +1,23 @@
 Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
 
 Mecarvit:
+    Os modais de visualizar editar devem ter um botão na parte de baixo, mesmo lugar que os botões de salvar/cancelar que fica no lado esquerdo, esse botão altera o form entre visualizar e editar. Se o usuário editar algum campo e voltar a visualizar, os valores de antes devem ser sobreescritos.
+
+    Selects devem receber uma nova lógica:
+        Se um Select tiver placeholder e uma label, a label fica visivel em cima do select da mesma forma que fica no input.
+        Um select recebe um novo slot, inside-empty-panel, que é um slot que aparece dentro do empty panel, embaixo do texto de que nenhuma opção foi achada quando não tem nenhuma opção dentro do select.
+            Para o cadastro de um cliente, o slot inside-empty-panel é um botão que serve para invocar o form de cadastro de endereços e veículos do cliente, tendo a label e icone + Cadastrar veículos/endereços.
+
+        Form de visualização APENAS do cliente deve mostrar as ordens de serviço que o cliente está associado. Clicar em uma mostra a ordem de serviço.
+
+        Quando o usuário clica no + Cadastrar na sidebar, ao entrar numa pagina ele abre o modal corretamente mas a rota que tinha ?cadastrar=true some, então se o usuário clicar para voltar no navegador, ele tem que fazer isso duas vezes, o ?cadastrar=true deve ficar na rota e a lógica deve ser que o modal aparece ao montar, se o componente de página só monta uma vez então ele só ira registrar a rota uma vez, sem ter que fazer a lógica de agora que a rota é retirada quando o modal abre.
+
+        Table recebe um slot que é um slot que é mostrado quando nenhum dado está sendo mostrado.
+
+        Novo select-search debaixo do cliente no form de OS para selecionar um ou mais funcionários para serem atribuídos como responsaveis à aquela OS.
+
+        Clicar no salvar um pagamento quando se tem valor avisa "Aplique a alteração com "Adicionar à lista" ou "Aplicar alteração" antes de salvar." O comportamento deve ser o seguinte: remover o botão de "Adicionar pagamento" do lugar que ele está. Quando se tem um vlaor inserido no valor do pagamento, o botão de salvar vira o "Adicionar pagamento". O Aplicar alteração recebe a mesma lógica.
+
+        Investigar o caso de uso que quando eu fiz o mock e tentei cadastrar uma OS em uma conta não mock, deu erro.
+
+        Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
