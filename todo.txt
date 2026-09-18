@@ -3,10 +3,10 @@ Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse e
 Mecarvit:
     Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
 
+Mover os scripts .sh e .ps1 para uma pasta chamada scripts, sync-common-deps também, fazer um script global (pesquisar na internet) que funciona no windows e no linux, um script só que pode invocar qualquer script dependendo do sistema dentro do /scripts. O que pode ser interessante é um comando só npm que invoca os scripts.
+
 Revisar se o que foi implementado no sistema bate com o documento.
 
 Revisar código de uma forma teste que pensei:
     Perguntar pra IA se ela analisa melhor um arquivo gigante do que arquivos separados, se sim:
         Fazer uma cópia do workspace atual, dentro dele pedir um script que transforma todo arquivo em um arquivo só, e assim, juntar eles num arquivo só onde tem o conteúdo dele, o lugar que ele fica no projeto e o nome dele.
-
-Ver email do kwecko sobre a análise atual dele.
