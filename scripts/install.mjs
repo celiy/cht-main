@@ -1,8 +1,17 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { getRootDir, getSharedRepos, listClientNames, parseClientFlag, resolveClient } from "./lib/clients.mjs";
+import {
+    clearClientDiscoveryCache,
+    getCataloguedClient,
+    getRootDir,
+    getSharedRepos,
+    listCataloguedClientNames,
+    listClientNames,
+    parseClientFlag,
+    resolveClient
+} from "./lib/clients.mjs";
+import { spawnSyncInherit } from "./lib/runCommand.mjs";
 import { syncTsconfig } from "./sync-tsconfig.mjs";
 
 function repoNameFromUrl(url) {
@@ -18,7 +27,7 @@ function isGitRepo(dir) {
 function gitPull(dir, label) {
     console.log(`[install] git pull in ${label}`);
 
-    const result = spawnSync("git", ["pull"], { cwd: dir, stdio: "inherit" });
+    const result = spawnSyncInherit("git", ["pull"], { cwd: dir });
 
     if (result.status !== 0) {
         console.warn(`[install] git pull failed in ${label} (continuing)`);
@@ -41,10 +50,57 @@ function gitSyncFromUrl(url, cwd) {
 
     console.log(`[install] git clone ${url}`);
 
-    const result = spawnSync("git", ["clone", url], { cwd, stdio: "inherit" });
+    const result = spawnSyncInherit("git", ["clone", url], { cwd });
 
     if (result.status !== 0) {
         console.warn(`[install] git clone failed for ${url} (continuing)`);
+    }
+}
+
+function addRepoUrl(urls, url) {
+    if (typeof url === "string" && url.trim()) {
+        urls.add(url.trim());
+    }
+}
+
+function githubPrefixFromSharedRepos() {
+    for (const url of getSharedRepos()) {
+        const match = String(url).match(/^(https?:\/\/[^/]+\/[^/]+\/)/);
+
+        if (match) {
+            return match[1];
+        }
+    }
+
+    return "https://github.com/celiy/";
+}
+
+/**
+ * Collect frontend/backend clone URLs from local cht.config.json, clients.json
+ * catalog, or naming convention — so `--client:<name>` works before the folder exists.
+ *
+ * @param {Set<string>} urls
+ * @param {string} name
+ */
+function addClientRepoUrls(urls, name) {
+    const catalog = getCataloguedClient(name);
+
+    addRepoUrl(urls, catalog?.frontend?.repo);
+    addRepoUrl(urls, catalog?.backend?.repo);
+
+    try {
+        const resolved = resolveClient(name);
+
+        addRepoUrl(urls, resolved.frontend?.repo);
+        addRepoUrl(urls, resolved.backend?.repo);
+    } catch {
+        if (!catalog?.frontend?.repo) {
+            addRepoUrl(urls, `${githubPrefixFromSharedRepos()}cht-client-${name}.git`);
+        }
+
+        if (!catalog?.backend?.repo) {
+            addRepoUrl(urls, `${githubPrefixFromSharedRepos()}cht-backend-${name}.git`);
+        }
     }
 }
 
@@ -55,29 +111,15 @@ function collectInstallRepoUrls(client) {
     const urls = new Set(getSharedRepos());
 
     if (client && client !== "dev") {
-        const resolved = resolveClient(client);
-
-        if (resolved.frontend?.repo) {
-            urls.add(resolved.frontend.repo);
-        }
-
-        if (resolved.backend?.repo) {
-            urls.add(resolved.backend.repo);
-        }
+        addClientRepoUrls(urls, client);
 
         return [...urls];
     }
 
-    for (const name of listClientNames()) {
-        const resolved = resolveClient(name);
+    const names = new Set([...listClientNames(), ...listCataloguedClientNames()]);
 
-        if (resolved.frontend?.repo) {
-            urls.add(resolved.frontend.repo);
-        }
-
-        if (resolved.backend?.repo) {
-            urls.add(resolved.backend.repo);
-        }
+    for (const name of names) {
+        addClientRepoUrls(urls, name);
     }
 
     return [...urls];
@@ -114,7 +156,7 @@ function npmRebuildNativeAddons(dir) {
 
     console.log(`[install] npm rebuild (native addons) in ${label}`);
 
-    const result = spawnSync("npm", ["rebuild"], { cwd: dir, stdio: "inherit" });
+    const result = spawnSyncInherit("npm", ["rebuild"], { cwd: dir });
 
     if (result.status !== 0) {
         throw new Error(`npm rebuild failed in ${dir}`);
@@ -124,7 +166,7 @@ function npmRebuildNativeAddons(dir) {
 function npmInstall(dir) {
     console.log(`[install] npm install in ${path.relative(getRootDir(), dir) || "."}`);
 
-    const result = spawnSync("npm", ["install"], { cwd: dir, stdio: "inherit" });
+    const result = spawnSyncInherit("npm", ["install"], { cwd: dir });
 
     if (result.status !== 0) {
         throw new Error(`npm install failed in ${dir}`);
@@ -154,6 +196,14 @@ function main() {
     const repoUrls = collectInstallRepoUrls(client);
 
     for (const url of repoUrls) {
+        gitSyncFromUrl(url, root);
+    }
+
+    clearClientDiscoveryCache();
+
+    const afterCloneUrls = collectInstallRepoUrls(client);
+
+    for (const url of afterCloneUrls) {
         gitSyncFromUrl(url, root);
     }
 

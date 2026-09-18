@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import { getRootDir, listClientNames, parsePositionalClientArg } from "./lib/clients.mjs";
+import { spawnSyncInherit } from "./lib/runCommand.mjs";
 
 function printUsage() {
     const known = ["dev", ...listClientNames()].join(", ");
@@ -17,11 +17,7 @@ function printUsage() {
 }
 
 function run(command, args, cwd, extraEnv = {}) {
-    const result = spawnSync(command, args, {
-        cwd,
-        stdio: "inherit",
-        env: { ...process.env, ...extraEnv }
-    });
+    const result = spawnSyncInherit(command, args, { cwd, env: extraEnv });
 
     if (result.status !== 0) {
         throw new Error(`Command failed: ${command} ${args.join(" ")}`);

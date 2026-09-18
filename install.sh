@@ -23,4 +23,4 @@ if ! command -v node >/dev/null 2>&1; then
     exit 1
 fi
 
-exec node "$ROOT_DIR/scripts/install.mjs" "$@"
+exec node "$ROOT_DIR/scripts/entry.mjs" install "$@"

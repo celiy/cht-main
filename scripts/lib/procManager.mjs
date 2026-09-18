@@ -1,9 +1,17 @@
 import { spawn, spawnSync } from "node:child_process";
 import { EventEmitter } from "node:events";
+import { isWindows, spawnWithPipes } from "./runCommand.mjs";
 
 const DEFAULT_RING_SIZE = 5000;
+const IS_WIN = isWindows();
 
 function hasCommand(name) {
+    if (IS_WIN) {
+        const probe = spawnSync("where", [name], { stdio: "ignore", shell: true });
+
+        return probe.status === 0;
+    }
+
     const probe = spawnSync("sh", ["-c", `command -v ${name} >/dev/null 2>&1`]);
 
     return probe.status === 0;
@@ -12,12 +20,49 @@ function hasCommand(name) {
 function buildShellCommand(dir, cmd) {
     const useStdbuf = hasCommand("stdbuf");
     const prefix = useStdbuf ? "exec stdbuf -oL -eL " : "exec ";
+    const escapedDir = dir.replace(/"/g, '\\"');
 
-    return `cd "${dir.replace(/"/g, '\\"')}" && ${prefix}${cmd}`;
+    return `cd "${escapedDir}" && ${prefix}${cmd}`;
+}
+
+function killWindowsPort(port) {
+    const result = spawnSync("netstat", ["-ano"], { encoding: "utf8", shell: true });
+
+    if (result.status !== 0) {
+        return;
+    }
+
+    const portPattern = new RegExp(`:${port}\\s`);
+    const pids = new Set();
+
+    for (const line of (result.stdout || "").split("\n")) {
+        if (!line.includes("LISTENING") || !portPattern.test(line)) {
+            continue;
+        }
+
+        const parts = line.trim().split(/\s+/);
+        const pid = parts[parts.length - 1];
+
+        if (pid && /^\d+$/.test(pid) && pid !== "0") {
+            pids.add(pid);
+        }
+    }
+
+    for (const pid of pids) {
+        spawnSync("taskkill", ["/PID", pid, "/T", "/F"], { stdio: "ignore", shell: true });
+    }
 }
 
 export function freePorts(ports) {
     if (!Array.isArray(ports) || ports.length === 0) {
+        return;
+    }
+
+    if (IS_WIN) {
+        for (const port of ports) {
+            killWindowsPort(port);
+        }
+
         return;
     }
 
@@ -69,13 +114,22 @@ export class ManagedProcess extends EventEmitter {
     }
 
     start() {
-        const shellCmd = buildShellCommand(this.dir, this.cmd);
+        if (IS_WIN) {
+            this.child = spawnWithPipes(this.cmd, [], {
+                cwd: this.dir,
+                stdio: ["ignore", "pipe", "pipe"],
+                env: { ...process.env, FORCE_COLOR: "1" },
+                shell: true
+            });
+        } else {
+            const shellCmd = buildShellCommand(this.dir, this.cmd);
 
-        this.child = spawn("setsid", ["bash", "-c", shellCmd], {
-            stdio: ["ignore", "pipe", "pipe"],
-            env: { ...process.env, FORCE_COLOR: "1" },
-            detached: true
-        });
+            this.child = spawn("setsid", ["bash", "-c", shellCmd], {
+                stdio: ["ignore", "pipe", "pipe"],
+                env: { ...process.env, FORCE_COLOR: "1" },
+                detached: true
+            });
+        }
 
         this.startedAt = Date.now();
         this.status = "running";
@@ -190,6 +244,13 @@ export class ManagedProcess extends EventEmitter {
         }
 
         const pid = this.child.pid;
+
+        if (IS_WIN) {
+            spawnSync("taskkill", ["/PID", String(pid), "/T", "/F"], { stdio: "ignore", shell: true });
+            await new Promise((resolve) => setTimeout(resolve, termTimeoutMs));
+
+            return;
+        }
 
         try {
             process.kill(-pid, "SIGTERM");

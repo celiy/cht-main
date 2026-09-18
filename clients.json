@@ -6,5 +6,15 @@
             "https://github.com/celiy/cht-shared.git"
         ],
         "vitePorts": [5173, 5174]
+    },
+    "clients": {
+        "mecarvit": {
+            "frontend": {
+                "repo": "https://github.com/celiy/cht-client-mecarvit.git"
+            },
+            "backend": {
+                "repo": "https://github.com/celiy/cht-backend-mecarvit.git"
+            }
+        }
     }
 }

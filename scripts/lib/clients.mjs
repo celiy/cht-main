@@ -11,11 +11,16 @@ const CLIENT_CONFIG_FILE = "cht.config.json";
 const DEFAULT_FRONTEND_BASE_DIR = "cht-base";
 const DEFAULT_VITE_PORTS = [5173, 5174];
 
+let cachedFile = null;
 let cachedShared = null;
 let cachedClientNames = null;
 
 export function getRootDir() {
     return ROOT_DIR;
+}
+
+export function clearClientDiscoveryCache() {
+    cachedClientNames = null;
 }
 
 export function getClientConfigPath(name) {
@@ -26,9 +31,9 @@ export function getClientDir(name) {
     return `${CLIENT_DIR_PREFIX}${name}`;
 }
 
-function loadSharedFile() {
-    if (cachedShared) {
-        return cachedShared;
+function loadClientsFile() {
+    if (cachedFile) {
+        return cachedFile;
     }
 
     if (!fs.existsSync(CLIENTS_FILE)) {
@@ -48,9 +53,42 @@ function loadSharedFile() {
         throw new Error(`[clients] Expected an object in ${CLIENTS_FILE}.`);
     }
 
+    cachedFile = parsed;
     cachedShared = parsed.shared || {};
 
+    return cachedFile;
+}
+
+function loadSharedFile() {
+    loadClientsFile();
+
     return cachedShared;
+}
+
+/**
+ * Bootstrap entries in clients.json so `install --client:<name>` can clone
+ * frontend/backend before the local folder exists.
+ *
+ * @param {string} name
+ * @returns {{ frontend?: { repo?: string }, backend?: { repo?: string } } | null}
+ */
+export function getCataloguedClient(name) {
+    const file = loadClientsFile();
+    const catalog = file.clients && typeof file.clients === "object" ? file.clients : {};
+    const entry = catalog[name];
+
+    if (!entry || typeof entry !== "object") {
+        return null;
+    }
+
+    return entry;
+}
+
+export function listCataloguedClientNames() {
+    const file = loadClientsFile();
+    const catalog = file.clients && typeof file.clients === "object" ? file.clients : {};
+
+    return Object.keys(catalog).sort();
 }
 
 /**
@@ -206,7 +244,9 @@ export function parseClientFlag(argv) {
     let client = null;
     const rest = [];
 
-    for (const arg of argv) {
+    for (let i = 0; i < argv.length; i++) {
+        const arg = argv[i];
+
         if (arg.startsWith("--client:")) {
             client = arg.slice("--client:".length);
 
@@ -214,6 +254,13 @@ export function parseClientFlag(argv) {
         }
 
         if (arg === "--client" || arg === "-c") {
+            const next = argv[i + 1];
+
+            if (next && !next.startsWith("-")) {
+                client = next;
+                i += 1;
+            }
+
             continue;
         }
 

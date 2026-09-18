@@ -2,7 +2,6 @@
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
-import { spawn, spawnSync } from "node:child_process";
 import {
     getRootDir,
     getVitePorts,
@@ -12,6 +11,7 @@ import {
     resolveClient
 } from "./lib/clients.mjs";
 import { freePorts } from "./lib/procManager.mjs";
+import { localBinPath, spawnSyncInherit, spawnWithPipes } from "./lib/runCommand.mjs";
 
 const DEFAULT_BACKEND_HOST = "127.0.0.1";
 const DEFAULT_BACKEND_PORT = 8000;
@@ -32,11 +32,7 @@ function printUsage() {
 }
 
 function run(command, args, cwd, extraEnv = {}) {
-    const result = spawnSync(command, args, {
-        cwd,
-        stdio: "inherit",
-        env: { ...process.env, ...extraEnv }
-    });
+    const result = spawnSyncInherit(command, args, { cwd, env: extraEnv });
 
     if (result.status !== 0) {
         throw new Error(`Command failed: ${command} ${args.join(" ")}`);
@@ -195,7 +191,7 @@ function spawnVite(baseDir, client, port) {
         delete env.CLIENT;
     }
 
-    const child = spawn("npx", args, {
+    const child = spawnWithPipes("npx", args, {
         cwd: baseDir,
         env,
         stdio: ["ignore", "inherit", "inherit"]
@@ -328,9 +324,9 @@ async function runDev(client) {
 
     delete electronEnv.ELECTRON_RUN_AS_NODE;
 
-    const electronBin = path.join(baseDir, "node_modules", ".bin", "electron");
+    const electronBin = localBinPath(baseDir, "electron");
 
-    electronProc = spawn(electronBin, ["electron-dist/main.cjs"], {
+    electronProc = spawnWithPipes(electronBin, ["electron-dist/main.cjs"], {
         cwd: baseDir,
         env: electronEnv,
         stdio: "inherit"

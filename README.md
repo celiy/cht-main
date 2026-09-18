@@ -27,8 +27,8 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
 - `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
 - `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
-- `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`). Clientes existentes são descobertos por pastas `cht-client-*` com `cht.config.json`.
-- `install.sh` / `scripts/install.mjs`: clona repositórios shared (+ backend do cliente se `--client:`) e instala dependências.
+- `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`) e catálogo `clients` (URLs de frontend/backend para `install --client:<name>` mesmo sem a pasta local).
+- `install.sh` / `install.ps1` / `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`) e instala dependências.
 - `run.sh` / `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `build.sh` / `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
 - `electron.sh` / `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop para Linux.
@@ -37,7 +37,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 
 ## Clientes
 
-Clientes existentes são pastas `cht-client-<name>` com [`cht.config.json`](./cht-client-mecarvit/cht.config.json) na raiz. [`clients.json`](./clients.json) guarda só os repositórios shared. Atualmente:
+Clientes existentes são pastas `cht-client-<name>` com `cht.config.json` na raiz. O catálogo em [`clients.json`](./clients.json) (`clients.<name>.frontend.repo` / `backend.repo`) permite clonar um cliente na primeira instalação. Atualmente:
 
 - **mecarvit**: frontend (`cht-client-mecarvit`) + backend (`cht-backend-mecarvit`)
 - **dev**: modo de desenvolvimento interno do `cht-base` (cliente virtual, sem backend)
@@ -46,7 +46,7 @@ Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicio
 
 ## Como funciona (visão geral)
 
-1. Pastas `cht-client-<name>` com `cht.config.json` definem os clientes. `clients.json` guarda só shared (`repos` + `vitePorts`). Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
+1. Pastas `cht-client-<name>` com `cht.config.json` definem os clientes em disco. `clients.json` guarda shared (`repos` + `vitePorts`) e o catálogo de URLs para bootstrap. Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
 2. O `cht-base` monta a app com o alias `@client` resolvido via `CLIENT=<name>` (ou `src/devApp` sem cliente).
 3. O cliente define rotas (`routes.ts`), layout e páginas/componentes específicos.
 4. O `run.sh` (wrapper para `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
@@ -56,25 +56,51 @@ Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicio
 
 ## Como executar
 
-No diretório raiz `cht-main`:
+No diretório raiz `cht-main`.
+
+### Dependências do sistema
+
+Instale isto **antes** dos scripts (o `npm install` da raiz não substitui estas ferramentas):
+
+| Ferramenta | Para quê | Windows | Linux / macOS |
+|---|---|---|---|
+| **Git** | clone/pull dos repositórios irmãos | [git-scm.com](https://git-scm.com/download/win) | `git` no PATH |
+| **Node.js 24** (ver [`.nvmrc`](./.nvmrc)) | npm, scripts, Vite, Electron | Instalador LTS em [nodejs.org](https://nodejs.org/) **ou** [fnm](https://github.com/Schniz/fnm) / [nvm-windows](https://github.com/coreybutler/nvm-windows) | [nvm](https://github.com/nvm-sh/nvm) (`nvm install` + `nvm use` a partir do `.nvmrc`) |
+| **Python 3** + Visual Studio Build Tools (Windows) | rebuild de addons nativos (`better-sqlite3`, `bcrypt`) no backend | [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) com “Desktop development with C++”; o instalador do Node pode oferecer “Tools for Native Modules” | `build-essential` / Xcode CLT |
+
+Confirme no terminal:
+
+```bash
+git --version
+node -v   # major 24
+npm -v
+```
 
 ### 1) Instalar / preparar ambiente
 
-**Node:** a raiz tem [`.nvmrc`](./.nvmrc) (hoje **24** LTS, alinhado ao Vitest no backend). Com [nvm](https://github.com/nvm-sh/nvm) instalado, `./install.sh`, `./run.sh`, `./build.sh` e `./electron.sh` rodam `nvm install` + `nvm use` antes de chamar o npm/Node — a versão certa do npm vem junto com essa instalação do Node. Sem nvm, use manualmente a mesma major do `.nvmrc`.
+**Node:** a raiz tem [`.nvmrc`](./.nvmrc) (hoje **24** LTS). Nos wrappers Unix, com nvm, corre `nvm install` + `nvm use` antes do npm. No Windows, use Node 24 no PATH (ou `fnm use` / `nvm use`). Sem gestor de versões, instale a mesma major do `.nvmrc` à mão.
 
 Apenas repositórios compartilhados:
 
 ```bash
 ./install.sh
+# Windows:
+.\install.ps1
+# ou:
+npm run install:repos
 ```
 
 Incluindo repositórios de um cliente específico (ex.: mecarvit):
 
 ```bash
 ./install.sh --client:mecarvit
+# Windows:
+.\install.ps1 --client:mecarvit
+# ou:
+npm run install:repos -- --client:mecarvit
 ```
 
-O `install.sh` é um wrapper para `scripts/install.mjs`. Com [nvm](https://github.com/nvm-sh/nvm), alinha o Node ao [`.nvmrc`](./.nvmrc) antes do npm. Ele faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios shared, nos clientes descobertos em `cht-client-*/cht.config.json` e, com `--client:<name>`, restringe os extras desse cliente. Depois roda `npm install` em cada pasta irmã com `package.json` (e na raiz, para preparar o runner).
+O `install.sh` / `install.ps1` chama `scripts/entry.mjs` → `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios `shared.repos`, nos clientes do catálogo `clients.json` / pastas `cht-client-*/cht.config.json` e, com `--client:<name>`, só os extras desse cliente (frontend + backend, mesmo que a pasta ainda não exista). Depois roda `npm install` na raiz e em cada pasta irmã com `package.json`.
 
 ### 2) Rodar ambiente de desenvolvimento
 
@@ -82,6 +108,7 @@ Modo dev padrão (apenas `cht-base`, sem backend):
 
 ```bash
 ./run.sh
+# Windows: .\run.ps1
 # ou: npm run dev
 ```
 
@@ -89,6 +116,7 @@ Cliente específico:
 
 ```bash
 ./run.sh --client:mecarvit
+# Windows: .\run.ps1 --client:mecarvit
 # ou: npm run dev -- --client:mecarvit
 ```
 
@@ -100,6 +128,7 @@ O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou
 
 ```bash
 ./build.sh mecarvit
+# Windows: .\build.ps1 mecarvit
 # ou: npm run build -- mecarvit
 ```
 
@@ -117,6 +146,7 @@ Modo desenvolvimento (abre a janela imediatamente; o frontend mostra loading at�
 
 ```bash
 ./electron.sh mecarvit
+# Windows: .\electron.ps1 mecarvit
 # ou: npm run electron -- mecarvit
 ```
 
