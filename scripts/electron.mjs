@@ -57,6 +57,28 @@ function healthUrl(host, port, healthPath) {
     return `http://${host}:${port}${normalized}`;
 }
 
+/**
+ * Derive host/port from the client `apiBaseUrl` so the spawned backend listens
+ * exactly where the frontend expects it.
+ */
+function apiEndpoint(apiBaseUrl) {
+    if (!apiBaseUrl) {
+        return null;
+    }
+
+    try {
+        const url = new URL(apiBaseUrl);
+        const fallbackPort = url.protocol === "https:" ? 443 : 80;
+
+        return {
+            host: url.hostname,
+            port: Number(url.port) || fallbackPort
+        };
+    } catch {
+        return null;
+    }
+}
+
 function backendStartCmd(backendDir, entry, packaged) {
     if (packaged) {
         const bin = process.platform === "win32" ? "tsx.cmd" : "tsx";
@@ -91,8 +113,9 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
     let backend = null;
 
     if (resolved.backend) {
-        const host = backendEntry?.host || DEFAULT_BACKEND_HOST;
-        const port = Number(backendEntry?.port) || DEFAULT_BACKEND_PORT;
+        const configuredEndpoint = apiEndpoint(entry?.apiBaseUrl);
+        const host = backendEntry?.host || configuredEndpoint?.host || DEFAULT_BACKEND_HOST;
+        const port = Number(backendEntry?.port) || configuredEndpoint?.port || DEFAULT_BACKEND_PORT;
         const backendDir = packaged ? "backend" : path.join(root, resolved.backend.dir);
 
         backend = {
