@@ -150,13 +150,16 @@ Modo desenvolvimento (abre a janela imediatamente; o frontend mostra loading at�
 # ou: npm run electron -- mecarvit
 ```
 
-Empacotar para Linux (`AppImage`, `deb` e diretório `dir`):
+Empacotar para o sistema hospedeiro (`AppImage`, `deb` e diretório `dir` no Linux):
 
 ```bash
 ./electron.sh build mecarvit
+# Windows: .\electron.ps1 build mecarvit --win
 ```
 
-Os artefatos saem em `builds/<cliente>/desktop`. O empacotamento está preparado para Windows (`nsis`/`portable`) e macOS (`dmg`/`zip`) quando o build rodar nesses sistemas.
+Os artefatos saem em `builds/<cliente>/desktop`. Alvos disponíveis: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) e `--mac` (`dmg`/`zip`).
+
+Instaladores e atualização automática via GitHub Releases: veja [`.cursor/docs/desktop-release.md`](./.cursor/docs/desktop-release.md).
 
 ### 5) Sincronizar dependências compartilhadas
 
