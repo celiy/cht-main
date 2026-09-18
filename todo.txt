@@ -8,3 +8,5 @@ Revisar se o que foi implementado no sistema bate com o documento.
 Revisar código de uma forma teste que pensei:
     Perguntar pra IA se ela analisa melhor um arquivo gigante do que arquivos separados, se sim:
         Fazer uma cópia do workspace atual, dentro dele pedir um script que transforma todo arquivo em um arquivo só, e assim, juntar eles num arquivo só onde tem o conteúdo dele, o lugar que ele fica no projeto e o nome dele.
+
+Ver email do kwecko sobre a análise atual dele.
