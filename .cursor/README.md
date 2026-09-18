@@ -7,6 +7,7 @@ Orientação para o agente. Preferir **poucas regras sempre ativas**; o resto ap
 | Ficheiro              | Quando                                |
 | --------------------- | ------------------------------------- |
 | `code-guidelines.mdc` | Sempre                                |
+| `git-writes.mdc`      | Sempre (commit/push só se pedido)     |
 | `cleanup-timers.mdc`  | Ficheiros `*.{vue,ts,…}`              |
 | `vue-components.mdc`  | Vue/TS do DS e do base                |
 | `document-guide.mdc`  | Documentar código (não JSDoc em tudo) |
@@ -15,11 +16,12 @@ Ficheiros `.md` nesta pasta **não** são regras Cursor. Usar `.mdc` com frontma
 
 ## Docs (`.cursor/docs/`)
 
-| Ficheiro       | Conteúdo                            |
-| -------------- | ----------------------------------- |
-| `context.md`   | Monorepo, clientes, runner, aliases |
-| `toast.md`     | Plugin `$toast` e host `<Toast>`    |
-| `deps_sync.md` | `common-dependencies.json`          |
+| Ficheiro             | Conteúdo                                  |
+| -------------------- | ----------------------------------------- |
+| `context.md`         | Monorepo, clientes, runner, aliases       |
+| `toast.md`           | Plugin `$toast` e host `<Toast>`          |
+| `deps_sync.md`       | `common-dependencies.json`                |
+| `desktop-release.md` | Release do app desktop e auto-atualização |
 
 ## Skills (`.cursor/skills/`)
 
