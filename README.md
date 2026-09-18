@@ -31,7 +31,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `install.sh` / `install.ps1` / `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`) e instala dependências.
 - `run.sh` / `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `build.sh` / `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
-- `electron.sh` / `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop para Linux.
+- `electron.sh` / `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop instalável (`--win`, `--linux`, `--mac`) com backend embutido, runtime Node próprio e auto-atualização via GitHub Releases.
 - `sync-common-deps.mjs`: sincronizador de dependências comuns entre repos.
 - `common-dependencies.json`: arquivo-base de versões compartilhadas.
 

@@ -3,7 +3,7 @@
 #
 # Usage:
 #   ./electron.sh <client>
-#   ./electron.sh build <client>
+#   ./electron.sh build <client> [--win|--linux|--mac] [--publish]
 #   npm run electron -- <client>
 
 set -u
