@@ -3,7 +3,7 @@ Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse e
 Mecarvit:
     Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
 
-Mover os scripts .sh e .ps1 para uma pasta chamada scripts, sync-common-deps também, fazer um script global (pesquisar na internet) que funciona no windows e no linux, um script só que pode invocar qualquer script dependendo do sistema dentro do /scripts. O que pode ser interessante é um comando só npm que invoca os scripts.
+Implementar um sistema de logs robusto que salvam em arquivos locais para debuggar erros do app em build.
 
 Revisar se o que foi implementado no sistema bate com o documento.
 
