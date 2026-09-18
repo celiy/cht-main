@@ -1,9 +1,20 @@
 Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
 
 Mecarvit:
+    Implementar dataLimitePagamento nos registros
+
+    Processo de alterar senha:
+        Um usuário com permissão de gerenciar funcionários ou superadmin, pode no form de um usuário, no fim deste form, um botão que surge um modal. Esse modal é um modal de confirmação de alerta. Este botão é um botão que reseta a senha de um funcionário, então ao resetar, vai aparecer o campo no form para o gerente criar uma senha nova e o processo de antes de um funcionário criar uma senha pela primeira vez se repete.
+
+        Na pagina do perfil, clicar em alterar senha mada para a pagina de alterar senha, esse form deve aparecer na pagina do perfil.
+
+    Botão de sair na pagina do perfil deve ser destructive.
+
     Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
 
 Implementar um sistema de logs robusto que salvam em arquivos locais para debuggar erros do app em build.
+
+O backend faz com que no system-tray tenha o icone do app mecarvit, clicar nele com o botão direito mostra o status do serviço mecarvit, com informações uteis.
 
 Revisar se o que foi implementado no sistema bate com o documento.
 
