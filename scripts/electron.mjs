@@ -38,8 +38,8 @@ function printUsage() {
     console.log("Run or package a CHT client as an Electron desktop app.");
     console.log("");
     console.log("Usage:");
-    console.log("  ./electron.sh <client>");
-    console.log("  ./electron.sh build <client> [--win|--linux|--mac] [--publish]");
+    console.log("  npx chtmain electron <client>");
+    console.log("  npx chtmain electron build <client> [--win|--linux|--mac] [--publish]");
     console.log("  npm run electron -- <client>");
     console.log("");
     console.log("Flags:");

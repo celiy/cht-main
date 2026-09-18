@@ -10,8 +10,8 @@ function printUsage() {
     console.log("Build/export frontend artifact for one client.");
     console.log("");
     console.log("Usage:");
+    console.log("  npx chtmain build <client>");
     console.log("  npm run build -- <client>");
-    console.log("  ./build.sh <client>");
     console.log("");
     console.log(`Known clients: ${known || "(none)"}`);
 }

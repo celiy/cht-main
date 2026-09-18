@@ -2,8 +2,10 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT_DIR = process.cwd();
+/** Resolved from this file so the script works from any working directory. */
+const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const BASE_FILE_NAME = "common-dependencies.json";
 const BASE_FILE_PATH = path.join(ROOT_DIR, BASE_FILE_NAME);
 const LEGACY_BASE_FILE_PATH = path.join(ROOT_DIR, ".cursor", BASE_FILE_NAME);
@@ -201,7 +203,7 @@ function ensureBaseFile(packageMap, baseFilePath) {
     const generated = buildCommonDependenciesFile(packageMap);
 
     writeJson(baseFilePath, generated);
-    
+
     return { created: true, data: generated };
 }
 

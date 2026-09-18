@@ -28,11 +28,12 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
 - `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
 - `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`) e catálogo `clients` (URLs de frontend/backend para `install --client:<name>` mesmo sem a pasta local).
-- `install.sh` / `install.ps1` / `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`) e instala dependências.
-- `run.sh` / `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
-- `build.sh` / `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
-- `electron.sh` / `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop instalável (`--win`, `--linux`, `--mac`) com backend embutido, runtime Node próprio e auto-atualização via GitHub Releases.
-- `sync-common-deps.mjs`: sincronizador de dependências comuns entre repos.
+- `scripts/entry.mjs`: **ponto de entrada único** de todas as tarefas (`npx chtmain <comando>` ou `npm run cht -- <comando>`), idêntico em Windows e Linux.
+- `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`) e instala dependências.
+- `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
+- `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
+- `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop instalável (`--win`, `--linux`, `--mac`) com backend embutido, runtime Node próprio e auto-atualização via GitHub Releases.
+- `scripts/sync-common-deps.mjs`: sincronizador de dependências comuns entre repos.
 - `common-dependencies.json`: arquivo-base de versões compartilhadas.
 
 ## Clientes
@@ -49,14 +50,35 @@ Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicio
 1. Pastas `cht-client-<name>` com `cht.config.json` definem os clientes em disco. `clients.json` guarda shared (`repos` + `vitePorts`) e o catálogo de URLs para bootstrap. Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
 2. O `cht-base` monta a app com o alias `@client` resolvido via `CLIENT=<name>` (ou `src/devApp` sem cliente).
 3. O cliente define rotas (`routes.ts`), layout e páginas/componentes específicos.
-4. O `run.sh` (wrapper para `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
-5. O `sync-common-deps.mjs` normaliza versões de dependências compartilhadas:
+4. O comando `dev` (runner em `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
+5. O `scripts/sync-common-deps.mjs` normaliza versões de dependências compartilhadas:
   - na primeira execução, gera `common-dependencies.json` com as versões mais recentes encontradas;
   - nas próximas execuções, usa sempre esse arquivo como fonte da verdade.
 
 ## Como executar
 
 No diretório raiz `cht-main`.
+
+### Um só ponto de entrada
+
+Todos os comandos passam por `scripts/entry.mjs`, que fala Node puro — logo o mesmo comando serve para Windows e Linux, sem `.sh` nem `.ps1` separados:
+
+```bash
+npx chtmain <comando> [args...]
+# ou, equivalente:
+npm run cht -- <comando> [args...]
+```
+
+| Comando | O que faz |
+| --- | --- |
+| `install` | clona/puxa os repositórios e instala dependências |
+| `dev` | sobe o runner de desenvolvimento (frontend + backend) |
+| `build` | builda o frontend de um cliente |
+| `electron` | abre ou empacota o app desktop |
+| `sync-deps` | normaliza versões de dependências compartilhadas |
+| `sync-tsconfig` | regenera os paths `@client/*` do tsconfig |
+
+Cada comando também tem um atalho em `npm run` (`npm run dev`, `npm run build -- mecarvit`, `npm run sync:deps`, …), mas o `npx chtmain` é o que funciona igual nos dois sistemas.
 
 ### Dependências do sistema
 
@@ -78,14 +100,12 @@ npm -v
 
 ### 1) Instalar / preparar ambiente
 
-**Node:** a raiz tem [`.nvmrc`](./.nvmrc) (hoje **24** LTS). Nos wrappers Unix, com nvm, corre `nvm install` + `nvm use` antes do npm. No Windows, use Node 24 no PATH (ou `fnm use` / `nvm use`). Sem gestor de versões, instale a mesma major do `.nvmrc` à mão.
+**Node:** a raiz tem [`.nvmrc`](./.nvmrc) (hoje **24** LTS). O `scripts/entry.mjs` alinha a versão automaticamente quando encontra `nvm` (Linux/macOS) ou `fnm` / `nvm-windows` no PATH. Sem gestor de versões, instale a mesma major do `.nvmrc` à mão.
 
 Apenas repositórios compartilhados:
 
 ```bash
-./install.sh
-# Windows:
-.\install.ps1
+npx chtmain install
 # ou:
 npm run install:repos
 ```
@@ -93,30 +113,26 @@ npm run install:repos
 Incluindo repositórios de um cliente específico (ex.: mecarvit):
 
 ```bash
-./install.sh --client:mecarvit
-# Windows:
-.\install.ps1 --client:mecarvit
+npx chtmain install --client:mecarvit
 # ou:
 npm run install:repos -- --client:mecarvit
 ```
 
-O `install.sh` / `install.ps1` chama `scripts/entry.mjs` → `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios `shared.repos`, nos clientes do catálogo `clients.json` / pastas `cht-client-*/cht.config.json` e, com `--client:<name>`, só os extras desse cliente (frontend + backend, mesmo que a pasta ainda não exista). Depois roda `npm install` na raiz e em cada pasta irmã com `package.json`.
+O comando `install` chama `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios `shared.repos`, nos clientes do catálogo `clients.json` / pastas `cht-client-*/cht.config.json` e, com `--client:<name>`, só os extras desse cliente (frontend + backend, mesmo que a pasta ainda não exista). Depois roda `npm install` na raiz e em cada pasta irmã com `package.json`.
 
 ### 2) Rodar ambiente de desenvolvimento
 
 Modo dev padrão (apenas `cht-base`, sem backend):
 
 ```bash
-./run.sh
-# Windows: .\run.ps1
+npx chtmain dev
 # ou: npm run dev
 ```
 
 Cliente específico:
 
 ```bash
-./run.sh --client:mecarvit
-# Windows: .\run.ps1 --client:mecarvit
+npx chtmain dev --client:mecarvit
 # ou: npm run dev -- --client:mecarvit
 ```
 
@@ -127,8 +143,7 @@ O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou
 ### 3) Build/export de frontend por cliente
 
 ```bash
-./build.sh mecarvit
-# Windows: .\build.ps1 mecarvit
+npx chtmain build mecarvit
 # ou: npm run build -- mecarvit
 ```
 
@@ -145,16 +160,16 @@ Se `builds/<cliente>/dist` já existir, ele é removido e recriado (replace tota
 Modo desenvolvimento (abre a janela imediatamente; o frontend mostra loading até o backend responder em `/health`):
 
 ```bash
-./electron.sh mecarvit
-# Windows: .\electron.ps1 mecarvit
+npx chtmain electron mecarvit
 # ou: npm run electron -- mecarvit
 ```
 
 Empacotar para o sistema hospedeiro (`AppImage`, `deb` e diretório `dir` no Linux):
 
 ```bash
-./electron.sh build mecarvit
-# Windows: .\electron.ps1 build mecarvit --win
+npx chtmain electron build mecarvit
+npx chtmain electron build mecarvit --win      # Windows (nsis)
+npx chtmain electron build mecarvit --publish  # envia para o GitHub Releases
 ```
 
 Os artefatos saem em `builds/<cliente>/desktop`. Alvos disponíveis: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) e `--mac` (`dmg`/`zip`).
@@ -164,16 +179,12 @@ Instaladores e atualização automática via GitHub Releases: veja [`.cursor/doc
 ### 5) Sincronizar dependências compartilhadas
 
 ```bash
+npx chtmain sync-deps
+# ou:
 npm run sync:deps
-```
-
-Também pode rodar diretamente:
-
-```bash
-node sync-common-deps.mjs
 ```
 
 ## Observações rápidas
 
 - Se você editar manualmente `common-dependencies.json`, a próxima execução do sync respeita esse arquivo.
-- Para detalhes completos da sincronização de dependências, veja `DEPENDENCY_SYNC.md`.
+- Para detalhes completos da sincronização de dependências, veja [`.cursor/docs/deps_sync.md`](./.cursor/docs/deps_sync.md).

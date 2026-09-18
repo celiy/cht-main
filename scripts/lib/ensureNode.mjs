@@ -103,7 +103,7 @@ function tryWindowsNodeVersion(wanted) {
 }
 
 /**
- * Align Node with `.nvmrc` when nvm/fnm is available (same intent as scripts/ensure-node.sh).
+ * Align Node with `.nvmrc` when nvm/fnm is available.
  *
  * @param {string} rootDir Repo root
  * @returns {boolean} false when version tooling failed hard on Unix nvm

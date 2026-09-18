@@ -4,16 +4,17 @@ Este projeto possui um sincronizador de versoes para dependencias Node compartil
 
 ## Arquivos
 
-- Script: `sync-common-deps.mjs`
+- Script: `scripts/sync-common-deps.mjs`
 - Arquivo-base (fonte da verdade): `common-dependencies.json`
 
 ## Comandos
 
 No diretorio raiz `cht-main`:
 
-- `npm run sync:deps`
-- ou `node sync-common-deps.mjs`
-- ou `./sync-common-deps.mjs`
+- `npx chtmain sync-deps`
+- ou `npm run sync:deps`
+
+O script resolve os caminhos a partir da propria localizacao, entao o diretorio de trabalho nao importa.
 
 ## Como funciona
 

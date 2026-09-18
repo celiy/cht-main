@@ -23,7 +23,7 @@ Pastas irmãs sob o mesmo diretório pai (ex.: `cht-project/`):
 | **cht-shared**              | Código partilhado (utilitários, validadores, etc.). Consumido via alias `@shared/*`.                                                                                                                                  |
 | **cht-client-&lt;nome&gt;** | App do cliente: `App.vue`, `routes.ts`, layouts, `pages/`, componentes e `js`. Não contém o servidor Vite; o `cht-base` importa `@client/*` em tempo de build.                                                        |
 
-Instalação de dependências em todos os pacotes com `package.json` no diretório pai: ver `cht-shared/install.sh` (percorre pastas irmãs e corre `npm i`).
+Instalação de dependências em todos os pacotes com `package.json` no diretório pai: `npx chtmain install` (`scripts/install.mjs`) percorre as pastas irmãs e corre `npm install`.
 
 ---
 
@@ -100,7 +100,7 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 | `npm run build` / `build:client` | Build sem cliente (devApp) ou com `CLIENT=<name>`.                                                   |
 | `npm run electron:compile`       | Compila `electron/main.ts` e `preload.ts` para `electron-dist/`.                                     |
 
-O launcher do monorepo é `./electron.sh <client>` (dev) e `./electron.sh build <client>` (pacote Linux).
+O launcher do monorepo é `npx chtmain electron <client>` (dev) e `npx chtmain electron build <client>` (pacote).
 
 Usa-se **`cross-env`** para `CLIENT=...` em ambientes Windows/Linux.
 
@@ -141,14 +141,14 @@ Imports típicos: `@design/...`, `@shared/...`, `@client/components/...`, `@clie
 
 ## Dev runner multi-shell (TUI estilo htop)
 
-Runner moderno baseado em **Node + Ink (React no terminal)**: blocos com bordas, cores por status, hyperlinks clicáveis (OSC 8) e troca de tabs por teclado. O `run.sh` na raiz é apenas um wrapper fino que delega para `scripts/runner/index.jsx`.
+Runner moderno baseado em **Node + Ink (React no terminal)**: blocos com bordas, cores por status, hyperlinks clicáveis (OSC 8) e troca de tabs por teclado. É o que o comando `dev` do `scripts/entry.mjs` inicia (`scripts/runner/index.jsx`).
 
 ### Uso
 
 ```bash
-./run.sh --client:mecarvit   # frontend (cht-base CLIENT=mecarvit) + backend (cht-backend-mecarvit)
-./run.sh --client:dev        # apenas cht-base em modo dev (rotas de laboratório), sem backend
-./run.sh                     # equivalente a --client:dev
+npx chtmain dev --client:mecarvit   # frontend (cht-base CLIENT=mecarvit) + backend (cht-backend-mecarvit)
+npx chtmain dev --client:dev        # apenas cht-base em modo dev (rotas de laboratório), sem backend
+npx chtmain dev                     # equivalente a --client:dev
 ```
 
 Equivalente via npm: `npm run dev -- --client:mecarvit`.
@@ -200,12 +200,12 @@ scripts/
 ### Adicionar um cliente novo
 
 1. Clonar ou criar a pasta `cht-client-<name>` com `cht.config.json` (`name`, `siteTitle`, `frontend.repo`, e `backend` se houver), mais `src/App.vue` e `src/routes.ts`.
-2. `./install.sh --client:<name>` clona o backend a partir de `backend.repo` (a pasta do frontend já tem de existir para ler o config).
-3. Pronto: `./run.sh --client:<name>` já funciona. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npm run sync:tsconfig`).
+2. `npx chtmain install --client:<name>` clona o backend a partir de `backend.repo` (a pasta do frontend já tem de existir para ler o config).
+3. Pronto: `npx chtmain dev --client:<name>` já funciona. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npx chtmain sync-tsconfig`).
 
 ### Export de build (artefato web)
 
-- `./build.sh <cliente>` (ou `npm run build -- <cliente>`) executa o build do `cht-base` para o cliente informado.
+- `npx chtmain build <cliente>` (ou `npm run build -- <cliente>`) executa o build do `cht-base` para o cliente informado.
 - O artefato final é copiado para `builds/<cliente>/dist`.
 - Se o destino já existir, ele é removido e recriado (replace total).
 - O script usa validação de cliente via `scripts/lib/clients.mjs`.
@@ -221,5 +221,6 @@ scripts/
 - `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.
 - `cht-base/src/main.ts` — cria router a partir de `@client/routes`, monta `@client/App.vue`, plugins, título.
-- `run.sh` — dev runner multi-shell (frontend + backend por cliente, alternância com setas).
-- `build.sh` / `scripts/build.mjs` — build/export do front para `builds/<cliente>/dist`.
+- `scripts/entry.mjs` — ponto de entrada único: despacha `install`/`dev`/`build`/`electron`/`sync-deps`/`sync-tsconfig`.
+- `scripts/runner/index.jsx` — dev runner multi-shell (frontend + backend por cliente, alternância com setas).
+- `scripts/build.mjs` — build/export do front para `builds/<cliente>/dist`.

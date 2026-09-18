@@ -17,8 +17,8 @@ https://github.com/<owner>/<repo>/releases/latest/download/latest.yml
 ## Comandos
 
 ```bash
-./electron.sh build <cliente> [--win|--linux|--mac] [--publish]
-# Windows: .\electron.ps1 build <cliente> --win --publish
+npx chtmain electron build <cliente> [--win|--linux|--mac] [--publish]
+# equivalente: npm run electron -- build <cliente> --win --publish
 ```
 
 - Sem `--win|--linux|--mac`, empacota para o sistema hospedeiro.
@@ -34,13 +34,13 @@ Os arquivos `.blockmap` habilitam download diferencial: a atualização baixa s�
 
 ## Token do GitHub
 
-O `GH_TOKEN` só é necessário em builds com `--publish`. Sem essa flag, o `electron-builder` não publica nada, então dev, build local e testes não precisam de token.
+O `GH_TOKEN` só é necessário em builds com `--publish`. Sem essa flag, o `electron-builder` não publica nada — dev, build local e testes não precisam de token. Se preferir evitar o token por completo, use a publicação manual.
 
-| Comando                                         | Token? |
-| ----------------------------------------------- | ------ |
-| `.\electron.ps1 mecarvit`                       | Não    |
-| `.\electron.ps1 build mecarvit --win`           | Não    |
-| `.\electron.ps1 build mecarvit --win --publish` | Sim    |
+| Comando                                               | Token? |
+| ----------------------------------------------------- | ------ |
+| `npx chtmain electron mecarvit`                       | Não    |
+| `npx chtmain electron build mecarvit --win`           | Não    |
+| `npx chtmain electron build mecarvit --win --publish` | Sim    |
 
 ### Criar o token (uma vez)
 
@@ -77,30 +77,101 @@ Ou apenas na sessão atual (útil para testar, ou quando não quer gravar o toke
 
 ```powershell
 $env:GH_TOKEN = "github_pat_xxxxxxxxxxxxxxxx"
-.\electron.ps1 build mecarvit --win --publish
+npx chtmain electron build mecarvit --win --publish
 ```
 
 ⚠️ O `setx` grava o token em texto puro no registro, legível por qualquer processo rodando como o seu usuário. Por isso: token fine-grained limitado a um repositório e com data de expiração. Quando vencer, o build falha com `401 Unauthorized` — gere outro e rode o `setx` novamente.
 
 A ordem de leitura pelo `electron-publish` é `GITHUB_RELEASE_TOKEN`, depois `GH_TOKEN`, depois `GITHUB_TOKEN`; qualquer uma delas serve.
 
-## Primeiro release
+## Publicar manualmente (sem token)
 
-1. Configure o `GH_TOKEN` conforme acima.
+O `--publish` é opcional. Sem ele, o build gera os arquivos localmente e não toca na rede — nenhum token é necessário. É a rota mais direta quando o token não coopera: dispensa credenciais e a release já nasce publicada, o que elimina o problema do rascunho.
 
-2. Gere e publique:
+### Passo a passo
+
+**1. Gere os artefatos**, sem a flag:
 
 ```powershell
-.\electron.ps1 build mecarvit --win --publish
+npx chtmain electron build mecarvit --win
 ```
 
-3. Confirme que o feed responde (`302`; `404` indica release em rascunho ou `latest.yml` ausente):
+Os arquivos ficam em `builds\mecarvit\desktop`. O build já roda o typecheck e o empacotamento; se ele terminar sem erro, os instaladores estão prontos.
+
+**2. Abra a página de nova release:**
+
+```text
+https://github.com/celiy/cht-client-mecarvit/releases/new
+```
+
+**3. Informe a tag:** `v` seguido da versão que o build usou (aparece no log como `App version`). Para a 1.0.1, a tag é `v1.0.1`. Deixe _Create new tag on publish_ selecionado.
+
+Se a tag já existir, o GitHub recusa. Nesse caso apague a release anterior — ou, melhor, incremente a versão em `cht-client-<cliente>/version` e gere o build novamente.
+
+**4. Anexe os arquivos** da tabela abaixo, arrastando-os para a área de anexos.
+
+**5. Clique em _Publish release_.** Não use _Save draft_: rascunho não é servido pela URL que o app consulta.
+
+Alternativa por linha de comando, com o [GitHub CLI](https://cli.github.com/) autenticado (`gh auth login`):
+
+```powershell
+gh release create v1.0.1 --repo celiy/cht-client-mecarvit --title "1.0.1" --notes "Primeira versão instalável." `
+  builds\mecarvit\desktop\mecarvit-setup-1.0.1.exe `
+  builds\mecarvit\desktop\mecarvit-setup-1.0.1.exe.blockmap `
+  builds\mecarvit\desktop\latest.yml
+```
+
+### Arquivos a anexar
+
+| Plataforma | Arquivos                                                              |
+| ---------- | --------------------------------------------------------------------- |
+| Windows    | `mecarvit-setup-<versao>.exe`, `.exe.blockmap`, `latest.yml`          |
+| Linux      | `mecarvit-<versao>-linux-x86_64.AppImage`, `.deb`, `latest-linux.yml` |
+| macOS      | `.dmg`, `.zip`, `latest-mac.yml`                                      |
+
+O `latest.yml` é obrigatório: sem ele o app não descobre a atualização. O `.blockmap` é opcional, mas sem ele a atualização baixa o instalador inteiro em vez de só o que mudou.
+
+Os nomes dos arquivos precisam ser preservados: é por eles que o `latest.yml` os referencia. Ao gerar várias plataformas, anexe tudo na **mesma** release.
+
+Não anexe:
+
+- pastas `win-unpacked\`, `linux-unpacked\` e `mac\` (versão descompactada, só para testes locais);
+- `builder-debug.yml`, `builder-effective-config.yaml`, `.icon-ico\` (arquivos de diagnóstico do build);
+- `*.__uninstaller.exe` (já vai embutido no instalador).
+
+### Conferir
 
 ```powershell
 curl.exe -sI https://github.com/celiy/cht-client-mecarvit/releases/latest/download/latest.yml
 ```
 
-⚠️ Por padrão o `electron-builder` cria a release como **rascunho** (`releaseType: "draft"`), e `releases/latest` não resolve para drafts — o updater recebe 404. Ou publique a release manualmente no GitHub a cada build, ou defina no `cht.config.json` do cliente:
+Esperado: `302`. Um `404` indica release ausente ou salva como rascunho.
+
+A URL `releases/latest` aponta para a release **publicada mais recente**. Publique sempre em ordem de versão: se a 1.0.2 sair antes da 1.0.1, um app 1.0.0 que consultar o feed será direcionado à release errada, mesmo que o updater ignore versões mais antigas.
+
+### Publicar a próxima versão
+
+1. Edite `cht-client-<cliente>/version` (ex.: `version 1.0.2`).
+2. Rode o build sem `--publish`.
+3. Crie uma nova release com a tag correspondente (`v1.0.2`), anexando os novos arquivos.
+
+## Primeiro release
+
+Pela rota automatizada (requer `GH_TOKEN` configurado):
+
+1. Gere e publique:
+
+```powershell
+npx chtmain electron build mecarvit --win --publish
+```
+
+2. Confirme que o feed responde (`302`; `404` indica release em rascunho ou `latest.yml` ausente):
+
+```powershell
+curl.exe -sI https://github.com/celiy/cht-client-mecarvit/releases/latest/download/latest.yml
+```
+
+⚠️ Por padrão o `electron-builder` cria a release como **rascunho** (`releaseType: "draft"`), e `releases/latest` não resolve para drafts — o updater recebe 404. Ou publique a release manualmente no GitHub a cada build (a rota manual já nasce publicada), ou defina no `cht.config.json` do cliente:
 
 ```json
 "publish": {
@@ -113,9 +184,13 @@ curl.exe -sI https://github.com/celiy/cht-client-mecarvit/releases/latest/downlo
 
 ## Publicar uma atualização
 
+Pelo `--publish`:
+
 1. Edite a versão em `cht-client-<cliente>/version` (primeira linha: `version 1.0.2`).
-2. Rode `.\electron.ps1 build mecarvit --win --publish`.
+2. Rode `npx chtmain electron build mecarvit --win --publish`.
 3. No app instalado, o botão de atualização aparece no topo da barra lateral (e no canto superior direito das telas de login e registro) e faz download e instalação.
+
+Pela publicação manual, os mesmos passos, trocando o passo 2 por um build sem `--publish` e o envio dos artefatos em uma nova release.
 
 O `appId` (`dev.cht.<cliente>`) precisa permanecer o mesmo entre versões — trocá-lo quebra a detecção de atualização.
 
@@ -133,6 +208,22 @@ O `appId` (`dev.cht.<cliente>`) precisa permanecer o mesmo entre versões — tr
 | Instalador com ícone padrão do Electron                           | falta `cht-client-<cliente>/build/icon.ico` (o build avisa)                                |
 
 Passado o `setx`, `echo $env:GH_TOKEN` confirma se a variável chegou àquela janela.
+
+### Verificar o token na API
+
+Dois testes que não criam nada e isolam a causa do `403`:
+
+```powershell
+# O token pertence à conta esperada? O login deve ser o dono do repositório.
+curl.exe -s -H "Authorization: Bearer $env:GH_TOKEN" https://api.github.com/user
+
+# O token tem escrita no repositório? Procure "push": true.
+curl.exe -s -H "Authorization: Bearer $env:GH_TOKEN" https://api.github.com/repos/celiy/cht-client-mecarvit
+```
+
+Se o login não for `celiy`, o token pertence a outra conta e o repositório precisa estar no escopo dele. Se `push` for `false`, falta a permissão de Contents.
+
+⚠️ O `setx` não altera a janela atual: se você já tinha exportado o token antigo com `$env:GH_TOKEN`, essa janela continua usando o valor velho mesmo depois de editar as permissões no GitHub. Abra um terminal novo, ou reatribua `$env:GH_TOKEN` com o valor atual.
 
 ### Falhas silenciosas ao publicar
 
