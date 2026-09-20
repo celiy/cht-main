@@ -25,10 +25,29 @@ Ficheiros `.md` nesta pasta **não** são regras Cursor. Usar `.mdc` com frontma
 
 ## Skills (`.cursor/skills/`)
 
-| Skill              | Quando                                            |
-| ------------------ | ------------------------------------------------- |
-| `add-ds-component` | Novo componente no design system + página de docs |
-| `code-review`      | Revisar mudanças git por breaking changes         |
+| Skill               | Quando                                            |
+| ------------------- | ------------------------------------------------- |
+| `add-ds-component`  | Novo componente no design system + página de docs |
+| `code-review`       | Revisar mudanças git por breaking changes         |
+| `verification-loop` | Gate de qualidade antes de dizer que terminou     |
+| `security-review`   | Autenticação, entrada de usuário, segredos, CORS  |
+| `tdd-workflow`      | Ciclo RED → GREEN → REFACTOR com evidência        |
+
+Skills marcadas em `THIRD_PARTY_NOTICES.md` são adaptadas do projeto ECC (MIT) — ver o aviso
+na raiz antes de sincronizar mudanças de volta.
+
+## Comandos (`.cursor/commands/`)
+
+Entry points finos: cada arquivo é um atalho `/nome` que manda ler a skill correspondente.
+Não duplicar conteúdo aqui — a fonte é o `SKILL.md`.
+
+| Comando             | Skill               |
+| ------------------- | ------------------- |
+| `/verify`           | `verification-loop` |
+| `/tdd`              | `tdd-workflow`      |
+| `/security-review`  | `security-review`   |
+| `/code-review`      | `code-review`       |
+| `/add-ds-component` | `add-ds-component`  |
 
 ## Fora de `.cursor`
 

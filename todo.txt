@@ -12,12 +12,13 @@ Mecarvit:
 
     Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
 
+Script que da bump na versão automaticamente de um repo. Regras: ver sempre é por 3 numeros: x.x.x, cada decimal segue um valor maximo: infinito:10:10, ao ultrapassar então segue os exemplos de bump: 1.1.1 -> 1.1.2, 1.1.10 -> 1.2.0, 5.10.10 -> 6.0.0 e por assim vai. Deve receber o nome do repo cht sem passar o prefixo, então o cht-client mecarvit receberia algo como tipo bump client-mecarvit. O comando de build do electron pode receber uma flag que é tipo bump repo para atualizar automaticamente ao dar build.
+
 Implementar um sistema de logs robusto que salvam em arquivos locais para debuggar erros do app em build.
 
 O backend faz com que no system-tray tenha o icone do app mecarvit, clicar nele com o botão direito mostra o status do serviço mecarvit, com informações uteis.
 
 Revisar se o que foi implementado no sistema bate com o documento.
 
-Revisar código de uma forma teste que pensei:
-    Perguntar pra IA se ela analisa melhor um arquivo gigante do que arquivos separados, se sim:
-        Fazer uma cópia do workspace atual, dentro dele pedir um script que transforma todo arquivo em um arquivo só, e assim, juntar eles num arquivo só onde tem o conteúdo dele, o lugar que ele fica no projeto e o nome dele.
+Revisar o código e estilos dos componentes a mão. Ir por cada componente, ver cada prop, cada slot, o jeito que ele foi escrito, evitir repetições, manter o código com um padrão uniforme, etc.
+    Revisar o docs para fazer menos uso de funções no <script></script>
