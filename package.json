@@ -11,6 +11,7 @@
         "dev": "node scripts/entry.mjs dev",
         "build": "node scripts/entry.mjs build",
         "electron": "node scripts/entry.mjs electron",
+        "bump": "node scripts/entry.mjs bump",
         "sync:deps": "node scripts/entry.mjs sync-deps",
         "sync:tsconfig": "node scripts/entry.mjs sync-tsconfig",
         "lint": "eslint cht-base cht-design-system cht-shared",

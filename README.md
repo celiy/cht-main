@@ -52,8 +52,9 @@ Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicio
 3. O cliente define rotas (`routes.ts`), layout e páginas/componentes específicos.
 4. O comando `dev` (runner em `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
 5. O `scripts/sync-common-deps.mjs` normaliza versões de dependências compartilhadas:
-  - na primeira execução, gera `common-dependencies.json` com as versões mais recentes encontradas;
-  - nas próximas execuções, usa sempre esse arquivo como fonte da verdade.
+
+- na primeira execução, gera `common-dependencies.json` com as versões mais recentes encontradas;
+- nas próximas execuções, usa sempre esse arquivo como fonte da verdade.
 
 ## Como executar
 
@@ -69,14 +70,15 @@ npx chtmain <comando> [args...]
 npm run cht -- <comando> [args...]
 ```
 
-| Comando | O que faz |
-| --- | --- |
-| `install` | clona/puxa os repositórios e instala dependências |
-| `dev` | sobe o runner de desenvolvimento (frontend + backend) |
-| `build` | builda o frontend de um cliente |
-| `electron` | abre ou empacota o app desktop |
-| `sync-deps` | normaliza versões de dependências compartilhadas |
-| `sync-tsconfig` | regenera os paths `@client/*` do tsconfig |
+| Comando         | O que faz                                             |
+| --------------- | ----------------------------------------------------- |
+| `install`       | clona/puxa os repositórios e instala dependências     |
+| `dev`           | sobe o runner de desenvolvimento (frontend + backend) |
+| `build`         | builda o frontend de um cliente                       |
+| `electron`      | abre ou empacota o app desktop                        |
+| `bump`          | incrementa a versão de um repositório                 |
+| `sync-deps`     | normaliza versões de dependências compartilhadas      |
+| `sync-tsconfig` | regenera os paths `@client/*` do tsconfig             |
 
 Cada comando também tem um atalho em `npm run` (`npm run dev`, `npm run build -- mecarvit`, `npm run sync:deps`, …), mas o `npx chtmain` é o que funciona igual nos dois sistemas.
 
@@ -84,11 +86,11 @@ Cada comando também tem um atalho em `npm run` (`npm run dev`, `npm run build -
 
 Instale isto **antes** dos scripts (o `npm install` da raiz não substitui estas ferramentas):
 
-| Ferramenta | Para quê | Windows | Linux / macOS |
-|---|---|---|---|
-| **Git** | clone/pull dos repositórios irmãos | [git-scm.com](https://git-scm.com/download/win) | `git` no PATH |
-| **Node.js 24** (ver [`.nvmrc`](./.nvmrc)) | npm, scripts, Vite, Electron | Instalador LTS em [nodejs.org](https://nodejs.org/) **ou** [fnm](https://github.com/Schniz/fnm) / [nvm-windows](https://github.com/coreybutler/nvm-windows) | [nvm](https://github.com/nvm-sh/nvm) (`nvm install` + `nvm use` a partir do `.nvmrc`) |
-| **Python 3** + Visual Studio Build Tools (Windows) | rebuild de addons nativos (`better-sqlite3`, `bcrypt`) no backend | [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) com “Desktop development with C++”; o instalador do Node pode oferecer “Tools for Native Modules” | `build-essential` / Xcode CLT |
+| Ferramenta                                         | Para quê                                                          | Windows                                                                                                                                                                     | Linux / macOS                                                                         |
+| -------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Git**                                            | clone/pull dos repositórios irmãos                                | [git-scm.com](https://git-scm.com/download/win)                                                                                                                             | `git` no PATH                                                                         |
+| **Node.js 24** (ver [`.nvmrc`](./.nvmrc))          | npm, scripts, Vite, Electron                                      | Instalador LTS em [nodejs.org](https://nodejs.org/) **ou** [fnm](https://github.com/Schniz/fnm) / [nvm-windows](https://github.com/coreybutler/nvm-windows)                 | [nvm](https://github.com/nvm-sh/nvm) (`nvm install` + `nvm use` a partir do `.nvmrc`) |
+| **Python 3** + Visual Studio Build Tools (Windows) | rebuild de addons nativos (`better-sqlite3`, `bcrypt`) no backend | [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) com “Desktop development with C++”; o instalador do Node pode oferecer “Tools for Native Modules” | `build-essential` / Xcode CLT                                                         |
 
 Confirme no terminal:
 
@@ -176,7 +178,32 @@ Os artefatos saem em `builds/<cliente>/desktop`. Alvos disponíveis: `--win` (`n
 
 Instaladores e atualização automática via GitHub Releases: veja [`.cursor/docs/desktop-release.md`](./.cursor/docs/desktop-release.md).
 
-### 5) Sincronizar dependências compartilhadas
+### 5) Incrementar a versão de um repositório
+
+```bash
+npx chtmain bump client-mecarvit          # o nome vai sem o prefixo `cht-`
+npx chtmain bump main                     # o próprio workspace
+npx chtmain bump client-mecarvit --dry-run
+```
+
+A versão é sempre `x.y.z`; minor e patch viram `0` ao passar de 10:
+
+| Antes     | Depois  |
+| --------- | ------- |
+| `1.1.1`   | `1.1.2` |
+| `1.1.10`  | `1.2.0` |
+| `5.10.10` | `6.0.0` |
+
+O comando reescreve o arquivo `version` do repositório e **não** faz commit.
+
+Para incrementar e empacotar em um passo só, use a flag `--bump` no build do Electron:
+
+```bash
+npx chtmain electron build mecarvit --win --bump
+npx chtmain electron build mecarvit --win --bump client-mecarvit
+```
+
+### 6) Sincronizar dependências compartilhadas
 
 ```bash
 npx chtmain sync-deps

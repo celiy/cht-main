@@ -12,6 +12,7 @@ import {
 } from "./lib/clients.mjs";
 import { freePorts } from "./lib/procManager.mjs";
 import { localBinPath, spawnSyncInherit, spawnWithPipes } from "./lib/runCommand.mjs";
+import { bumpVersionDir, resolveRepoDir } from "./lib/version.mjs";
 
 const DEFAULT_BACKEND_HOST = "127.0.0.1";
 const DEFAULT_BACKEND_PORT = 8000;
@@ -22,6 +23,7 @@ const VITE_READY_TIMEOUT_MS = 60_000;
 const VERSION_FILE_CANDIDATES = ["version", "version.json", "version.txt"];
 const PACKAGE_TARGETS = ["win", "linux", "mac"];
 const STAGE_DIR = ".electron-stage";
+const TRAY_ICON_NAME = "tray-icon.png";
 const BACKEND_ROOT_SKIP_DIRS = new Set([".git", "data", "docs", "tests", "dist"]);
 const SHARED_PACKAGE_DIR = "cht-shared";
 const BACKEND_SKIP_FILES = new Set([
@@ -45,6 +47,9 @@ function printUsage() {
     console.log("Flags:");
     console.log("  --win|--linux|--mac  Packaging target (defaults to the host OS).");
     console.log("  --publish            Upload artifacts + latest.yml to the release feed.");
+    console.log("  --bump [repo]        Bump the app version before building. Defaults to");
+    console.log("                       the client's version file; pass a repo name (without");
+    console.log("                       the `cht-` prefix) to bump another one.");
     console.log("");
     console.log(`Known clients: ${known || "(none)"}`);
 }
@@ -58,16 +63,49 @@ function run(command, args, cwd, extraEnv = {}) {
 }
 
 function parseArgs(argv) {
-    const rest = argv.filter((arg) => arg !== "build");
+    const withoutBuild = argv.filter((arg) => arg !== "build");
     const isBuild = argv.includes("build");
+    const { shouldBump, bumpRepo, rest } = parseBumpArg(withoutBuild);
     const client = parsePositionalClientArg(rest);
 
     return {
         isBuild,
         client,
         target: parseTarget(argv),
-        shouldPublish: argv.includes("--publish")
+        shouldPublish: argv.includes("--publish"),
+        shouldBump,
+        bumpRepo
     };
+}
+
+/**
+ * `--bump` bumps the version of the client being built. `--bump <repo>` bumps a
+ * named repo instead, where the name omits the `cht-` prefix. The value is
+ * consumed so it is not mistaken for the positional client argument.
+ *
+ * @param {string[]} argv Arguments without the `build` subcommand.
+ * @returns {{ shouldBump: boolean, bumpRepo: string | null, rest: string[] }}
+ */
+function parseBumpArg(argv) {
+    const index = argv.indexOf("--bump");
+
+    if (index === -1) {
+        return { shouldBump: false, bumpRepo: null, rest: argv };
+    }
+
+    const rest = [...argv];
+
+    rest.splice(index, 1);
+
+    const candidate = rest[index];
+    let bumpRepo = null;
+
+    if (candidate && !candidate.startsWith("-")) {
+        bumpRepo = candidate;
+        rest.splice(index, 1);
+    }
+
+    return { shouldBump: true, bumpRepo, rest };
 }
 
 function vitePort() {
@@ -146,6 +184,42 @@ function resolveClientVersion(resolved) {
     return readAppVersion(path.resolve(clientDir));
 }
 
+/**
+ * Bump the version before the build reads it, so the installer, the updater
+ * feed and `app.getVersion()` all carry the new number.
+ *
+ * `--bump` targets the client being built; `--bump <repo>` targets a named repo
+ * (name without the `cht-` prefix).
+ *
+ * @param {string} root Workspace root.
+ * @param {object} resolved Resolved client entry.
+ * @param {string | null} bumpRepo Explicit repo name, when given.
+ */
+function applyVersionBump(root, resolved, bumpRepo) {
+    const clientDir = resolved.frontend?.clientDir;
+    const dir = bumpRepo
+        ? resolveRepoDir(root, bumpRepo)
+        : clientDir
+          ? path.resolve(root, clientDir)
+          : null;
+
+    if (!dir) {
+        console.warn("[electron] --bump ignored: no version file for this client.");
+
+        return;
+    }
+
+    if (!fs.existsSync(dir)) {
+        throw new Error(`[electron] --bump target not found: ${dir}`);
+    }
+
+    const result = bumpVersionDir(dir);
+
+    console.log(
+        `[electron] Bumped ${path.relative(root, result.filePath)}: ${result.from} -> ${result.to}`
+    );
+}
+
 function currentPlatformTarget() {
     if (process.platform === "win32") {
         return "win";
@@ -194,7 +268,13 @@ function resolvePublish(entry) {
     const configured = entry?.publish;
 
     if (configured?.owner && configured?.repo) {
-        return [{ provider: configured.provider || "github", owner: configured.owner, repo: configured.repo }];
+        return [
+            {
+                provider: configured.provider || "github",
+                owner: configured.owner,
+                repo: configured.repo
+            }
+        ];
     }
 
     const derived = parseGitHubRepo(entry?.frontend?.repo);
@@ -248,6 +328,36 @@ function resolveAppIcon(root, resolved) {
     };
 }
 
+/**
+ * Tray icon used by the desktop shell. A PNG works on every platform and keeps
+ * the brand colors, so it is preferred over the `.ico` variant.
+ *
+ * @param {string} root Workspace root.
+ * @param {object} resolved Resolved client entry.
+ * @returns {string | null} Absolute path to the source icon.
+ */
+function resolveTrayIcon(root, resolved) {
+    const clientDir = resolved.frontend?.clientDir
+        ? path.join(root, resolved.frontend.clientDir)
+        : null;
+
+    if (!clientDir) {
+        return null;
+    }
+
+    const buildDir = path.join(clientDir, "build");
+
+    for (const name of ["icon.png", "icon.ico"]) {
+        const candidate = path.join(buildDir, name);
+
+        if (fs.existsSync(candidate)) {
+            return candidate;
+        }
+    }
+
+    return null;
+}
+
 function backendStartCmd(backendDir, entry, packaged) {
     if (packaged) {
         const bin = process.platform === "win32" ? "tsx.cmd" : "tsx";
@@ -278,6 +388,7 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
     const entry = resolved.isDev ? null : loadClientConfig(resolved.name);
     const backendEntry = entry?.backend || null;
     const windowConfig = entry?.electron || {};
+    const trayIconSource = resolveTrayIcon(root, resolved);
 
     let backend = null;
 
@@ -305,6 +416,7 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
         viteUrl: isDev ? viteUrl : undefined,
         hasBackend: Boolean(backend),
         backend,
+        trayIcon: packaged ? TRAY_ICON_NAME : (trayIconSource ?? undefined),
         window: {
             width: windowConfig.width,
             height: windowConfig.height
@@ -436,7 +548,9 @@ function stageNodeRuntime(stageRoot, target) {
     const source = process.env.CHT_NODE_BINARY || process.execPath;
 
     if (!fs.existsSync(source)) {
-        console.warn(`[electron] Node binary not found at ${source}; skipping the bundled runtime.`);
+        console.warn(
+            `[electron] Node binary not found at ${source}; skipping the bundled runtime.`
+        );
 
         return;
     }
@@ -462,16 +576,27 @@ function stageNodeRuntime(stageRoot, target) {
  * `extraResources` source, so the backend is staged one level deeper and the
  * whole stage root becomes the resources root.
  */
-function prepareDesktopResources(root, baseDir, backendAbsDir, target) {
-    if (!backendAbsDir) {
+function prepareDesktopResources(root, baseDir, backendAbsDir, target, trayIconPath) {
+    const needsStage = Boolean(backendAbsDir) || Boolean(trayIconPath);
+
+    if (!needsStage) {
         return [];
     }
 
     const stageRoot = path.join(baseDir, STAGE_DIR, "resources");
-    const backendDestination = path.join(stageRoot, "backend");
 
     fs.rmSync(stageRoot, { recursive: true, force: true });
     fs.mkdirSync(stageRoot, { recursive: true });
+
+    if (trayIconPath) {
+        fs.copyFileSync(trayIconPath, path.join(stageRoot, TRAY_ICON_NAME));
+    }
+
+    if (!backendAbsDir) {
+        return [{ from: stageRoot, to: "." }];
+    }
+
+    const backendDestination = path.join(stageRoot, "backend");
 
     fs.cpSync(backendAbsDir, backendDestination, {
         recursive: true,
@@ -481,7 +606,9 @@ function prepareDesktopResources(root, baseDir, backendAbsDir, target) {
     });
 
     if (!fs.existsSync(path.join(backendDestination, "node_modules", "tsx", "dist", "cli.mjs"))) {
-        console.warn("[electron] Backend node_modules/tsx is missing; run npm install in the backend.");
+        console.warn(
+            "[electron] Backend node_modules/tsx is missing; run npm install in the backend."
+        );
     }
 
     // The backend resolves `@shared/*` through `tsconfig.json` to `../cht-shared`,
@@ -496,7 +623,9 @@ function prepareDesktopResources(root, baseDir, backendAbsDir, target) {
             filter: (source) => shouldStageBackendPath(source, sharedSource)
         });
     } else {
-        console.warn(`[electron] ${SHARED_PACKAGE_DIR} not found; the packaged backend may fail to start.`);
+        console.warn(
+            `[electron] ${SHARED_PACKAGE_DIR} not found; the packaged backend may fail to start.`
+        );
     }
 
     stageNodeRuntime(stageRoot, target);
@@ -504,7 +633,15 @@ function prepareDesktopResources(root, baseDir, backendAbsDir, target) {
     return [{ from: stageRoot, to: "." }];
 }
 
-function writeBuilderConfig({ root, baseDir, resolved, extraResources, appVersion, publish, icon }) {
+function writeBuilderConfig({
+    root,
+    baseDir,
+    resolved,
+    extraResources,
+    appVersion,
+    publish,
+    icon
+}) {
     const outDir = path.join(root, "builds", resolved.name, "desktop");
 
     const config = {
@@ -661,7 +798,7 @@ async function runDev(client) {
     cleanup();
 }
 
-function runBuild(client, target, shouldPublish) {
+function runBuild(client, target, shouldPublish, bump) {
     const root = getRootDir();
     const baseDir = path.join(root, "cht-base");
     const resolved = resolveClient(client);
@@ -672,6 +809,11 @@ function runBuild(client, target, shouldPublish) {
         packaged: true
     });
     const entry = resolved.isDev ? null : loadClientConfig(resolved.name);
+
+    if (bump?.shouldBump) {
+        applyVersionBump(root, resolved, bump.bumpRepo);
+    }
+
     const appVersion =
         resolveClientVersion(resolved) || readAppVersion(root) || DEFAULT_APP_VERSION;
     const publish = resolvePublish(entry);
@@ -705,7 +847,13 @@ function runBuild(client, target, shouldPublish) {
         root,
         baseDir,
         resolved,
-        extraResources: prepareDesktopResources(root, baseDir, backendAbsDir, target),
+        extraResources: prepareDesktopResources(
+            root,
+            baseDir,
+            backendAbsDir,
+            target,
+            resolveTrayIcon(root, resolved)
+        ),
         appVersion,
         publish,
         icon
@@ -713,7 +861,9 @@ function runBuild(client, target, shouldPublish) {
 
     console.log(`[electron] App version: ${appVersion}`);
     console.log(`[electron] Package target: ${target}`);
-    console.log(`[electron] Update feed: ${publish ? `${publish[0].owner}/${publish[0].repo}` : "(none)"}`);
+    console.log(
+        `[electron] Update feed: ${publish ? `${publish[0].owner}/${publish[0].repo}` : "(none)"}`
+    );
 
     const targetIcon = icon?.[target] ?? null;
 
@@ -726,7 +876,9 @@ function runBuild(client, target, shouldPublish) {
     }
 
     if (target === "win" && process.platform !== "win32") {
-        console.warn("[electron] Cross-building for Windows: native backend addons must target win32-x64.");
+        console.warn(
+            "[electron] Cross-building for Windows: native backend addons must target win32-x64."
+        );
     }
 
     const builderArgs = ["electron-builder", "--config", configPath, `--${target}`];
@@ -748,7 +900,7 @@ async function main() {
         process.exit(0);
     }
 
-    const { isBuild, client, target, shouldPublish } = parseArgs(argv);
+    const { isBuild, client, target, shouldPublish, shouldBump, bumpRepo } = parseArgs(argv);
 
     if (!client) {
         printUsage();
@@ -758,7 +910,7 @@ async function main() {
     assertKnownClient(client);
 
     if (isBuild) {
-        runBuild(client, target, shouldPublish);
+        runBuild(client, target, shouldPublish, { shouldBump, bumpRepo });
         return;
     }
 

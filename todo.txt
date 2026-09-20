@@ -1,24 +1,13 @@
 Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
 
 Mecarvit:
-    Implementar dataLimitePagamento nos registros
-
-    Processo de alterar senha:
-        Um usuário com permissão de gerenciar funcionários ou superadmin, pode no form de um usuário, no fim deste form, um botão que surge um modal. Esse modal é um modal de confirmação de alerta. Este botão é um botão que reseta a senha de um funcionário, então ao resetar, vai aparecer o campo no form para o gerente criar uma senha nova e o processo de antes de um funcionário criar uma senha pela primeira vez se repete.
-
-        Na pagina do perfil, clicar em alterar senha mada para a pagina de alterar senha, esse form deve aparecer na pagina do perfil.
-
-    Botão de sair na pagina do perfil deve ser destructive.
-
     Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
 
-Script que da bump na versão automaticamente de um repo. Regras: ver sempre é por 3 numeros: x.x.x, cada decimal segue um valor maximo: infinito:10:10, ao ultrapassar então segue os exemplos de bump: 1.1.1 -> 1.1.2, 1.1.10 -> 1.2.0, 5.10.10 -> 6.0.0 e por assim vai. Deve receber o nome do repo cht sem passar o prefixo, então o cht-client mecarvit receberia algo como tipo bump client-mecarvit. O comando de build do electron pode receber uma flag que é tipo bump repo para atualizar automaticamente ao dar build.
-
-Implementar um sistema de logs robusto que salvam em arquivos locais para debuggar erros do app em build.
-
-O backend faz com que no system-tray tenha o icone do app mecarvit, clicar nele com o botão direito mostra o status do serviço mecarvit, com informações uteis.
-
 Revisar se o que foi implementado no sistema bate com o documento.
+
+Cargo do funcionário reflete o que ele pode ver no frontend. No caso fazer apenas as opções da sidebar não aparecer de acordo com o cargo.
+
+Fazer o backend usar uma porta impossivel de estar em uso no sistema e implementar um sistema que se o backend hostear numa porta que existe, ele adiciona +1 a porta atual até achar uma porta disponivel dentro de um limite, o frontend segue essa lógica, se ele requisitar conexão com o back no inicio da aplicação e não achar, ele adiciona +1 a porta até achar ou até bater no limite. 
 
 Revisar o código e estilos dos componentes a mão. Ir por cada componente, ver cada prop, cada slot, o jeito que ele foi escrito, evitir repetições, manter o código com um padrão uniforme, etc.
     Revisar o docs para fazer menos uso de funções no <script></script>

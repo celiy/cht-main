@@ -17,12 +17,13 @@ https://github.com/<owner>/<repo>/releases/latest/download/latest.yml
 ## Comandos
 
 ```bash
-npx chtmain electron build <cliente> [--win|--linux|--mac] [--publish]
+npx chtmain electron build <cliente> [--win|--linux|--mac] [--publish] [--bump [repo]]
 # equivalente: npm run electron -- build <cliente> --win --publish
 ```
 
 - Sem `--win|--linux|--mac`, empacota para o sistema hospedeiro.
 - Artefatos saem em `builds/<cliente>/desktop`.
+- `--bump` incrementa a versão **antes** de empacotar, para que o instalador, o `app.getVersion()` e o feed de atualização carreguem o número novo. Sem argumento, incrementa o `version` do cliente sendo empacotado; com um nome de repositório sem o prefixo `cht-`, incrementa o daquele repositório. Detalhes das regras em [README](../../README.md) e em `npx chtmain bump --help`. O arquivo é reescrito **sem** commit.
 
 | Alvo      | Artefatos                                                                         |
 | --------- | --------------------------------------------------------------------------------- |
@@ -31,6 +32,22 @@ npx chtmain electron build <cliente> [--win|--linux|--mac] [--publish]
 | `--mac`   | `.dmg`, `.zip`, `latest-mac.yml`                                                  |
 
 Os arquivos `.blockmap` habilitam download diferencial: a atualização baixa só o que mudou.
+
+## System tray
+
+O app desktop cria um ícone na bandeja do sistema a partir de `cht-client-<cliente>/build/icon.png`. Se o arquivo não existir, o app abre normalmente e simplesmente não cria o tray.
+
+O menu (clique com o botão direito; em alguns desktops Linux, clique simples) mostra informações úteis:
+
+| Item                           | Conteúdo                                          |
+| ------------------------------ | ------------------------------------------------- |
+| Título e versão                | nome do app e `app.getVersion()`                  |
+| Status do servidor local       | iniciando, em execução, com erro, encerrado       |
+| Detalhe do erro / URL de saúde | mensagem do backend e `healthUrl`                 |
+| Status de atualização          | procurando, disponível, baixando, pronta          |
+| Ações                          | abrir janela, reiniciar servidor, atualizar, sair |
+
+O menu é reconstruído sempre que o status do backend ou da atualização muda, e o ícone aparece no `tray-icon.png` embarcado em `resources` pelo script de build. Se o desktop não suportar bandeja, o app registra um aviso e segue funcionando.
 
 ## Token do GitHub
 

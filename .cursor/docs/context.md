@@ -58,6 +58,20 @@ Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.j
 - `cht-base/tsconfig.node.json` — inclui `configs/**/*.ts` para typecheck do Vite/configs.
 - `cht-base/src/env.d.ts` — tipa `import.meta.env.VITE_SITE_TITLE` (entre outros `vite/client`).
 
+### Tailwind: fontes do cliente
+
+- `cht-base/src/css/style.css` importa o Tailwind e registra as fontes com `@source`. O cliente entra por `@source "virtual:client-source"`, que **não** é um caminho real: `cht-base/vite-plugins/clientSource.ts` substitui a diretiva pela pasta `src` do cliente ativo (`CLIENT`). Sem `CLIENT`, a diretiva é removida — nos docs, `@source "../../"` já cobre `src/devApp`.
+- **Não** troque isso por um glob como `@source "../../../cht-client-*/src"`. O `*` dentro de um segmento de diretório não expande: o Tailwind ignora a diretiva em silêncio e as classes usadas **só** pelo cliente desaparecem do bundle (um `w-20` ou `right-4` que existe no `.vue` e não sai no CSS). O mesmo vale para `cht-client-*` sem o `/src`; `**` funciona, mas só depois de um trecho literal, e varreria os outros clientes.
+- Sintoma típico: `top-4` funciona e `right-4` não, na mesma linha de `class` — a primeira aparece no `cht-base` ou no design system, a segunda só no cliente.
+- Ao mexer em `@source`, valide olhando o CSS gerado, não o navegador:
+
+```bash
+cd cht-base && CLIENT=mecarvit npm run build:client
+grep -oF '.w-20' dist/assets/*.css   # deve achar; vazio = fonte não registrada
+```
+
+- `?direct` (`/src/css/style.css?direct`) responde 500 no dev server por não resolver `virtual:client-theme`. É anterior e independente disto; para conferir o CSS em dev, use a URL sem query.
+
 ### Rotas e UI (responsabilidade do cliente)
 
 - O **cliente** exporta **`routes.ts`** (`RouteRecordRaw[]` por defeito) e define layouts livremente (ex.: `layouts/MainLayout.vue` com `<Sidebar>` do design system + `<RouterView />`).
@@ -172,6 +186,7 @@ Clientes existentes são descobertos no disco: pastas `cht-client-<name>` com `c
 scripts/
   lib/
     clients.mjs         # resolveClient, parseClientFlag, getSharedRepos, ...
+    version.mjs         # leitura/escrita da versão e regra de bump (x.y.z)
     procManager.mjs     # ProcessManager: spawn setsid + ring buffer + kill tree
     ansiUtils.mjs       # stripAnsi, findUrls, osc8Link
   runner/
@@ -183,6 +198,7 @@ scripts/
       useProcesses.js, useKeyboard.js
   install.mjs           # clona shared.repos + backend.repo do config do cliente, npm i recursivo
   build.mjs             # build/export do front para builds/<cliente>/dist
+  bump.mjs              # incrementa o arquivo `version` de um repo (sem commit)
 ```
 
 ### Comportamento
@@ -221,6 +237,7 @@ scripts/
 - `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.
 - `cht-base/src/main.ts` — cria router a partir de `@client/routes`, monta `@client/App.vue`, plugins, título.
-- `scripts/entry.mjs` — ponto de entrada único: despacha `install`/`dev`/`build`/`electron`/`sync-deps`/`sync-tsconfig`.
+- `scripts/entry.mjs` — ponto de entrada único: despacha `install`/`dev`/`build`/`electron`/`bump`/`sync-deps`/`sync-tsconfig`.
 - `scripts/runner/index.jsx` — dev runner multi-shell (frontend + backend por cliente, alternância com setas).
 - `scripts/build.mjs` — build/export do front para `builds/<cliente>/dist`.
+- `scripts/bump.mjs` — incrementa a versão (`x.y.z`) de um repo; a lógica fica em `scripts/lib/version.mjs`.
