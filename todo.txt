@@ -1,11 +1,7 @@
 Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
 
 Mecarvit:
-    Fazer o componente de serviços ser igual funcionalmente e visualmente à o que falei com minha mãe
-
-Revisar se o que foi implementado no sistema bate com o documento.
-
-Cargo do funcionário reflete o que ele pode ver no frontend. No caso fazer apenas as opções da sidebar não aparecer de acordo com o cargo.
+    Revisar se o que foi implementado no sistema bate com o documento.
 
 Fazer o backend usar uma porta impossivel de estar em uso no sistema e implementar um sistema que se o backend hostear numa porta que existe, ele adiciona +1 a porta atual até achar uma porta disponivel dentro de um limite, o frontend segue essa lógica, se ele requisitar conexão com o back no inicio da aplicação e não achar, ele adiciona +1 a porta até achar ou até bater no limite. 
 

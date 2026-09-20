@@ -94,7 +94,11 @@
 
     "tailwindCSS.experimental.configFile": {
         "cht-client-mecarvit/src/css/style.css": "cht-client-mecarvit/**",
-        "cht-base/src/css/style.prettier.css": "{cht-base,cht-design-system,cht-shared}/**"
+        "cht-base/src/css/style.prettier.css": [
+            "cht-base/**",
+            "cht-design-system/**",
+            "cht-shared/**"
+        ]
     },
     "tailwindCSS.includeLanguages": {
         "vue": "html",
