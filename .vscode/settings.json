@@ -1,18 +1,14 @@
 {
     "typescript.preferences.importModuleSpecifier": "non-relative",
-
     "typescript.updateImportsOnFileMove.enabled": "always",
     "javascript.updateImportsOnFileMove.enabled": "always",
-
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-
     "editor.quickSuggestions": {
         "strings": "on",
         "other": "on",
         "comments": "off"
     },
-
     "[vue]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -37,20 +33,20 @@
     "[css]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
         "source.removeUnusedImports": "explicit"
     },
-
     "vue.format.template.enabled": false,
     "vue.format.script.enabled": false,
     "vue.format.style.enabled": false,
-
     "eslint.useFlatConfig": true,
     "eslint.format.enable": false,
-    "eslint.workingDirectories": [{ "mode": "auto" }],
-
+    "eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        }
+    ],
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
@@ -58,13 +54,10 @@
         "**/dist/**": true,
         "**/out/**": true
     },
-
     "search.useIgnoreFiles": false,
     "search.useGlobalIgnoreFiles": false,
-
     "files.trimFinalNewlines": true,
     "files.insertFinalNewline": true,
-
     "git.autoRepositoryDetection": "subFolders",
     "git.repositoryScanMaxDepth": 10,
     "git.openRepositoryInParentFolders": "always",
@@ -80,36 +73,24 @@
         "cht-backend-mecarvit",
         "cht-shared"
     ],
-
     "files.exclude": {
         "**/*.map": true
     },
-
     "search.exclude": {
         "**/dist/**": true,
         "**/out/**": true,
         "**/node_modules/**": true,
         "**/*.map": true
     },
-
     "tailwindCSS.experimental.configFile": {
         "cht-client-mecarvit/src/css/style.css": "cht-client-mecarvit/**",
-        "cht-base/src/css/style.prettier.css": [
-            "cht-base/**",
-            "cht-design-system/**",
-            "cht-shared/**"
-        ]
+        "cht-design-system/src/css/intellisense.css": "cht-design-system/**",
+        "cht-base/src/css/style.prettier.css": ["cht-base/**", "cht-shared/**"]
     },
     "tailwindCSS.includeLanguages": {
         "vue": "html",
         "vue-html": "html"
     },
     "tailwindCSS.emmetCompletions": true,
-    "tailwindCSS.classAttributes": [
-        "class",
-        "className",
-        "ngClass",
-        "class:list",
-        ":class"
-    ]
+    "tailwindCSS.classAttributes": ["class", "className", "ngClass", "class:list", ":class"]
 }
