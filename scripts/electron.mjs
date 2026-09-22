@@ -15,7 +15,7 @@ import { localBinPath, spawnSyncInherit, spawnWithPipes } from "./lib/runCommand
 import { bumpVersionDir, resolveRepoDir } from "./lib/version.mjs";
 
 const DEFAULT_BACKEND_HOST = "127.0.0.1";
-const DEFAULT_BACKEND_PORT = 8000;
+const DEFAULT_PORT_SCAN_LIMIT = 20;
 const DEFAULT_HEALTH_PATH = "/health";
 const DEFAULT_APP_VERSION = "1.0.0";
 const BACKEND_ENTRY = "src/server.ts";
@@ -122,6 +122,20 @@ function healthUrl(host, port, healthPath) {
  * Derive host/port from the client `apiBaseUrl` so the spawned backend listens
  * exactly where the frontend expects it.
  */
+function clientApiBaseUrl(entry, target) {
+    const fromTarget = entry?.api?.[target];
+
+    if (typeof fromTarget === "string" && fromTarget.trim() !== "") {
+        return fromTarget.trim();
+    }
+
+    if (typeof entry?.apiBaseUrl === "string" && entry.apiBaseUrl.trim() !== "") {
+        return entry.apiBaseUrl.trim();
+    }
+
+    return null;
+}
+
 function apiEndpoint(apiBaseUrl) {
     if (!apiBaseUrl) {
         return null;
@@ -393,18 +407,22 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
     let backend = null;
 
     if (resolved.backend) {
-        const configuredEndpoint = apiEndpoint(entry?.apiBaseUrl);
+        const configuredEndpoint = apiEndpoint(clientApiBaseUrl(entry, "electron"));
         const host = backendEntry?.host || configuredEndpoint?.host || DEFAULT_BACKEND_HOST;
-        const port = Number(backendEntry?.port) || configuredEndpoint?.port || DEFAULT_BACKEND_PORT;
+        const portScanLimit =
+            Number(backendEntry?.portScanLimit) ||
+            Number(entry?.apiPortScanLimit) ||
+            DEFAULT_PORT_SCAN_LIMIT;
         const backendDir = packaged ? "backend" : path.join(root, resolved.backend.dir);
 
         backend = {
             dir: backendDir,
             cmd: backendStartCmd(path.join(root, resolved.backend.dir), backendEntry, packaged),
             entry: BACKEND_ENTRY,
-            healthUrl: healthUrl(host, port, backendEntry?.healthPath || DEFAULT_HEALTH_PATH),
+            healthUrl: healthUrl(host, 0, backendEntry?.healthPath || DEFAULT_HEALTH_PATH),
             host,
-            port,
+            port: 0,
+            portScanLimit,
             nodePath: isDev ? process.execPath : undefined
         };
     }
