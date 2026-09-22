@@ -1,5 +1,10 @@
 Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
 
+Modularização de como os projetos são iniciados:
+    O cht-main ao rodar um comando de build ou watch de um cliente, deve invés de escanear por pastas com cht-nome e tal pro front e pro back, se um repositório quiser ser usado pelo cht, ele precisa apenas do cht-config que ja existe no front, mas mudar a lógica do backend; o backend inclui um campo na sua config onde ele especifica os caminhos corretos e mais informações do backend para utilização, então por exemplo se um backend não for em node, ele pode passar um comando para ser rodado na pasta do backend.
+
+Implementar websocket
+
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
 
