@@ -1,5 +1,3 @@
-Ver o design do shadcn de modal rapido de confirmação de deletar, pegar esse estilo e fazer ele o padrão pro confirmationmodal
-
 Modularização de como os projetos são iniciados:
     O cht-main ao rodar um comando de build ou watch de um cliente, deve invés de escanear por pastas com cht-nome e tal pro front e pro back, se um repositório quiser ser usado pelo cht, ele precisa apenas do cht-config que ja existe no front, mas mudar a lógica do backend; o backend inclui um campo na sua config onde ele especifica os caminhos corretos e mais informações do backend para utilização, então por exemplo se um backend não for em node, ele pode passar um comando para ser rodado na pasta do backend.
 
@@ -8,10 +6,11 @@ Implementar websocket
 Implementar uso diferente de rotas por cada build de um frontend:
     Um frontend pode especificar qual rota base do backend ele quer chamar. Por exemplo numa implementação futura quando for possivel dar build de um projeto em mobile, seria interessante separar qual rota qual versão de um frontend o projeto consome. Implementar o uso de rotas para desenvolvimento local, deploy em web, uso de api local tipo do app Mecarvit, rota para caso a aplicação sejam mobile e etc.
 
-Mecarvit:
-    Revisar se o que foi implementado no sistema bate com o documento.
-
-Fazer o backend usar uma porta impossivel de estar em uso no sistema e implementar um sistema que se o backend hostear numa porta que existe, ele adiciona +1 a porta atual até achar uma porta disponivel dentro de um limite, o frontend segue essa lógica, se ele requisitar conexão com o back no inicio da aplicação e não achar, ele adiciona +1 a porta até achar ou até bater no limite. 
+    No projeto mecarvit, usar a rota 3001, se for app local, usar a rota conforme abaixo:
+        Fazer o backend usar uma porta impossivel de estar em uso no sistema e implementar um sistema que se o backend hostear numa porta que existe, ele adiciona +1 a porta atual até achar uma porta disponivel dentro de um limite, o frontend segue essa lógica, se ele requisitar conexão com o back no inicio da aplicação e não achar, ele adiciona +1 a porta até achar ou até bater no limite. 
 
 Revisar o código e estilos dos componentes a mão. Ir por cada componente, ver cada prop, cada slot, o jeito que ele foi escrito, evitir repetições, manter o código com um padrão uniforme, etc.
     Revisar o docs para fazer menos uso de funções no <script></script>
+    
+Mecarvit:
+    Revisar se o que foi implementado no sistema bate com o documento.
