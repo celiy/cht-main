@@ -5,6 +5,9 @@ Modularização de como os projetos são iniciados:
 
 Implementar websocket
 
+Implementar uso diferente de rotas por cada build de um frontend:
+    Um frontend pode especificar qual rota base do backend ele quer chamar. Por exemplo numa implementação futura quando for possivel dar build de um projeto em mobile, seria interessante separar qual rota qual versão de um frontend o projeto consome. Implementar o uso de rotas para desenvolvimento local, deploy em web, uso de api local tipo do app Mecarvit, rota para caso a aplicação sejam mobile e etc.
+
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
 
