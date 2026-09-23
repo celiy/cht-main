@@ -22,7 +22,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 
 ## Estrutura do workspace
 
-- `cht-base`: boot Vue + Vite + router; o cliente (`cht-client-*`) fornece `App.vue`, `routes.ts` e layouts; sem `CLIENT`, usa `cht-base/src/devApp` para laboratório.
+- `cht-base`: boot Vue + Vite + router; o cliente (pasta irmã com `cht.config.json`) fornece `App.vue`, `routes.ts` e layouts; sem `CLIENT`, usa `cht-base/src/devApp` para laboratório.
 - `cht-design-system`: componentes e padrões visuais reutilizáveis.
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
 - `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
@@ -38,7 +38,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 
 ## Clientes
 
-Clientes existentes são pastas `cht-client-<name>` com `cht.config.json` na raiz. O catálogo em [`clients.json`](./clients.json) (`clients.<name>.frontend.repo` / `backend.repo`) permite clonar um cliente na primeira instalação. Atualmente:
+Clientes existentes são pastas irmãs com `cht.config.json` na raiz (`name` é o id, o nome da pasta é livre). O catálogo em [`clients.json`](./clients.json) (`clients.<name>.frontend.repo` / `backend.repo`) permite clonar um cliente na primeira instalação. Atualmente:
 
 - **mecarvit**: frontend (`cht-client-mecarvit`) + backend (`cht-backend-mecarvit`)
 - **dev**: modo de desenvolvimento interno do `cht-base` (cliente virtual, sem backend)
@@ -47,7 +47,7 @@ Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicio
 
 ## Como funciona (visão geral)
 
-1. Pastas `cht-client-<name>` com `cht.config.json` definem os clientes em disco. `clients.json` guarda shared (`repos` + `vitePorts`) e o catálogo de URLs para bootstrap. Convenções (`cht-client-<name>`, `cht-backend-<name>`) eliminam configuração redundante.
+1. Pastas irmãs com `cht.config.json` definem os clientes. `clients.json` guarda shared (`repos` + `vitePorts`) e o catálogo de URLs para o primeiro clone. O bloco `backend` no `cht.config.json` indica pasta, comando e se o backend entra no Electron (`packageWithElectron`, padrão `true`).
 2. O `cht-base` monta a app com o alias `@client` resolvido via `CLIENT=<name>` (ou `src/devApp` sem cliente).
 3. O cliente define rotas (`routes.ts`), layout e páginas/componentes específicos.
 4. O comando `dev` (runner em `scripts/runner/index.jsx`) inicia os processos necessários conforme o cliente escolhido em um TUI Ink.
@@ -120,7 +120,7 @@ npx chtmain install --client:mecarvit
 npm run install:repos -- --client:mecarvit
 ```
 
-O comando `install` chama `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios `shared.repos`, nos clientes do catálogo `clients.json` / pastas `cht-client-*/cht.config.json` e, com `--client:<name>`, só os extras desse cliente (frontend + backend, mesmo que a pasta ainda não exista). Depois roda `npm install` na raiz e em cada pasta irmã com `package.json`.
+O comando `install` chama `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios `shared.repos`, nas URLs do catálogo `clients.json` / `cht.config.json` e, com `--client:<name>`, só os extras desse cliente (frontend + backend, mesmo que a pasta ainda não exista). Depois roda `npm install` na raiz e em cada pasta irmã com `package.json`.
 
 ### 2) Rodar ambiente de desenvolvimento
 
@@ -138,7 +138,7 @@ npx chtmain dev --client:mecarvit
 # ou: npm run dev -- --client:mecarvit
 ```
 
-A sintaxe é genérica: para qualquer pasta `cht-client-<name>` com `cht.config.json`, basta `--client:<name>`. Não há scripts hardcoded por cliente no `package.json` raiz.
+A sintaxe é genérica: para qualquer pasta irmã com `cht.config.json`, basta `--client:<name>` (o valor de `name` no ficheiro). Não há scripts hardcoded por cliente no `package.json` raiz.
 
 O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou `h`/`l`) para alternar tabs, `↑`/`↓` (ou `k`/`j`) e PgUp/PgDn para scroll do console, `r` reinicia o processo ativo, `c` limpa o buffer, `q` (ou `Ctrl+C`) encerra. URLs detectados nos logs aparecem como hyperlinks clicáveis na status bar.
 

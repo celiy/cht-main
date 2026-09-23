@@ -1,11 +1,2 @@
-Modularização de como os projetos são iniciados:
-    O cht-main ao rodar um comando de build ou watch de um cliente, deve invés de escanear por pastas com cht-nome e tal pro front e pro back, se um repositório quiser ser usado pelo cht, ele precisa apenas do cht-config que ja existe no front, mas mudar a lógica do backend; o backend inclui um campo na sua config onde ele especifica os caminhos corretos e mais informações do backend para utilização, então por exemplo se um backend não for em node, ele pode passar um comando para ser rodado na pasta do backend.
-
-Implementar websocket
-    No Mecarvit, se um funcionário da oficina dele realizar uma ação de cadastro, informar via notificação para o superadmin que tal funcionáio fez tal ação
-
-Revisar o código e estilos dos componentes a mão. Ir por cada componente, ver cada prop, cada slot, o jeito que ele foi escrito, evitir repetições, manter o código com um padrão uniforme, etc.
-    Revisar o docs para fazer menos uso de funções no <script></script>
-    
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.

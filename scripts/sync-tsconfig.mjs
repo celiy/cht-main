@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Regenerate the `@client/*` path array in cht-base/tsconfig.app.json from
-// discovered `cht-client-*` folders that contain `cht.config.json`. This is
+// discovered sibling folders that contain `cht.config.json`. This is
 // purely for IDE / vue-tsc support: the runtime alias is already dynamic via
 // vite.config.ts (CLIENT env -> resolveClientDir).
 //
@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { getRootDir, listClientNames } from "./lib/clients.mjs";
+import { getClientDir, getRootDir, listClientNames } from "./lib/clients.mjs";
 
 const ROOT_DIR = getRootDir();
 const TSCONFIG_PATH = path.join(ROOT_DIR, "cht-base", "tsconfig.app.json");
@@ -26,7 +26,7 @@ function buildClientPaths() {
 
     return [
         ...paths,
-        ...names.map((name) => `../cht-client-${name}/src/*`)
+        ...names.map((name) => `../${getClientDir(name)}/src/*`)
     ];
 }
 

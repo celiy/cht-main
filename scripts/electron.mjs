@@ -372,29 +372,32 @@ function resolveTrayIcon(root, resolved) {
     return null;
 }
 
-function backendStartCmd(backendDir, entry, packaged) {
+function isNpmFamilyCommand(cmd) {
+    return /^\s*npm(\s|$)/.test(cmd) || /^\s*npx\s/.test(cmd);
+}
+
+function backendStartCmd(resolvedBackend, packaged) {
+    if (!resolvedBackend) {
+        return "";
+    }
+
     if (packaged) {
+        if (resolvedBackend.packagedCmd) {
+            return resolvedBackend.packagedCmd;
+        }
+
+        const candidate = resolvedBackend.startCmd || resolvedBackend.cmd;
+
+        if (candidate && !isNpmFamilyCommand(candidate)) {
+            return candidate;
+        }
+
         const bin = process.platform === "win32" ? "tsx.cmd" : "tsx";
 
         return `node_modules/.bin/${bin} src/server.ts`;
     }
 
-    const configured = entry?.startScript || "start";
-    const packagePath = path.join(backendDir, "package.json");
-
-    if (fs.existsSync(packagePath)) {
-        try {
-            const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
-
-            if (pkg?.scripts?.[configured]) {
-                return `npm run ${configured}`;
-            }
-        } catch {
-            // Fall through to the web-dev script.
-        }
-    }
-
-    return `npm run ${entry?.script || "dev"}`;
+    return resolvedBackend.startCmd || resolvedBackend.cmd;
 }
 
 function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
@@ -406,7 +409,7 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
 
     let backend = null;
 
-    if (resolved.backend) {
+    if (resolved.backend && (!packaged || resolved.backend.packageWithElectron)) {
         const configuredEndpoint = apiEndpoint(clientApiBaseUrl(entry, "electron"));
         const host = backendEntry?.host || configuredEndpoint?.host || DEFAULT_BACKEND_HOST;
         const portScanLimit =
@@ -417,7 +420,7 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
 
         backend = {
             dir: backendDir,
-            cmd: backendStartCmd(path.join(root, resolved.backend.dir), backendEntry, packaged),
+            cmd: backendStartCmd(resolved.backend, packaged),
             entry: BACKEND_ENTRY,
             healthUrl: healthUrl(host, 0, backendEntry?.healthPath || DEFAULT_HEALTH_PATH),
             host,
@@ -855,7 +858,10 @@ function runBuild(client, target, shouldPublish, bump) {
     compileElectron(baseDir);
     writeRuntimeConfig(baseDir, runtimeConfig);
 
-    const backendAbsDir = resolved.backend ? path.join(root, resolved.backend.dir) : null;
+    const backendAbsDir =
+        resolved.backend && resolved.backend.packageWithElectron
+            ? path.join(root, resolved.backend.dir)
+            : null;
 
     if (backendAbsDir && !fs.existsSync(backendAbsDir)) {
         throw new Error(`[electron] Backend directory not found: ${backendAbsDir}`);
@@ -889,7 +895,7 @@ function runBuild(client, target, shouldPublish, bump) {
         console.log(`[electron] Icon: ${path.relative(root, targetIcon)}`);
     } else {
         console.warn(
-            `[electron] No installer icon for "${target}". Add cht-client-${resolved.name}/build/icon.ico (win) or icon.png (linux/mac).`
+            `[electron] No installer icon for "${target}". Add ${resolved.frontend.clientDir}/build/icon.ico (win) or icon.png (linux/mac).`
         );
     }
 

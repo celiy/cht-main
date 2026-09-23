@@ -94,7 +94,7 @@ export function freePorts(ports) {
 }
 
 export class ManagedProcess extends EventEmitter {
-    constructor({ id, name, dir, cmd, subtitle, ringSize = DEFAULT_RING_SIZE }) {
+    constructor({ id, name, dir, cmd, subtitle, env, ringSize = DEFAULT_RING_SIZE }) {
         super();
 
         this.id = id;
@@ -102,6 +102,7 @@ export class ManagedProcess extends EventEmitter {
         this.dir = dir;
         this.cmd = cmd;
         this.subtitle = subtitle || "";
+        this.env = env && typeof env === "object" ? env : {};
         this.ringSize = ringSize;
         this.lines = [];
         this.partial = "";
@@ -114,11 +115,17 @@ export class ManagedProcess extends EventEmitter {
     }
 
     start() {
+        const env = { ...process.env, FORCE_COLOR: "1", ...this.env };
+
+        if (this.env.CHT_DEVAPP === "1") {
+            delete env.CLIENT;
+        }
+
         if (IS_WIN) {
             this.child = spawnWithPipes(this.cmd, [], {
                 cwd: this.dir,
                 stdio: ["ignore", "pipe", "pipe"],
-                env: { ...process.env, FORCE_COLOR: "1" },
+                env,
                 shell: true
             });
         } else {
@@ -126,7 +133,7 @@ export class ManagedProcess extends EventEmitter {
 
             this.child = spawn("setsid", ["bash", "-c", shellCmd], {
                 stdio: ["ignore", "pipe", "pipe"],
-                env: { ...process.env, FORCE_COLOR: "1" },
+                env,
                 detached: true
             });
         }

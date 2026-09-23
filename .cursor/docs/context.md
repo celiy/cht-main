@@ -38,23 +38,23 @@ Instalação de dependências em todos os pacotes com `package.json` no diretór
 
 ### Configs (cliente — metadados de build)
 
-- Cada pasta `cht-client-<name>` leva `cht.config.json` na raiz (`name`, `siteTitle`, `frontend.repo`, `backend?`).
-- O runner, o install, o build e o `cht-base` **descobrem** clientes varrendo pastas `cht-client-*` que contenham esse ficheiro. Não há lista central de clientes existentes.
+- Cada pasta de frontend leva **`cht.config.json`** na raiz (`name`, `siteTitle`, `frontend.repo`, `backend?`). O nome da pasta é livre.
+- O runner, o install, o build e o `cht-base` **descobrem** clientes varrendo pastas irmãs que contenham esse ficheiro. Não há lista central de clientes existentes nem convenção `cht-client-*`.
 - `cht-base/configs/types.ts` — `ClientConfig`.
-- `cht-base/configs/index.ts` — `loadConfig(name)` lê `../cht-client-<name>/cht.config.json` (usado em `vite.config.ts` para o alias `@client` e `VITE_SITE_TITLE`).
+- `cht-base/configs/index.ts` — `loadConfig(name)` encontra o `cht.config.json` cujo `name` coincide (usado em `vite.config.ts` para o alias `@client` e `VITE_SITE_TITLE`).
 
-Ao adicionar um cliente novo: clonar/criar `cht-client-<nome>` com `cht.config.json`, `src/App.vue` e `src/routes.ts`. Não é preciso editar `cht-base/package.json` nem um registry.
+Ao adicionar um cliente novo: clonar/criar a pasta irmã com `cht.config.json`, `src/App.vue` e `src/routes.ts`. Não é preciso editar `cht-base/package.json` nem um registry.
 
 ### Build-time (Vite)
 
 - Ficheiro: `cht-base/vite.config.ts`.
-- Lê `process.env.CLIENT`, `loadConfig(clientName)`; resolve `clientDir` (convenção `cht-client-<name>` se omitido).
+- Lê `process.env.CLIENT`, `loadConfig(clientName)`; resolve `clientDir` a partir da pasta onde o `cht.config.json` foi encontrado.
 - Alias **`@client`** → `../<clientDir>/src` quando há cliente; **sem** `CLIENT`, aponta para **`./src/devApp`** (mesma forma de import: `@client/App.vue`, `@client/routes.ts`).
 - **`define`:** `import.meta.env.VITE_SITE_TITLE` — string JSON do título (`siteTitle` do config do cliente ou `"cht-base dev"` no modo dev).
 
 ### TypeScript no base
 
-- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir das pastas `cht-client-*` descobertas por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro ficheiro que existe no disco, listar todos os clientes conhecidos ajuda o IDE. O alias de runtime continua a ser resolvido por `vite.config.ts` conforme `CLIENT`.
+- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir das pastas com `cht.config.json` descobertas por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro ficheiro que existe no disco, listar todos os clientes conhecidos ajuda o IDE. O alias de runtime continua a ser resolvido por `vite.config.ts` conforme `CLIENT`.
 - `cht-base/tsconfig.node.json` — inclui `configs/**/*.ts` para typecheck do Vite/configs.
 - `cht-base/src/env.d.ts` — tipa `import.meta.env.VITE_SITE_TITLE` (entre outros `vite/client`).
 
@@ -167,16 +167,17 @@ npx chtmain dev                     # equivalente a --client:dev
 
 Equivalente via npm: `npm run dev -- --client:mecarvit`.
 
-### Discovery: `cht-client-*/cht.config.json` + `clients.json` (shared)
+### Discovery: `cht.config.json` + `clients.json` (shared)
 
-Clientes existentes são descobertos no disco: pastas `cht-client-<name>` com `cht.config.json` na raiz. O [clients.json](../../clients.json) na raiz guarda só infra compartilhada (`shared.repos`, `shared.vitePorts`). Convenções:
+Clientes existentes são descobertos no disco: qualquer pasta irmã com `cht.config.json` na raiz. O [clients.json](../../clients.json) na raiz guarda só infra compartilhada (`shared.repos`, `shared.vitePorts`) e o catálogo de clone. Campos relevantes:
 
-- `cht.config.json` ⇒ `name`, `siteTitle`, `frontend.repo`, `backend.repo` / `backend.script` (opcional).
+- `cht.config.json` ⇒ `name`, `siteTitle`, `frontend.repo`, bloco `backend` opcional.
 - `frontend.dir` ⇒ `cht-base` (a app shell).
 - `frontend.cmd` ⇒ `dev:client` com `CLIENT=<name>`.
-- `frontend.clientDir` ⇒ `cht-client-<name>`.
-- `backend.dir` ⇒ default `cht-backend-<name>`. Cliente sem backend: omitir o bloco `backend`.
-- `backend.script` ⇒ default `dev`.
+- `frontend.clientDir` ⇒ pasta onde o `cht.config.json` foi encontrado.
+- `backend.dir` ⇒ pasta do backend (obrigatória se houver `backend`).
+- `backend.cmd` ⇒ comando a correr nessa pasta (Node, Maven, …). Sem `cmd`, usa `npm run` + `backend.script` (padrão `dev`).
+- `backend.packageWithElectron` ⇒ default `true`; `false` omite o backend do instalador Electron.
 - `shared.repos` ⇒ URLs sempre clonados pelo `install`.
 - `shared.vitePorts` ⇒ portas liberadas antes do dev (default `[5173, 5174]`).
 
@@ -215,8 +216,8 @@ scripts/
 
 ### Adicionar um cliente novo
 
-1. Clonar ou criar a pasta `cht-client-<name>` com `cht.config.json` (`name`, `siteTitle`, `frontend.repo`, e `backend` se houver), mais `src/App.vue` e `src/routes.ts`.
-2. `npx chtmain install --client:<name>` clona o backend a partir de `backend.repo` (a pasta do frontend já tem de existir para ler o config).
+1. Clonar ou criar uma pasta irmã com `cht.config.json` (`name`, `siteTitle`, `frontend.repo`, e `backend` com `dir` + `cmd` se houver), mais `src/App.vue` e `src/routes.ts`.
+2. `npx chtmain install --client:<name>` clona o backend a partir de `backend.repo` (a pasta do frontend já tem de existir para ler o config, ou o nome tem de estar no catálogo `clients.json`).
 3. Pronto: `npx chtmain dev --client:<name>` já funciona. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npx chtmain sync-tsconfig`).
 
 ### Export de build (artefato web)

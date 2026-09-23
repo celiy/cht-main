@@ -2,6 +2,7 @@ import React from "react";
 import { render } from "ink";
 import { parseClientFlag, resolveClient, buildProcessList, getVitePorts, listClientNames } from "../lib/clients.mjs";
 import { ProcessManager, freePorts } from "../lib/procManager.mjs";
+import { findFreePort } from "../lib/ports.mjs";
 import { syncTsconfig } from "../sync-tsconfig.mjs";
 import { App } from "./App.jsx";
 
@@ -26,9 +27,22 @@ async function main() {
 
     const { client } = parseClientFlag(argv);
     const resolved = resolveClient(client);
-    const specs = buildProcessList(resolved);
+    const vitePorts = getVitePorts();
+    const clientPort = vitePorts[0] ?? 5173;
 
-    // Keep cht-base/tsconfig.app.json in sync with discovered cht-client-*
+    freePorts(vitePorts);
+
+    let docsPort;
+
+    if (!resolved.isDev) {
+        const startFrom = vitePorts[1] ?? clientPort + 1;
+
+        docsPort = await findFreePort(startFrom, [clientPort]);
+    }
+
+    const specs = buildProcessList(resolved, { clientPort, docsPort });
+
+    // Keep cht-base/tsconfig.app.json in sync with discovered cht.config.json folders.
     // folders before entering the alternate screen (silent unless something changes).
     syncTsconfig({ silent: true });
 
@@ -36,8 +50,6 @@ async function main() {
         console.error("No processes resolved for client.");
         process.exit(1);
     }
-
-    freePorts(getVitePorts());
 
     const manager = new ProcessManager(specs);
 

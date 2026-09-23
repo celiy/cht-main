@@ -27,6 +27,7 @@ const SCRIPT_COMMANDS = {
     build: "build.mjs",
     electron: "electron.mjs",
     bump: "bump.mjs",
+    create: "create.mjs",
     "sync-deps": "sync-common-deps.mjs",
     "sync-tsconfig": "sync-tsconfig.mjs"
 };
@@ -53,6 +54,7 @@ function printUsage() {
     console.log("  dev            Start the dev runner (frontend + backend per client).");
     console.log("  build          Build a client frontend into builds/<client>/dist.");
     console.log("  electron       Open or package a client as a desktop app.");
+    console.log("  create         Scaffold a client frontend from the cht-base template.");
     console.log("  bump           Bump the version file of one workspace repo.");
     console.log("  sync-deps      Normalize shared dependency versions across repos.");
     console.log("  sync-tsconfig  Regenerate the @client/* tsconfig paths.");

@@ -63,21 +63,9 @@ function addRepoUrl(urls, url) {
     }
 }
 
-function githubPrefixFromSharedRepos() {
-    for (const url of getSharedRepos()) {
-        const match = String(url).match(/^(https?:\/\/[^/]+\/[^/]+\/)/);
-
-        if (match) {
-            return match[1];
-        }
-    }
-
-    return "https://github.com/celiy/";
-}
-
 /**
- * Collect frontend/backend clone URLs from local cht.config.json, clients.json
- * catalog, or naming convention — so `--client:<name>` works before the folder exists.
+ * Collect frontend/backend clone URLs from local cht.config.json and the
+ * clients.json catalog so `--client:<name>` works before the folder exists.
  *
  * @param {Set<string>} urls
  * @param {string} name
@@ -94,13 +82,7 @@ function addClientRepoUrls(urls, name) {
         addRepoUrl(urls, resolved.frontend?.repo);
         addRepoUrl(urls, resolved.backend?.repo);
     } catch {
-        if (!catalog?.frontend?.repo) {
-            addRepoUrl(urls, `${githubPrefixFromSharedRepos()}cht-client-${name}.git`);
-        }
-
-        if (!catalog?.backend?.repo) {
-            addRepoUrl(urls, `${githubPrefixFromSharedRepos()}cht-backend-${name}.git`);
-        }
+        // Config is missing until the frontend repo is cloned; catalog URLs are enough.
     }
 }
 
