@@ -110,7 +110,7 @@ grep -oF '.w-20' dist/assets/*.css   # deve achar; vazio = fonte não registrada
 | Script                           | Comportamento                                                                                        |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `npm run dev`                    | Vite sem `CLIENT` — `@client` → `src/devApp` (rotas `/`, `/devDesign`, `/devForm`).                  |
-| `npm run dev:client`             | Vite com `CLIENT` no ambiente — `@client` → `cht-client-<name>/src`. O runner passa `CLIENT=<name>`. |
+| `npm run dev:client`             | Vite com `CLIENT` no ambiente — `@client` → `../<clientDir>/src` (pasta do `cht.config.json`). O runner passa `CLIENT=<name>`. |
 | `npm run build` / `build:client` | Build sem cliente (devApp) ou com `CLIENT=<name>`.                                                   |
 | `npm run electron:compile`       | Compila `electron/main.ts` e `preload.ts` para `electron-dist/`.                                     |
 
@@ -149,7 +149,7 @@ Imports típicos: `@design/...`, `@shared/...`, `@client/components/...`, `@clie
 | ----------- | ----------------------------------------------------------------------------- |
 | `@design/*` | `cht-design-system/src/*`                                                     |
 | `@shared/*` | `cht-shared/src/*`                                                            |
-| `@client/*` | `cht-client-<nome>/src/*` com `CLIENT`; sem `CLIENT`, `cht-base/src/devApp/*` |
+| `@client/*` | `<clientDir>/src/*` com `CLIENT` (`clientDir` vem do `cht.config.json`); sem `CLIENT`, `cht-base/src/devApp/*` |
 
 ---
 
@@ -160,7 +160,7 @@ Runner moderno baseado em **Node + Ink (React no terminal)**: blocos com bordas,
 ### Uso
 
 ```bash
-npx chtmain dev --client:mecarvit   # frontend (cht-base CLIENT=mecarvit) + backend (cht-backend-mecarvit)
+npx chtmain dev --client:mecarvit   # frontend (cht-base CLIENT=mecarvit) + backend (pasta em backend.dir do config)
 npx chtmain dev --client:dev        # apenas cht-base em modo dev (rotas de laboratório), sem backend
 npx chtmain dev                     # equivalente a --client:dev
 ```
@@ -180,6 +180,23 @@ Clientes existentes são descobertos no disco: qualquer pasta irmã com `cht.con
 - `backend.packageWithElectron` ⇒ default `true`; `false` omite o backend do instalador Electron.
 - `shared.repos` ⇒ URLs sempre clonados pelo `install`.
 - `shared.vitePorts` ⇒ portas liberadas antes do dev (default `[5173, 5174]`).
+- Detalhe de campos e exemplos (Java, Electron): página **Sistema → cht.config** no devApp (`/docs/cht-config`).
+
+### devApp (documentação de componentes)
+
+- Páginas em `cht-base/src/devApp/pages/docs/components/*.vue`; nav em `ts/componentsNav.ts`.
+- **Estado de prontidão:** `devApp/data/componentReadiness.json` (slug da rota → `success` | `info` | `warning` | `destructive`). `DocsOutline` mostra `DocsComponentStatus` (`Item` tipo alert) acima do conteúdo; textos em `ts/componentReadiness.ts`.
+
+### Design system: Select com “cadastrar” no painel
+
+- `FormRenderer` expõe slot `#select-inside-empty-panel` (repasse em `ItemViewEdit`).
+- `OptionsList` usa o slot `insideEmptyPanel`: rodapé do painel quando há opções; mensagem vazia + slot quando não há resultados.
+- CRUD Mecarvit: ver `clientes.vue` (endereços/veículos) e `funcionarios.vue` (cargo) — `selectAction` no campo + botão no slot; `closeSelect(fieldId)` antes de abrir sub-diálogo.
+
+### Modal e URL (`?modal=[id,...]`)
+
+- Vários modais abertos no mesmo tick: `cht-shared/src/frontend/modalQuery.ts` (`trackModalUrlOpenState`, `scheduleModalUrlQuerySync`) evita corrida no `router.push`.
+- Testes: `cht-backend-mecarvit/tests/modalQuery.test.ts`.
 
 ### Estrutura do código
 
@@ -232,7 +249,7 @@ scripts/
 ## Ficheiros-chave para navegação rápida
 
 - `cht-base/vite.config.ts` — `CLIENT`, alias `@client`, `VITE_SITE_TITLE`.
-- `cht-client-<nome>/cht.config.json` — metadados do cliente (`name`, `siteTitle`, repos).
+- `<clientDir>/cht.config.json` — metadados do cliente (`name`, `siteTitle`, repos, `backend`).
 - `cht-base/configs/*` — loader (`loadConfig`) e tipo `ClientConfig`.
 - `cht-base/src/devApp/*` — cliente interno (`App.vue`, `routes.ts`, `DevAppLayout.vue`, `ts/componentsNav.ts`).
 - `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.

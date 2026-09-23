@@ -31,5 +31,6 @@ description: >-
 2. Route in `cht-base/src/devApp/routes.ts`.
 3. Nav item in `cht-base/src/devApp/ts/componentsNav.ts`.
 4. Exercise the page in the browser before finishing.
+5. Se a página é de componente (não fundamento): entrada em `cht-base/src/devApp/data/componentReadiness.json` e texto em `ts/componentReadiness.ts` (banner `DocsComponentStatus` é automático via `DocsOutline`).
 
 Do not add a `custom/` stub and a primitive stub for the same component unless both are intentional.
