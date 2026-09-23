@@ -13,6 +13,7 @@ import {
 import { freePorts } from "./lib/procManager.mjs";
 import { localBinPath, spawnSyncInherit, spawnWithPipes } from "./lib/runCommand.mjs";
 import { bumpVersionDir, resolveRepoDir } from "./lib/version.mjs";
+import { syncTsconfig } from "./sync-tsconfig.mjs";
 
 const DEFAULT_BACKEND_HOST = "127.0.0.1";
 const DEFAULT_PORT_SCAN_LIMIT = 20;
@@ -841,6 +842,8 @@ function runBuild(client, target, shouldPublish, bump) {
     const icon = resolveAppIcon(root, resolved);
 
     console.log(`[electron] Building frontend for "${resolved.name}"...`);
+
+    syncTsconfig({ client: client === "dev" ? "dev" : client });
 
     const frontendEnv = {
         ELECTRON_BUILD: "1"

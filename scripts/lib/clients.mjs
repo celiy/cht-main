@@ -103,7 +103,7 @@ function loadSharedFile() {
  * frontend/backend before the local folder exists.
  *
  * @param {string} name
- * @returns {{ frontend?: { repo?: string }, backend?: { repo?: string } } | null}
+ * @returns {{ frontend?: { repo?: string, ref?: string }, backend?: { repo?: string, ref?: string } } | null}
  */
 export function getCataloguedClient(name) {
     const file = loadClientsFile();
@@ -271,6 +271,7 @@ export function resolveBackendConfig(backend, name) {
         packagedCmd: packagedCmd || null,
         packageWithElectron: backend.packageWithElectron !== false,
         repo: backend.repo || null,
+        ref: typeof backend.ref === "string" && backend.ref.trim() ? backend.ref.trim() : null,
         host: backend.host || null,
         port: backend.port || null,
         portScanLimit: backend.portScanLimit || null,
@@ -316,7 +317,10 @@ export function resolveClient(name) {
         dir: DEFAULT_FRONTEND_BASE_DIR,
         cmd: `npx cross-env CLIENT=${name} npm run dev:client`,
         clientDir: getClientDir(name),
-        repo: frontendOverride.repo || null
+        repo: frontendOverride.repo || null,
+        ref: typeof frontendOverride.ref === "string" && frontendOverride.ref.trim()
+            ? frontendOverride.ref.trim()
+            : null
     };
 
     return {

@@ -44,7 +44,7 @@ async function main() {
 
     // Keep cht-base/tsconfig.app.json in sync with discovered cht.config.json folders.
     // folders before entering the alternate screen (silent unless something changes).
-    syncTsconfig({ silent: true });
+    syncTsconfig({ silent: true, client: resolved.name });
 
     if (specs.length === 0) {
         console.error("No processes resolved for client.");

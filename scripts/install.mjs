@@ -24,63 +24,138 @@ function isGitRepo(dir) {
     return fs.existsSync(path.join(dir, ".git"));
 }
 
-function gitPull(dir, label) {
-    console.log(`[install] git pull in ${label}`);
-
-    const result = spawnSyncInherit("git", ["pull"], { cwd: dir });
-
+function assertGitOk(result, message) {
     if (result.status !== 0) {
-        console.warn(`[install] git pull failed in ${label} (continuing)`);
+        throw new Error(message);
     }
 }
 
-function gitSyncFromUrl(url, cwd) {
+function looksLikeCommitSha(ref) {
+    return /^[0-9a-f]{7,40}$/i.test(ref);
+}
+
+/**
+ * @param {string | { url?: string, repo?: string, ref?: string } | null | undefined} value
+ * @param {string | null | undefined} extraRef
+ * @returns {{ url: string, ref?: string } | null}
+ */
+function parseRepoSpec(value, extraRef) {
+    const hint = typeof extraRef === "string" && extraRef.trim() ? extraRef.trim() : undefined;
+
+    if (typeof value === "string" && value.trim()) {
+        return { url: value.trim(), ref: hint };
+    }
+
+    if (!value || typeof value !== "object") {
+        return null;
+    }
+
+    const urlCandidate = [value.url, value.repo].find(
+        (entry) => typeof entry === "string" && entry.trim()
+    );
+    const url = urlCandidate ? urlCandidate.trim() : "";
+    const ref =
+        typeof value.ref === "string" && value.ref.trim() ? value.ref.trim() : hint;
+
+    if (!url) {
+        return null;
+    }
+
+    return { url, ref };
+}
+
+function addRepoSpec(list, spec) {
+    if (!spec) {
+        return;
+    }
+
+    const existing = list.find((item) => item.url === spec.url);
+
+    if (existing) {
+        if (!existing.ref && spec.ref) {
+            existing.ref = spec.ref;
+        }
+
+        return;
+    }
+
+    list.push({ url: spec.url, ref: spec.ref });
+}
+
+function gitCheckoutRef(dir, label, ref) {
+    console.log(`[install] git checkout ${ref} in ${label}`);
+
+    const args = looksLikeCommitSha(ref) ? ["checkout", "--detach", ref] : ["checkout", ref];
+    const result = spawnSyncInherit("git", args, { cwd: dir });
+
+    assertGitOk(result, `git checkout ${ref} failed in ${label}`);
+
+    if (looksLikeCommitSha(ref)) {
+        return;
+    }
+
+    const pull = spawnSyncInherit("git", ["pull", "--ff-only"], { cwd: dir });
+
+    if (pull.status !== 0) {
+        console.log(`[install] git pull skipped after checkout in ${label} (tag or pinned ref)`);
+    }
+}
+
+function gitSyncRepo(spec, cwd) {
+    const { url, ref } = spec;
     const name = repoNameFromUrl(url);
     const dest = path.join(cwd, name);
 
     if (fs.existsSync(dest)) {
-        if (isGitRepo(dest)) {
-            gitPull(dest, name);
+        if (!isGitRepo(dest)) {
+            throw new Error(`[install] ${name} exists but is not a git repo`);
+        }
+
+        console.log(`[install] git fetch in ${name}`);
+        assertGitOk(
+            spawnSyncInherit("git", ["fetch", "--tags", "--prune"], { cwd: dest }),
+            `git fetch failed in ${name}`
+        );
+
+        if (ref) {
+            gitCheckoutRef(dest, name, ref);
         } else {
-            console.warn(`[install] skip pull (not a git repo): ${name}`);
+            console.log(`[install] git pull --ff-only in ${name}`);
+            assertGitOk(
+                spawnSyncInherit("git", ["pull", "--ff-only"], { cwd: dest }),
+                `git pull failed in ${name}`
+            );
         }
 
         return;
     }
 
     console.log(`[install] git clone ${url}`);
+    assertGitOk(spawnSyncInherit("git", ["clone", url], { cwd }), `git clone failed for ${url}`);
 
-    const result = spawnSyncInherit("git", ["clone", url], { cwd });
-
-    if (result.status !== 0) {
-        console.warn(`[install] git clone failed for ${url} (continuing)`);
-    }
-}
-
-function addRepoUrl(urls, url) {
-    if (typeof url === "string" && url.trim()) {
-        urls.add(url.trim());
+    if (ref) {
+        gitCheckoutRef(dest, name, ref);
     }
 }
 
 /**
- * Collect frontend/backend clone URLs from local cht.config.json and the
+ * Collect frontend/backend clone specs from local cht.config.json and the
  * clients.json catalog so `--client:<name>` works before the folder exists.
  *
- * @param {Set<string>} urls
+ * @param {{ url: string, ref?: string }[]} list
  * @param {string} name
  */
-function addClientRepoUrls(urls, name) {
+function addClientRepoSpecs(list, name) {
     const catalog = getCataloguedClient(name);
 
-    addRepoUrl(urls, catalog?.frontend?.repo);
-    addRepoUrl(urls, catalog?.backend?.repo);
+    addRepoSpec(list, parseRepoSpec(catalog?.frontend, catalog?.frontend?.ref));
+    addRepoSpec(list, parseRepoSpec(catalog?.backend, catalog?.backend?.ref));
 
     try {
         const resolved = resolveClient(name);
 
-        addRepoUrl(urls, resolved.frontend?.repo);
-        addRepoUrl(urls, resolved.backend?.repo);
+        addRepoSpec(list, parseRepoSpec(resolved.frontend?.repo, resolved.frontend?.ref));
+        addRepoSpec(list, parseRepoSpec(resolved.backend?.repo, resolved.backend?.ref));
     } catch {
         // Config is missing until the frontend repo is cloned; catalog URLs are enough.
     }
@@ -88,23 +163,28 @@ function addClientRepoUrls(urls, name) {
 
 /**
  * @param {string | null} client From `--client:<name>`; when set, only that client's repos are added beyond shared.
+ * @returns {{ url: string, ref?: string }[]}
  */
-function collectInstallRepoUrls(client) {
-    const urls = new Set(getSharedRepos());
+function collectInstallRepos(client) {
+    const list = [];
+
+    for (const entry of getSharedRepos()) {
+        addRepoSpec(list, parseRepoSpec(entry));
+    }
 
     if (client && client !== "dev") {
-        addClientRepoUrls(urls, client);
+        addClientRepoSpecs(list, client);
 
-        return [...urls];
+        return list;
     }
 
     const names = new Set([...listClientNames(), ...listCataloguedClientNames()]);
 
     for (const name of names) {
-        addClientRepoUrls(urls, name);
+        addClientRepoSpecs(list, name);
     }
 
-    return [...urls];
+    return list;
 }
 
 const NATIVE_ADDON_PACKAGES = ["better-sqlite3", "bcrypt"];
@@ -172,24 +252,35 @@ function main() {
     const root = getRootDir();
 
     if (isGitRepo(root)) {
-        gitPull(root, path.basename(root) || ".");
+        const label = path.basename(root) || ".";
+
+        console.log(`[install] git fetch in ${label}`);
+        assertGitOk(
+            spawnSyncInherit("git", ["fetch", "--tags", "--prune"], { cwd: root }),
+            `git fetch failed in ${label}`
+        );
+        console.log(`[install] git pull --ff-only in ${label}`);
+        assertGitOk(
+            spawnSyncInherit("git", ["pull", "--ff-only"], { cwd: root }),
+            `git pull failed in ${label}`
+        );
     }
 
-    const repoUrls = collectInstallRepoUrls(client);
+    const repoSpecs = collectInstallRepos(client);
 
-    for (const url of repoUrls) {
-        gitSyncFromUrl(url, root);
+    for (const spec of repoSpecs) {
+        gitSyncRepo(spec, root);
     }
 
     clearClientDiscoveryCache();
 
-    const afterCloneUrls = collectInstallRepoUrls(client);
+    const afterCloneSpecs = collectInstallRepos(client);
 
-    for (const url of afterCloneUrls) {
-        gitSyncFromUrl(url, root);
+    for (const spec of afterCloneSpecs) {
+        gitSyncRepo(spec, root);
     }
 
-    syncTsconfig();
+    syncTsconfig({ client });
 
     if (fs.existsSync(path.join(root, "package.json"))) {
         npmInstall(root);

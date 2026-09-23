@@ -72,8 +72,7 @@ rg -n "v-html" cht-base/src cht-design-system/src cht-client-*/src
 
 - No Electron, confirme que `contextIsolation: true`, `nodeIntegration: false` e `sandbox: true`
   seguem em `cht-base/electron/main.ts`, e que o preload só expõe IPC — nunca o `require` cru.
-- Arquivos servidos estaticamente (`/public` e `/data`) são acessíveis sem autenticação.
-  Se um deles passar a conter dado por-empresa, isso vira achado.
+- Arquivos em `public/` são acessíveis sem autenticação. Não sirva `data/` (SQLite por empresa) como estático.
 
 ## 6. CORS e limite de requisições
 

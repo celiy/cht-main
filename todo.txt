@@ -1,2 +1,11 @@
+Testar o comando de criar um template frontend
+
+Option:
+    Fazer o tamanho do option ser menor em questão do tamanho do texto
+    Option Helper: Um texto similar ao option só que muted-foreground, o texto normal do option e este texto helper ficam separados por justify-between
+
+    Checkmark pode ser um switch:
+        switch recebe size que deixa ele menor, usar isso no option
+
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.

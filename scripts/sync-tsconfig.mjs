@@ -4,30 +4,44 @@
 // purely for IDE / vue-tsc support: the runtime alias is already dynamic via
 // vite.config.ts (CLIENT env -> resolveClientDir).
 //
-// TypeScript resolves `paths` to the first entry that exists on disk, so
-// listing every known client makes the IDE pick whichever client repo is
-// currently checked out without manual edits.
+// TypeScript resolves `paths` to the first entry that exists on disk.
+// `CLIENT` (or syncTsconfig({ client })) is placed first so `vue-tsc -b`
+// typechecks the active app, not always `src/devApp`. Without CLIENT the
+// stub stays first for the docs IDE.
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { getClientDir, getRootDir, listClientNames } from "./lib/clients.mjs";
+import { getClientDir, getRootDir, listClientNames, parseClientFlag } from "./lib/clients.mjs";
 
 const ROOT_DIR = getRootDir();
 const TSCONFIG_PATH = path.join(ROOT_DIR, "cht-base", "tsconfig.app.json");
 
-function buildClientPaths() {
-    const names = listClientNames();
-    const paths = ["./src/devApp/*"];
-
-    if (names.length === 0) {
-        return paths;
+function activeClientName(explicit) {
+    if (explicit != null && String(explicit).trim()) {
+        return String(explicit).trim();
     }
 
-    return [
-        ...paths,
-        ...names.map((name) => `../${getClientDir(name)}/src/*`)
-    ];
+    return (process.env.CLIENT ?? "").trim();
+}
+
+function buildClientPaths(explicitClient) {
+    const names = listClientNames();
+    const clientPaths = names.map((name) => `../${getClientDir(name)}/src/*`);
+    const devApp = "./src/devApp/*";
+    const client = activeClientName(explicitClient);
+
+    if (!client || client === "dev") {
+        return [devApp, ...clientPaths];
+    }
+
+    if (!names.includes(client)) {
+        return [devApp, ...clientPaths];
+    }
+
+    const active = `../${getClientDir(client)}/src/*`;
+
+    return [active, ...clientPaths.filter((entry) => entry !== active), devApp];
 }
 
 function arraysEqual(a, b) {
@@ -55,7 +69,7 @@ function writeText(filePath, content) {
  * the rest of the file. We use a regex on the raw text so existing comments
  * and indentation are preserved.
  */
-function syncClientPaths({ silent = false } = {}) {
+function syncClientPaths({ silent = false, client } = {}) {
     if (!fs.existsSync(TSCONFIG_PATH)) {
         if (!silent) {
             console.warn(`[sync-tsconfig] missing ${TSCONFIG_PATH}, skip.`);
@@ -65,7 +79,7 @@ function syncClientPaths({ silent = false } = {}) {
     }
 
     const raw = readText(TSCONFIG_PATH);
-    const desired = buildClientPaths();
+    const desired = buildClientPaths(client);
     const desiredJson = JSON.stringify(desired);
 
     const pattern = /("@client\/\*"\s*:\s*)(\[[^\]]*\])/;
@@ -113,5 +127,6 @@ const isDirectInvocation =
     process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 
 if (isDirectInvocation) {
-    syncClientPaths();
+    const { client } = parseClientFlag(process.argv.slice(2));
+    syncClientPaths({ client });
 }

@@ -54,7 +54,7 @@ Ao adicionar um cliente novo: clonar/criar a pasta irmã com `cht.config.json`, 
 
 ### TypeScript no base
 
-- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é **gerado automaticamente** a partir das pastas com `cht.config.json` descobertas por `scripts/sync-tsconfig.mjs` (rodado no início do runner e no `install`). Como o TS resolve `paths` para o primeiro ficheiro que existe no disco, listar todos os clientes conhecidos ajuda o IDE. O alias de runtime continua a ser resolvido por `vite.config.ts` conforme `CLIENT`.
+- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é gerado por `scripts/sync-tsconfig.mjs` (runner, install, `build`/`build:client`). O TypeScript usa o **primeiro** path que existe: com `CLIENT` (ou `syncTsconfig({ client })`) esse cliente vem primeiro; sem `CLIENT`, `src/devApp` fica primeiro. O alias de runtime continua no Vite.
 - `cht-base/tsconfig.node.json` — inclui `configs/**/*.ts` para typecheck do Vite/configs.
 - `cht-base/src/env.d.ts` — tipa `import.meta.env.VITE_SITE_TITLE` (entre outros `vite/client`).
 

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { getRootDir, listClientNames, parsePositionalClientArg } from "./lib/clients.mjs";
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
+import { syncTsconfig } from "./sync-tsconfig.mjs";
 
 function printUsage() {
     const known = ["dev", ...listClientNames()].join(", ");
@@ -63,6 +64,8 @@ function main() {
     }
 
     console.log(`[build] Building client "${client}" in cht-base...`);
+
+    syncTsconfig({ client: client === "dev" ? "dev" : client });
 
     if (client === "dev") {
         run("npm", ["run", "build"], baseDir);

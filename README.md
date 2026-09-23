@@ -27,7 +27,7 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
 - `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
 - `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
-- `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`) e catálogo `clients` (URLs de frontend/backend para `install --client:<name>` mesmo sem a pasta local).
+- `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`; cada repo pode ser URL ou `{ "url", "ref" }`) e catálogo `clients` (URLs/`ref` de frontend/backend para `install --client:<name>` mesmo sem a pasta local).
 - `scripts/entry.mjs`: **ponto de entrada único** de todas as tarefas (`npx chtmain <comando>` ou `npm run cht -- <comando>`), idêntico em Windows e Linux.
 - `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`) e instala dependências.
 - `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
@@ -120,7 +120,7 @@ npx chtmain install --client:mecarvit
 npm run install:repos -- --client:mecarvit
 ```
 
-O comando `install` chama `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git pull** (se a pasta já existir) nos repositórios `shared.repos`, nas URLs do catálogo `clients.json` / `cht.config.json` e, com `--client:<name>`, só os extras desse cliente (frontend + backend, mesmo que a pasta ainda não exista). Depois roda `npm install` na raiz e em cada pasta irmã com `package.json`.
+O comando `install` chama `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git fetch** + **git pull --ff-only** (se a pasta já for um repo) nos `shared.repos` e nas URLs do catálogo / `cht.config.json`. Falha de clone, fetch, checkout ou pull **aborta** o install (não continua com o workspace a meio). Pode-se fixar `ref` (branch, tag ou commit) em `shared.repos` (`{ "url", "ref" }`) ou em `frontend.ref` / `backend.ref`. Sem `ref`, usa-se o branch padrão do remoto. Depois corre `npm install` na raiz e em cada pasta irmã com `package.json`.
 
 ### 2) Rodar ambiente de desenvolvimento
 
