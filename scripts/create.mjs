@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { spawnSyncInherit } from "./lib/runCommand.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(HERE, "..");
@@ -149,6 +149,16 @@ function main() {
 
     console.log(existed ? `Ficheiros copiados para ${dest}` : `Cliente criado em ${dest}`);
     console.log(`name: ${tokens.__CLIENT_NAME__}`);
+
+    if (fs.existsSync(path.join(dest, "package.json"))) {
+        console.log(`[create] npm install in ${dest}`);
+        const install = spawnSyncInherit("npm", ["install"], { cwd: dest });
+
+        if (install.status !== 0) {
+            console.warn("[create] npm install falhou; corre npm install na pasta do cliente.");
+        }
+    }
+
     console.log("Seguinte: npx chtmain sync-tsconfig && npx chtmain dev --client:" + kebab);
 }
 
