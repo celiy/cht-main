@@ -2,3 +2,54 @@ Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
 
 O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo, no caso o @client faz isso. Decidir se isso é necessário para o funcionamento
+
+CPF na tabela funcionários mostra CPF censurado pela metade
+     Um funcionário que tem cargo baixo não pode ver o CPF, email telefone, apenas o super admin
+     Nos clientes mesma coisa pra cel e documento
+     Veiculos mesma coisa pra placas
+     Em geral apenas super admin ou gerente consegue ver esses detalhes
+
+Tirar botão resetar senha form criação funcionário
+
+Documentar que quando a aplicação for web, vai ter um adminstrador do sistema que terá acesso painel admin de todas as oficinas na web
+
+Implementar audit log que acontecem no banco de dados
+    Audit logs de cada oficina só podem ser acessados pelo dono da oficina localmente, web esse sistema vira global
+
+Form de endereços automaticamente preenche endereço baseado no CEP com API
+
+Quando o usuário digita no search do select e da enter pra selecionar, o valor do search input deve ser zerado. Isso só acontece se uma opção for selecionada
+
+Tabela OS mostra quantos dias uma OS está aberta
+    Data limite de pagamento vira "Pagamaneto", que pode ter status pago, a vencer, atrasado
+        Dar hover no badge mostra tooltip com a data de pagamento
+
+Poder exportar os dados para PDF
+    O botão fica visivel apenas se tem dados sendo visualizados na tabela atual. O botão exportar PDF exporta apenas os dados visiveis dados os filtros aplicados, tooltip que especifica isso para o usuário
+    Visualizar entidade incluindo OS tem botão de exportar pra PDF
+
+OS Pode ser criada com status de orçamento
+    Não pode receber pagamentos
+
+Revisar o que pode ser feito numa OS dado seus status, tipo não pode receber pagamentos
+
+Botão limpar filtros
+
+Mecanico comum editando uma OS não pode alterar o diagnóstico do cliente, apenas super admin
+
+ItemServico não tem mais valor obra valor serviço, agora só existe um campo pra valor
+
+Validar pra um pagamento não poder ser maior que o valor de um lançamento
+
+Label no select tipo pagamento
+
+Revisar o que cada cargo pode ver no frontend
+
+Cargos:
+
+
+Elaborar dashboard
+
+Revisar o backend, revisar como os bancos são criados, revisar se cada banco tem seu usuário e senha.
+    Evitar usar senhas padrões
+    Instalador do Windows tem a senha que será usada para senha do banco de dados
