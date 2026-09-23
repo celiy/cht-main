@@ -1,2 +1,4 @@
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
+
+O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo, no caso o @client faz isso. Decidir se isso é necessário para o funcionamento
