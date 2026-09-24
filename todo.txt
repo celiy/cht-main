@@ -1,55 +1,94 @@
+Documentação:
+    Documentar que quando a aplicação for web, vai ter um adminstrador do sistema que terá acesso painel admin de todas as oficinas cadastradas na web.
+
+    VER O QUE FOI FEITO ABAIXO E ATUALIZAR DOCUMENTO DE ACORDO.
+
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
 
 O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo, no caso o @client faz isso. Decidir se isso é necessário para o funcionamento
 
-CPF na tabela funcionários mostra CPF censurado pela metade
-     Um funcionário que tem cargo baixo não pode ver o CPF, email telefone, apenas o super admin
-     Nos clientes mesma coisa pra cel e documento
-     Veiculos mesma coisa pra placas
-     Em geral apenas super admin ou gerente consegue ver esses detalhes
+- Implementar audit log que acontecem no banco de dados
+    Audit logs de cada oficina só podem ser acessados pelo superadmin da oficina. Esta opção aparece no dropdown do perfil dele na side bar onde leva pra uma página que mostra todo os logs. Ele pode filtrar qual ação foi feita, quem fez e etc.
 
-Tirar botão resetar senha form criação funcionário
+Status do todo:
+    X Concluído
+    / Em revisão
+    = Em andamento
+    - Pendente
 
-Documentar que quando a aplicação for web, vai ter um adminstrador do sistema que terá acesso painel admin de todas as oficinas na web
+    O agente de IA deve apenas mudar o status neste arquivo.
 
-Implementar audit log que acontecem no banco de dados
-    Audit logs de cada oficina só podem ser acessados pelo dono da oficina localmente, web esse sistema vira global
+- Tirar botão resetar senha no form de criação do funcionário, deve aparecer apenas na edição.
 
-Form de endereços automaticamente preenche endereço baseado no CEP com API
+- Form de endereços automaticamente preenche endereço baseado no CEP com API pública.
 
-Quando o usuário digita no search do select e da enter pra selecionar, o valor do search input deve ser zerado. Isso só acontece se uma opção for selecionada
+- O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar o banco de dados.
 
-Tabela OS mostra quantos dias uma OS está aberta
-    Data limite de pagamento vira "Pagamaneto", que pode ter status pago, a vencer, atrasado
-        Dar hover no badge mostra tooltip com a data de pagamento
+- Quando o usuário digita no search do select e da enter pra selecionar uma option tipo no form do usário de endereço, o valor do search input deve ser zerado. Isso só acontece se uma opção for selecionada pelo enter corretamente.
 
-Poder exportar os dados para PDF
-    O botão fica visivel apenas se tem dados sendo visualizados na tabela atual. O botão exportar PDF exporta apenas os dados visiveis dados os filtros aplicados, tooltip que especifica isso para o usuário
-    Visualizar entidade incluindo OS tem botão de exportar pra PDF
+- Poder exportar os dados para PDF
+    Ao visualizar uma entidade, apenas um usuário com permissão de exportação pode exportar uma tabela para PDF. Esse botão fica do lado direito do título de uma entidade. Clicar nesse botão na visualização de uma tabela exporta dado os filtros aplicados. Então se o usuário não inserir nenhum filtro, os dados que voltarem desta busca sem paginação são exportados para PDF. Se tiver filtros, segue esta lógica mas só os dados que se aplicarem ao filtro. Incluir tooltip que diz o que o botão faz por que ele deve ser apenas um ícone.
 
-OS Pode ser criada com status de orçamento
-    Não pode receber pagamentos
+Ordens de serviço:
+    - Novo status:
+        Orçamento. Do lado do botão de cadastrar uma OS, botão chamado "Fazer orçamento", onde uma OS é criada com o campo de funcionários, status, datas, diagnóstico do mecânico e pagamentos são invisiveis.
 
-Revisar o que pode ser feito numa OS dado seus status, tipo não pode receber pagamentos
+        Ao editar esta ordem de serviço, se o usuário selecionar um status que não seja o de orçamento, estes campos irão aparecer normalmente. Para isso ser possível o campo status só aparece na edição e não criação. O botão de fazer orçamento passa um prop pro form saber que nesta criação os campos de cima irão ficar invisiveis e o status será orçamento.
 
-Botão limpar filtros
+    - Ações de status:
+        Uma OS não pode voltar do status concluído se já foi paga (já existe)
+        Uma OS não pode receber pagamentos se estiver marcada como Cancelada
+    
+    - Coluna "Data limite" vira "Pagamaneto", que é uma badge do mesmo estilo do status que pode ter os status de "Pago": success, "A vencer": warning, "Não pago": orange-600, "Atrasado": destructive. No caso o backend retorna via api "Pago" se o valor da OS está pago, "A vencer" se não foi pago mas o usuário configurou uma data limite de pagamento e não passo da data de pagamento, "Não pago" se o usuário não configurou data de pagamento mas não foi pago ainda, "Atrasado" se o usuário configurou data de pagamento, não foi pago e passou da data. Dar hover nessa badge mostra a data de pagamento se existe, um item da Table pode receber esse prop.
 
-Mecanico comum editando uma OS não pode alterar o diagnóstico do cliente, apenas super admin
+- Botão limpar filtros:
+    Ao lado esquerdo do botão de filtros, mas também ao lado direito dos filtros (entre os dois), botão X com tooltip de limpar filtros. Ele só aparece se tiver algum filtro aplicado.
 
-ItemServico não tem mais valor obra valor serviço, agora só existe um campo pra valor
+- ItemServico não tem mais valor obra e valor peças, agora só existe um campo único chamado valor.
 
-Validar pra um pagamento não poder ser maior que o valor de um lançamento
+- Validar pra um pagamento não poder ser maior que o valor de um lançamento:
+    O usuário não pode inserir um pagamento que se adicionado é maior que o valor de um lançamento.
 
-Label no select tipo pagamento
-
-Revisar o que cada cargo pode ver no frontend
+- Label no select tipo pagamento no form de pagamentos.
 
 Cargos:
+    - Nova estrutura:
+        Permissões Mecarvit: manter tabela cargo + usuario.cargo_id + fundador/superadmin fora da lista.
+        Trocar nivel_acesso de dígitos concatenados ("34") por JSON de chaves nomeadas (["veiculos","os"]) num catálogo único em cht-shared (key + label).
+        UI e requireAccess usam o catálogo — sem includes("4") nem opções hard-coded.
+        Flags finas como clientes.pii / os.diagnostico.editar. Sem tabela permissao, sem bitmask, sem ACL por linha.
 
+    - Permissões de visualização:
+        Novo modelo de permissão de acesso. Existem as partes principais do sistema como funcionários, clientes, veículos, ordens de serviço e registros financeiros. No caso de uso atual onde um funcionário é um mecânico comum, ele só teria acesso às ordens de serviço, mas se a gente limitar o cargo atual apenas a isso, na visualização de uma OS, ele pode ver dados sensiveis como o CPF de um funcionário e etc.
+
+        Para cada àrea do sistema, existe um set de qual permissão um funcionário tem. Para funcionários, um usuário pode ter a permissão apenas de visualização, ou pode ter também de edição/cadastro e exclusão.
+
+        Um funcionário que só tem permissão de visualização de funcionários pode ver apenas o nome deles e nada mais. Mesma coisa para um cliente, o funcionário pode ver apenas o nome dele. Visualização de um veículo deixa o funcionário ver qualquer dado do veículo. Se um cargo receber apenas a permissão de visualização, ele não poderá ver a área no frontend de visualização por entidade mas ele pode ver esses dados em outra parte tipo na visualização de uma OS. Mesma coisa se aplica aos registros, visualização de um registro financeiro apenas permite que o funcionário possa ver o valor de uma OS, não acessar a área diretamente.
+
+        Agora, se um funcionário poder editar/criar (um cargo não pode apenas cadastrar ou editar, ele tem que poder fazer os dois) uma entidade, então aquela entidade aparece pra ele no frontend.
+
+        Se ele tiver permissão de exclusão aí ele só normalmente poderá excluir/desativar uma entidade. Um usuário não pode ter apenas a função de exclusão sem ter a de criar/editar primeiro.
+
+        Agora, tem uma fragmentação maior, só poder criar/editar uma entidade não significa que o funcionário pode ver dados sensíveis como o CPF/CNPJ. Um acesso a uma entidade pode receber o nivel de Gerente, onde ele tem as permissões de ver, editar e excluir mas ele é considerado alguém de maior confiança, então ele pode editar e visualizar estes dados mais sensíveis.
+
+        Uma nova permissão chamada exportação é usada para poder exportar pada PDF os dados de uma tabela.
+
+        Apenas superadmin pode resetar senha de funcionários.
+
+        Apenas superadmin pode ter acesso aos logs do sistema.
+
+        Pré criar para todo sistemas cargos pré configurados que podem ser editados apenas pelo superadmin:
+            Gerente: Acesso a todas entidades do sistema, visualizar/editar/cadastrar dados normais e sensíveis, exclusão e ativação/desativação.
+
+            Mecanico: Acesso apenas à visualização e edição de ordens de serviço. Com estas permissões ao acessar a página de ordens de serviço o botão de cadastrar não deve aparecer, o menu de ação deve mostrar apenas as opções de visualizar e editar. Ao editar/visualizar uma ordem de serviço, deve ser visivel apenas o nome do cliente, dados do veículo, status, diagnóstico do cliente e mecânico (ele deve poder apenas alterar o diagnóstico do mecânico), visualizar apenas os serviços e seus valores, os valores abaixo, não pode visualizar/editar pagamentos, pode editar as observações e visualizar as datas de criado/modificado.
+
+    - Form de cargos:
+        Nome do cargo
+        Select que mostra as áreas do sistema:
+            OptionDropdown que mostra o nível de acesso de cada área (nenhum, visualização, edição/cadastro, exportação, remoção)
+        Checkbox de que o cargo é cargo de gerente
+
+    A logica antiga do superadmin ser protegido e algumas ações serem protegidas pelo superadmin persistem.
 
 Elaborar dashboard
-
-Revisar o backend, revisar como os bancos são criados, revisar se cada banco tem seu usuário e senha.
-    Evitar usar senhas padrões
-    Instalador do Windows tem a senha que será usada para senha do banco de dados
