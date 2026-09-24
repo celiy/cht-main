@@ -38,5 +38,3 @@ Mecarvit:
     - Elaborar dashboard:
         Apenas gerente/superadmin tem acesso a dashboard.
         Um usuário ao entrar pela primeira vez cai na dashboard, então a dashboard vai se manter como página mas vai ser diferente pra cada usuário.
-
-    - [x] O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar os banco de dados que ficam salvos localmente.
