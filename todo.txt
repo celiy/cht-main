@@ -1,6 +1,12 @@
 Documentação:
     Documentar que quando a aplicação for web, vai ter um adminstrador do sistema que terá acesso painel admin de todas as oficinas cadastradas na web.
 
+    Documentar sobre o requisito, caso de uso e atividades de um usuário (gerente) poder exportar dados de tabelas e entidades para PDF.
+
+    Documentar sobre o status de orçamento.
+
+    Documentar sobre ItemServico e afins terem apenas valor unificado invés de valor peça e valor obra.
+
     VER O QUE FOI FEITO ABAIXO E ATUALIZAR DOCUMENTO DE ACORDO.
 
 Mecarvit:
@@ -11,55 +17,29 @@ O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo
 - Implementar audit log que acontecem no banco de dados
     Audit logs de cada oficina só podem ser acessados pelo superadmin da oficina. Esta opção aparece no dropdown do perfil dele na side bar onde leva pra uma página que mostra todo os logs. Ele pode filtrar qual ação foi feita, quem fez e etc.
 
-Status do todo:
+- Elaborar dashboard
+
+Status do todo.txt:
     X Concluído
     / Em revisão
     = Em andamento
     - Pendente
 
-    O agente de IA deve apenas mudar o status neste arquivo.
-
-- Tirar botão resetar senha no form de criação do funcionário, deve aparecer apenas na edição.
-
-- Form de endereços automaticamente preenche endereço baseado no CEP com API pública.
-
 - O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar o banco de dados.
 
-- Quando o usuário digita no search do select e da enter pra selecionar uma option tipo no form do usário de endereço, o valor do search input deve ser zerado. Isso só acontece se uma opção for selecionada pelo enter corretamente.
-
-- Poder exportar os dados para PDF
-    Ao visualizar uma entidade, apenas um usuário com permissão de exportação pode exportar uma tabela para PDF. Esse botão fica do lado direito do título de uma entidade. Clicar nesse botão na visualização de uma tabela exporta dado os filtros aplicados. Então se o usuário não inserir nenhum filtro, os dados que voltarem desta busca sem paginação são exportados para PDF. Se tiver filtros, segue esta lógica mas só os dados que se aplicarem ao filtro. Incluir tooltip que diz o que o botão faz por que ele deve ser apenas um ícone.
-
-Ordens de serviço:
-    - Novo status:
-        Orçamento. Do lado do botão de cadastrar uma OS, botão chamado "Fazer orçamento", onde uma OS é criada com o campo de funcionários, status, datas, diagnóstico do mecânico e pagamentos são invisiveis.
-
-        Ao editar esta ordem de serviço, se o usuário selecionar um status que não seja o de orçamento, estes campos irão aparecer normalmente. Para isso ser possível o campo status só aparece na edição e não criação. O botão de fazer orçamento passa um prop pro form saber que nesta criação os campos de cima irão ficar invisiveis e o status será orçamento.
-
-    - Ações de status:
-        Uma OS não pode voltar do status concluído se já foi paga (já existe)
-        Uma OS não pode receber pagamentos se estiver marcada como Cancelada
-    
-    - Coluna "Data limite" vira "Pagamaneto", que é uma badge do mesmo estilo do status que pode ter os status de "Pago": success, "A vencer": warning, "Não pago": orange-600, "Atrasado": destructive. No caso o backend retorna via api "Pago" se o valor da OS está pago, "A vencer" se não foi pago mas o usuário configurou uma data limite de pagamento e não passo da data de pagamento, "Não pago" se o usuário não configurou data de pagamento mas não foi pago ainda, "Atrasado" se o usuário configurou data de pagamento, não foi pago e passou da data. Dar hover nessa badge mostra a data de pagamento se existe, um item da Table pode receber esse prop.
-
-- Botão limpar filtros:
-    Ao lado esquerdo do botão de filtros, mas também ao lado direito dos filtros (entre os dois), botão X com tooltip de limpar filtros. Ele só aparece se tiver algum filtro aplicado.
-
-- ItemServico não tem mais valor obra e valor peças, agora só existe um campo único chamado valor.
-
-- Validar pra um pagamento não poder ser maior que o valor de um lançamento:
+X Validar pra um pagamento não poder ser maior que o valor de um lançamento:
     O usuário não pode inserir um pagamento que se adicionado é maior que o valor de um lançamento.
 
-- Label no select tipo pagamento no form de pagamentos.
+X Label no select tipo pagamento no form de pagamentos.
 
 Cargos:
-    - Nova estrutura:
+    X Nova estrutura:
         Permissões Mecarvit: manter tabela cargo + usuario.cargo_id + fundador/superadmin fora da lista.
         Trocar nivel_acesso de dígitos concatenados ("34") por JSON de chaves nomeadas (["veiculos","os"]) num catálogo único em cht-shared (key + label).
         UI e requireAccess usam o catálogo — sem includes("4") nem opções hard-coded.
         Flags finas como clientes.pii / os.diagnostico.editar. Sem tabela permissao, sem bitmask, sem ACL por linha.
 
-    - Permissões de visualização:
+    X Permissões de visualização:
         Novo modelo de permissão de acesso. Existem as partes principais do sistema como funcionários, clientes, veículos, ordens de serviço e registros financeiros. No caso de uso atual onde um funcionário é um mecânico comum, ele só teria acesso às ordens de serviço, mas se a gente limitar o cargo atual apenas a isso, na visualização de uma OS, ele pode ver dados sensiveis como o CPF de um funcionário e etc.
 
         Para cada àrea do sistema, existe um set de qual permissão um funcionário tem. Para funcionários, um usuário pode ter a permissão apenas de visualização, ou pode ter também de edição/cadastro e exclusão.
@@ -83,12 +63,42 @@ Cargos:
 
             Mecanico: Acesso apenas à visualização e edição de ordens de serviço. Com estas permissões ao acessar a página de ordens de serviço o botão de cadastrar não deve aparecer, o menu de ação deve mostrar apenas as opções de visualizar e editar. Ao editar/visualizar uma ordem de serviço, deve ser visivel apenas o nome do cliente, dados do veículo, status, diagnóstico do cliente e mecânico (ele deve poder apenas alterar o diagnóstico do mecânico), visualizar apenas os serviços e seus valores, os valores abaixo, não pode visualizar/editar pagamentos, pode editar as observações e visualizar as datas de criado/modificado.
 
-    - Form de cargos:
+    X Form de cargos:
         Nome do cargo
         Select que mostra as áreas do sistema:
             OptionDropdown que mostra o nível de acesso de cada área (nenhum, visualização, edição/cadastro, exportação, remoção)
         Checkbox de que o cargo é cargo de gerente
 
-    A logica antiga do superadmin ser protegido e algumas ações serem protegidas pelo superadmin persistem.
+    X A logica antiga do superadmin ser protegido e algumas ações serem protegidas pelo superadmin persistem.
 
-Elaborar dashboard
+    - O select de oficina no login só aparece se o usuário inserir um login que existe em mais de um banco de dados. Tipo um funcionário pode trabalhar pra duas oficinas no mesmo sistema, então ao inserir as suas credenciais, seja admin ou funcionário comum, ele vai achar os usuários cadastrados nos bancos de dados, se existir um usuário com mesmo login em mais de uma oficina, fazer aparecer esse select no login, ai ele seleciona a oficina e prossegue, se não existir, ele faz login normal.
+
+    - Salvar PDF dos funcionários o arquivo saí como "funcion-rios"
+
+    - Salvar PDF deve ter um header default que tem o nome da empresa, data de exportação
+
+    - A opção de alterar uma OS para orçamento não deve aparecer se ela tiver qualquer outro status.
+
+    - Ao editar uma ordem de serviço que não tem status de concluído, que tinha serviços, ao remover os serviços na edição e salvar, o status vem como "Pago".
+
+    - A mensagem "OS com itens, pagamentos ou registro de entrada/saída permanece no banco." deve ser "Uma OS com serviços ou com um registro de entrada atribuída à ela não pode ser excluída."
+
+    - Remover o autocomplete que insere o email e senha automatico no form de cadastro de um funcionário.
+
+    - Inserir CEP no campo de CEP que procura pelo endereço via API deve deixar os outros input disabled até completar a ação. Se demorar mais que 6 segundos, cancelar a operação e notificar o usuário via toast.
+
+    - O icone da lupa no search do select vira um spinner do fa com rotate quando recebe um prop external-search-loading. Implementar isso em todo os selects que tem pesquisa externa.
+
+    - O campo de status não mostra ao criar uma OS.
+
+    - Remover o campo data de início, no backend e frontend, a lógica é que a data de início de uma OS é a data que ela seria criada. Data de conclusão não pode ser modificada, ela apenas é settada quando o usuário coloca o status de uma OS como concluída. Tirando este status remove esta data. Este campo só aparece quando tiver um valor nela.
+
+    - Uma OS não deve retornar e mostrar o status de pagamento no front se for status Orçamento.
+
+    - Pressionar enter no campo de Valor vazio do form de pagamento invés de dar erro informando que deve ser maior que 0, apenas executar a ação de salvar que nem o botão "Salvar" faz.
+
+    - Um registro de entrada gerado a partir de uma OS recebe um nome padrão, esse nome padrão deve ser DD/MM/AAAA (criação da OS) - #ID_OS
+
+    - Tabela de entradas e saídas, a coluna Data limite vira Pagamento seguindo a mesma lógica a da ordem de serviço.
+
+    - Campo data limite pagamento vai pra onde tem os valores dos serviços.
