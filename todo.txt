@@ -1,97 +1,42 @@
-Documentação:
-    Documentar que quando a aplicação for web, vai ter um adminstrador do sistema que terá acesso painel admin de todas as oficinas cadastradas na web.
-
-    Documentar sobre o requisito, caso de uso e atividades de um usuário (gerente) poder exportar dados de tabelas e entidades para PDF.
-
-    Documentar sobre o status de orçamento.
-
-    Documentar sobre ItemServico e afins terem apenas valor unificado invés de valor peça e valor obra.
-
-    Documentar sobre a mudança nos cargos de nível de acesso: Modelo antigo: cargo.nivel_acesso era uma string de dígitos concatenados (ex.: "34"), cada dígito mapeava áreas do sistema; checagens usavam includes("4") etc.
-
-        Modelo novo: o mesmo campo cargo.nivel_acesso (SQLite, coluna text em cargo) guarda um JSON ordenado de chaves nomeadas, ex.: ["clientes.editar","clientes.ver","os.ver"]. Catálogo único em cht-shared (PERMISSIONS, áreas: funcionários, clientes, veículos, OS, financeiro). Níveis por área: nenhum → ver → editar/criar (juntos) → exportar → excluir. Chaves extras: gerente, funcionarios.pii, clientes.pii, os.diagnostico.editar, os.pagamentos, superadmin. Não há tabela de permissões, bitmask nem ACL por linha; continua usuario.cargo_id + flag usuario.fundador para o fundador.
-
-        Banco de dados: sem nova tabela nem alteração de schema DDL; só mudança de formato do conteúdo em nivel_acesso. Na abertura do banco da oficina, cargos existentes com dígitos legados são regravados automaticamente para JSON (migrateNivelAcesso). Oficinas novas recebem cargos seed: Superadmin (["superadmin"]), Gerente e Mecânico (presets) se ainda não existirem.
-
-        Comportamento de produto: UI de cargos = nome + nível por área (dropdown) + checkbox “cargo de gerente” (equivale a gerente + PII de funcionários/clientes). Cargos preset Gerente e Mecânico só o superadmin edita/exclui. Mecânico: só OS (ver/editar, diagnóstico mecânico); sem criar OS, sem PII de cliente, sem pagamentos na OS. Gerente: acesso amplo conforme preset. Apenas superadmin reseta senha de outros funcionários; logs de sistema (quando existirem) só superadmin. Visualização sem .editar/.criar não abre o menu da entidade, mas dados limitados podem aparecer em contexto (ex.: nome na OS). Exportação PDF exige permissão .exportar da área.
-
-        Compatibilidade: leitura ainda aceita dígitos legados até migração; documentar o mapeamento legado (2=clientes, 3=veículos, 4=OS+financeiro, 5=funcionários, 6=financeiro, 0=superadmin) apenas como transição, não como modelo atual.
-
-        Remova da doc referências a dígitos concatenados como formato vigente e descreva o formulário de cargos e as restrições do Mecânico/Gerente/superadmin acima.
-
-    Docuemntar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
-
-    Documentar sobre como dataInicio da OS foi removida
-
-    VER O QUE FOI FEITO ABAIXO E ATUALIZAR DOCUMENTO DE ACORDO.
-
 Recarregar a página tem que fazer com que o ?modal da url suma e não abra nenhum modal.
-
-Mecarvit:
-    Revisar se o que foi implementado no sistema bate com o documento.
 
 O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo, no caso o @client faz isso. Decidir se isso é necessário para o funcionamento
 
-- Implementar audit log que acontecem no banco de dados
-    Audit logs de cada oficina só podem ser acessados pelo superadmin da oficina. Esta opção aparece no dropdown do perfil dele na side bar onde leva pra uma página que mostra todo os logs. Ele pode filtrar qual ação foi feita, quem fez e etc.
-
-- Elaborar dashboard:
-    Apenas gerente/superadmin tem acesso a dashboard.
-
-- O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar o banco de dados.
-
-    - [x] O select de oficina no login só aparece se o usuário inserir um login que existe em mais de um banco de dados. Tipo um funcionário pode trabalhar pra duas oficinas no mesmo sistema, então ao inserir as suas credenciais, seja admin ou funcionário comum, ele vai achar os usuários cadastrados nos bancos de dados, se existir um usuário com mesmo login em mais de uma oficina, fazer aparecer esse select no login, ai ele seleciona a oficina e prossegue, se não existir, ele faz login normal.
-
-    - Inserir CEP no campo de CEP que procura pelo endereço via API deve deixar os outros input disabled até completar a ação. Se demorar mais que 6 segundos, cancelar a operação e notificar o usuário via toast.
-
-    - O campo de status não mostra ao criar uma OS. Ele deve ser mostrado.
-
-    - [x] Uma OS não deve retornar e mostrar o status de pagamento no front se for status Orçamento.
-
-    - [x] Pressionar enter no campo de Valor vazio do form de pagamento invés de dar erro informando que deve ser maior que 0, apenas executar a ação de salvar que nem o botão "Salvar" faz.
-
-    - [x] Um registro de entrada gerado a partir de uma OS recebe um nome padrão, esse nome padrão deve ser DD/MM/AAAA (criação da OS) - #ID_OS
-
-    - [x] Tabela de entradas e saídas, a coluna Data limite vira Pagamento seguindo a mesma lógica a da ordem de serviço.
-
-    - [x] Campo data limite pagamento vai pra onde tem os valores dos serviços.
-
-    - [x] Usuário comum sem ser o Gerente não pode modificar os próprios dados na página de perfil. Isso faz o botão de Salvar e trocar Senha sumir. Apenas o Gerente/superadmin podem trocar a senha.
-
-    - [x] Form de Cargo:
-        - Deve ter um select/dropdown o que for melhor, só para todas as entidades (funcionários, clientes etc), ai um option dropdown com opções que spawna do lado mostra as permissões para aquela entidade. Neste caso, multipla escolha, mas essa multipla escolha no frontend é tratado da seguinte maneira: Nenhum vem pré selecionado, selecionar visualização tira a seleção do nenhum, selecionar Edição/cadastro, já marca visualização, desmarca Nenhum, marcar exportação também mesma lógica de antes, remoção também só que sem marcar o exportação.
-
-        - As permissões de cada entidade devem mostrar no optionHelperText do Option.
-
-        - Apenas o gerente ou super admin podem gerenciar os funcionários. Nenhum cargo comum pode modificar nenhum funcionário, essa opção não aparece no form de maneira alguma. Um cargo pode apenas visualizar funcionários.
-
-        - Checkbox do gerente deve ser um checkbox normal invés de switch. Esse checkbox deve do tipo card também.
-
-        - Selecionar gerente no form já ativa toda as permissões no select nos options.
-
-    - [x] Selecionar edição/visualização força a visualização de funcionários, clientes, veículos e registros financeiros a serem selecionados.
-        - A partir disso ao criar uma OS, com estas permissões um mecanico pode criar uma OS com um cliente já existente, ele não pode criar um novo a não ser que tenha permissão de edição/criação de clientes.
-
-        - Ação de Pagamentos na tabela da OS só aparece se usuário tiver permissão de edição/cadastro de Registros financeiros.
-
-        - Listagem de funcionários responsáveis mostra o CPF invés do nome do funcionário se um usuário com cargo de edição/visualização acessar uma OS.
-
-        - Um funcionário com permissão de criação/edição de OS deve poder pesquisar e atribuir clientes a uma OS na sua criação mas não pode alterar eles na edição de uma OS, então este campo de Cliente deve estar disabled no frontend. Ele também não pode cadastrar/editar clientes neste form a não ser que tenha a permissão de cadastro/edição de clientes.
-
-        - O select de funcionários responsáveis não deve aparecer na edição ou criação se o funcionário tem apenas permissão de edição/criação de OS.
-
-        - Se o funcionário não for gerente ele não pode modificar o diagnóstico do cliente, isso já existe mas o campo deve estar disabled no front na edição de uma OS.
-
-        - Botão de salvar uma OS não funciona para usuário que tem apenas permissão de edição/criação de OS.
+Mecarvit:
+    Revisar se o que foi implementado no sistema bate com o documento.
     
-    - [x] No form de funcionários, o botão de + de cadastrar cargos vira um lapis de edição com tooltip que informa que é edição, isso só acontece se um cargo estiver selecionado, e apenas um gerente/superadmin podem alterar um cargo.
+    Documentação:
+        Documentar que quando a aplicação for web, vai ter um adminstrador do sistema que terá acesso painel admin de todas as oficinas cadastradas na web.
 
-    - o mock deve criar mais de uma oficina, e cada oficina deve ter pelo menos um super admin em comum com o mesmo cadastro e uns usuários com o mesmo cadastro pra podermos testar o caso de uso do select de oficinas.
+        Documentar sobre o requisito, caso de uso e atividades de um usuário (gerente) poder exportar dados de tabelas e entidades para PDF.
 
-    - [x] No form de cargos, as opções que mostram mais opções (Funcionário, Clientes) devem ter um optionHelperText que mostra quais permissões pra aquela entidade estão selecionadas. O select atual disso mostra "Visualização, Visualização, Edição..." Ele deve apenas forçadamente mostrar o texto "Permissões".
+        Documentar sobre o status de orçamento.
 
-    - [x] Um usuário pode desselecionar a opção "Nenhum" das permissões, no caso ele não pode desselecionar a opção "Nenhum" se ele não tiver selecionado outra permissão
+        Documentar sobre ItemServico e afins terem apenas valor unificado invés de valor peça e valor obra.
 
-    - Tirar botão de visualizar/editar no form do cargo.
+        Documentar sobre a mudança nos cargos de nível de acesso: Modelo antigo: cargo.nivel_acesso era uma string de dígitos concatenados (ex.: "34"), cada dígito mapeava áreas do sistema; checagens usavam includes("4") etc.
 
-    - Ajustar visual dos inputs data pagamento total geral e pago
+            Modelo novo: o mesmo campo cargo.nivel_acesso (SQLite, coluna text em cargo) guarda um JSON ordenado de chaves nomeadas, ex.: ["clientes.editar","clientes.ver","os.ver"]. Catálogo único em cht-shared (PERMISSIONS, áreas: funcionários, clientes, veículos, OS, financeiro). Níveis por área: nenhum → ver → editar/criar (juntos) → exportar → excluir. Chaves extras: gerente, funcionarios.pii, clientes.pii, os.diagnostico.editar, os.pagamentos, superadmin. Não há tabela de permissões, bitmask nem ACL por linha; continua usuario.cargo_id + flag usuario.fundador para o fundador.
+
+            Banco de dados: sem nova tabela nem alteração de schema DDL; só mudança de formato do conteúdo em nivel_acesso. Na abertura do banco da oficina, cargos existentes com dígitos legados são regravados automaticamente para JSON (migrateNivelAcesso). Oficinas novas recebem cargos seed: Superadmin (["superadmin"]), Gerente e Mecânico (presets) se ainda não existirem.
+
+            Comportamento de produto: UI de cargos = nome + nível por área (dropdown) + checkbox “cargo de gerente” (equivale a gerente + PII de funcionários/clientes). Cargos preset Gerente e Mecânico só o superadmin edita/exclui. Mecânico: só OS (ver/editar, diagnóstico mecânico); sem criar OS, sem PII de cliente, sem pagamentos na OS. Gerente: acesso amplo conforme preset. Apenas superadmin reseta senha de outros funcionários; logs de sistema (quando existirem) só superadmin. Visualização sem .editar/.criar não abre o menu da entidade, mas dados limitados podem aparecer em contexto (ex.: nome na OS). Exportação PDF exige permissão .exportar da área.
+
+            Compatibilidade: leitura ainda aceita dígitos legados até migração; documentar o mapeamento legado (2=clientes, 3=veículos, 4=OS+financeiro, 5=funcionários, 6=financeiro, 0=superadmin) apenas como transição, não como modelo atual.
+
+            Remova da doc referências a dígitos concatenados como formato vigente e descreva o formulário de cargos e as restrições do Mecânico/Gerente/superadmin acima.
+
+        Docuemntar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
+
+        Documentar sobre como dataInicio da OS foi removida
+
+
+
+    - Implementar audit log que acontecem no banco de dados
+        Audit logs de cada oficina só podem ser acessados pelo superadmin da oficina. Esta opção aparece no dropdown do perfil dele na side bar onde leva pra uma página que mostra todo os logs. Ele pode filtrar qual ação foi feita, quem fez e etc.
+
+    - Elaborar dashboard:
+        Apenas gerente/superadmin tem acesso a dashboard.
+        Um usuário ao entrar pela primeira vez cai na dashboard, então a dashboard vai se manter como página mas vai ser diferente pra cada usuário.
+
+    - O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar o banco de dados.
