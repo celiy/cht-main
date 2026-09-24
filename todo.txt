@@ -26,7 +26,7 @@ Mecarvit:
 
             Remova da doc referências a dígitos concatenados como formato vigente e descreva o formulário de cargos e as restrições do Mecânico/Gerente/superadmin acima.
 
-        Docuemntar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
+        Documentar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
 
         Documentar sobre como dataInicio da OS foi removida
 
@@ -39,4 +39,4 @@ Mecarvit:
         Apenas gerente/superadmin tem acesso a dashboard.
         Um usuário ao entrar pela primeira vez cai na dashboard, então a dashboard vai se manter como página mas vai ser diferente pra cada usuário.
 
-    - O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar o banco de dados.
+    - [x] O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar os banco de dados que ficam salvos localmente.

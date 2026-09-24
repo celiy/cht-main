@@ -697,7 +697,8 @@ function writeBuilderConfig({
             allowToChangeInstallationDirectory: true,
             deleteAppDataOnUninstall: false,
             shortcutName: resolved.siteTitle,
-            artifactName: `${resolved.name}-setup-\${version}.\${ext}`
+            artifactName: `${resolved.name}-setup-\${version}.\${ext}`,
+            include: path.join(baseDir, "electron", "nsis", "owner-page.nsh")
         },
         mac: {
             target: ["dmg", "zip"]
