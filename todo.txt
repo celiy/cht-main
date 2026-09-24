@@ -19,9 +19,11 @@ Documentação:
 
         Remova da doc referências a dígitos concatenados como formato vigente e descreva o formulário de cargos e as restrições do Mecânico/Gerente/superadmin acima.
 
+    Docuemntar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
+
     VER O QUE FOI FEITO ABAIXO E ATUALIZAR DOCUMENTO DE ACORDO.
 
-Recarregar a página faz com que o ?modal da url suma e não abra nenhum modal.
+Recarregar a página tem que fazer com que o ?modal da url suma e não abra nenhum modal.
 
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
@@ -36,47 +38,47 @@ O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo
 
 - O instalador do Windows deve pedir pro usuário um login e senha para poder prosseguir. No caso os bancos de dados de cada oficina serão salvos localmente, certo? Se alguém quiser acessar, no caso o dono do sistema que tem o programa, ao instalar o programa pela primeira vez, ele terá que criar um login que é esse login que é gerado na .env do backend a instalar que dá a permissão do usuário acessar o banco de dados.
 
-    - Form de cargos:
+    - [x] Form de cargos:
         Nome do cargo
         Select que mostra as áreas do sistema:
             OptionDropdown que mostra o nível de acesso de cada área (nenhum, visualização, edição/cadastro, exportação, remoção)
         Checkbox de que o cargo é cargo de gerente
 
-    - O select de oficina no login só aparece se o usuário inserir um login que existe em mais de um banco de dados. Tipo um funcionário pode trabalhar pra duas oficinas no mesmo sistema, então ao inserir as suas credenciais, seja admin ou funcionário comum, ele vai achar os usuários cadastrados nos bancos de dados, se existir um usuário com mesmo login em mais de uma oficina, fazer aparecer esse select no login, ai ele seleciona a oficina e prossegue, se não existir, ele faz login normal.
+    - [x] O select de oficina no login só aparece se o usuário inserir um login que existe em mais de um banco de dados. Tipo um funcionário pode trabalhar pra duas oficinas no mesmo sistema, então ao inserir as suas credenciais, seja admin ou funcionário comum, ele vai achar os usuários cadastrados nos bancos de dados, se existir um usuário com mesmo login em mais de uma oficina, fazer aparecer esse select no login, ai ele seleciona a oficina e prossegue, se não existir, ele faz login normal.
 
-    - Salvar PDF dos funcionários o arquivo saí como "funcion-rios"
+    - [x] Salvar PDF dos funcionários o arquivo saí como "funcion-rios"
 
-    - Salvar PDF deve ter um header default que tem o nome da empresa, data de exportação
+    - [x] Salvar PDF deve ter um header default que tem o nome da empresa, data de exportação
 
-    - A opção de alterar uma OS para orçamento não deve aparecer se ela tiver qualquer outro status.
+    - [x] A opção de alterar uma OS para orçamento não deve aparecer se ela tiver qualquer outro status.
 
-    - Ao editar uma ordem de serviço que não tem status de concluído, que tinha serviços, ao remover os serviços na edição e salvar, o status vem como "Pago".
+    - [x] Ao editar uma ordem de serviço que não tem status de concluído, que tinha serviços, ao remover os serviços na edição e salvar, o status vem como "Pago".
 
-    - A mensagem "OS com itens, pagamentos ou registro de entrada/saída permanece no banco." deve ser "Uma OS com serviços ou com um registro de entrada atribuída à ela não pode ser excluída."
+    - [x] A mensagem "OS com itens, pagamentos ou registro de entrada/saída permanece no banco." deve ser "Uma OS com serviços ou com um registro de entrada atribuída à ela não pode ser excluída."
 
-    - Remover o autocomplete que insere o email e senha automatico no form de cadastro de um funcionário.
+    - [x] Remover o autocomplete que insere o email e senha automatico no form de cadastro de um funcionário.
 
-    - Inserir CEP no campo de CEP que procura pelo endereço via API deve deixar os outros input disabled até completar a ação. Se demorar mais que 6 segundos, cancelar a operação e notificar o usuário via toast.
+    - [x] Inserir CEP no campo de CEP que procura pelo endereço via API deve deixar os outros input disabled até completar a ação. Se demorar mais que 6 segundos, cancelar a operação e notificar o usuário via toast.
 
-    - O icone da lupa no search do select vira um spinner do fa com rotate quando recebe um prop external-search-loading. Implementar isso em todo os selects que tem pesquisa externa.
+    - [x] O icone da lupa no search do select vira um spinner do fa com rotate quando recebe um prop external-search-loading. Implementar isso em todo os selects que tem pesquisa externa.
 
-    - O campo de status não mostra ao criar uma OS.
+    - [x] O campo de status não mostra ao criar uma OS.
 
-    - Remover o campo data de início, no backend e frontend, a lógica é que a data de início de uma OS é a data que ela seria criada. Data de conclusão não pode ser modificada, ela apenas é settada quando o usuário coloca o status de uma OS como concluída. Tirando este status remove esta data. Este campo só aparece quando tiver um valor nela.
+    - [x] Remover o campo data de início, no backend e frontend, a lógica é que a data de início de uma OS é a data que ela seria criada. Data de conclusão não pode ser modificada, ela apenas é settada quando o usuário coloca o status de uma OS como concluída. Tirando este status remove esta data. Este campo só aparece quando tiver um valor nela.
 
-    - Uma OS não deve retornar e mostrar o status de pagamento no front se for status Orçamento.
+    - [x] Uma OS não deve retornar e mostrar o status de pagamento no front se for status Orçamento.
 
-    - Pressionar enter no campo de Valor vazio do form de pagamento invés de dar erro informando que deve ser maior que 0, apenas executar a ação de salvar que nem o botão "Salvar" faz.
+    - [x] Pressionar enter no campo de Valor vazio do form de pagamento invés de dar erro informando que deve ser maior que 0, apenas executar a ação de salvar que nem o botão "Salvar" faz.
 
-    - Um registro de entrada gerado a partir de uma OS recebe um nome padrão, esse nome padrão deve ser DD/MM/AAAA (criação da OS) - #ID_OS
+    - [x] Um registro de entrada gerado a partir de uma OS recebe um nome padrão, esse nome padrão deve ser DD/MM/AAAA (criação da OS) - #ID_OS
 
-    - Tabela de entradas e saídas, a coluna Data limite vira Pagamento seguindo a mesma lógica a da ordem de serviço.
+    - [x] Tabela de entradas e saídas, a coluna Data limite vira Pagamento seguindo a mesma lógica a da ordem de serviço.
 
-    - Campo data limite pagamento vai pra onde tem os valores dos serviços.
+    - [x] Campo data limite pagamento vai pra onde tem os valores dos serviços.
 
-    - Usuário comum sem ser o Gerente não pode modificar os próprios dados na página de perfil. Isso faz o botão de Salvar e trocar Senha sumir. Apenas o Gerente/superadmin podem trocar a senha.
+    - [x] Usuário comum sem ser o Gerente não pode modificar os próprios dados na página de perfil. Isso faz o botão de Salvar e trocar Senha sumir. Apenas o Gerente/superadmin podem trocar a senha.
 
-    - Form de Cargo:
+    - [x] Form de Cargo:
         - Deve ter um select/dropdown o que for melhor, só para todas as entidades (funcionários, clientes etc), ai um option dropdown com opções que spawna do lado mostra as permissões para aquela entidade. Neste caso, multipla escolha, mas essa multipla escolha no frontend é tratado da seguinte maneira: Nenhum vem pré selecionado, selecionar visualização tira a seleção do nenhum, selecionar Edição/cadastro, já marca visualização, desmarca Nenhum, marcar exportação também mesma lógica de antes, remoção também só que sem marcar o exportação.
 
         - As permissões de cada entidade devem mostrar no optionHelperText do Option.
@@ -87,7 +89,7 @@ O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo
 
         - Selecionar gerente no form já ativa toda as permissões no select nos options.
 
-    - Selecionar edição/visualização força a visualização de funcionários, clientes, veículos e registros financeiros a serem selecionados.
+    - [x] Selecionar edição/visualização força a visualização de funcionários, clientes, veículos e registros financeiros a serem selecionados.
         - A partir disso ao criar uma OS, com estas permissões um mecanico pode criar uma OS com um cliente já existente, ele não pode criar um novo a não ser que tenha permissão de edição/criação de clientes.
 
         - Ação de Pagamentos na tabela da OS só aparece se usuário tiver permissão de edição/cadastro de Registros financeiros.
@@ -102,5 +104,5 @@ O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo
 
         - Botão de salvar uma OS não funciona para usuário que tem apenas permissão de edição/criação de OS.
     
-    - No form de funcionários, o botão de + de cadastrar cargos vira um lapis de edição com tooltip que informa que é edição, isso só acontece se um cargo estiver selecionado, e apenas um gerente/superadmin podem alterar um cargo.
+    - [x] No form de funcionários, o botão de + de cadastrar cargos vira um lapis de edição com tooltip que informa que é edição, isso só acontece se um cargo estiver selecionado, e apenas um gerente/superadmin podem alterar um cargo.
         
