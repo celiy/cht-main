@@ -13,7 +13,6 @@
         "electron": "node scripts/entry.mjs electron",
         "bump": "node scripts/entry.mjs bump",
         "sync:deps": "node scripts/entry.mjs sync-deps",
-        "sync:tsconfig": "node scripts/entry.mjs sync-tsconfig",
         "lint": "eslint cht-base cht-design-system cht-shared",
         "lint:fix": "npm run lint -- --fix",
         "format": "prettier --write \"cht-base/**/*.{vue,ts,js,css,json,md}\" \"cht-design-system/**/*.{vue,ts}\" \"cht-shared/**/*.{ts,js,json,md}\" \".cursor/**/*.{md,mdc}\"",

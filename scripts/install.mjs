@@ -12,7 +12,6 @@ import {
     resolveClient
 } from "./lib/clients.mjs";
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
-import { syncTsconfig } from "./sync-tsconfig.mjs";
 
 function repoNameFromUrl(url) {
     const last = url.split("/").pop() || "";
@@ -279,8 +278,6 @@ function main() {
     for (const spec of afterCloneSpecs) {
         gitSyncRepo(spec, root);
     }
-
-    syncTsconfig({ client });
 
     if (fs.existsSync(path.join(root, "package.json"))) {
         npmInstall(root);

@@ -13,7 +13,7 @@ import {
 import { freePorts } from "./lib/procManager.mjs";
 import { localBinPath, spawnSyncInherit, spawnWithPipes } from "./lib/runCommand.mjs";
 import { bumpVersionDir, resolveRepoDir } from "./lib/version.mjs";
-import { syncTsconfig } from "./sync-tsconfig.mjs";
+import { withClientTsconfig } from "./mount-client-tsconfig.mjs";
 
 const DEFAULT_BACKEND_HOST = "127.0.0.1";
 const DEFAULT_PORT_SCAN_LIMIT = 20;
@@ -843,20 +843,20 @@ function runBuild(client, target, shouldPublish, bump) {
 
     console.log(`[electron] Building frontend for "${resolved.name}"...`);
 
-    syncTsconfig({ client: client === "dev" ? "dev" : client });
-
     const frontendEnv = {
         ELECTRON_BUILD: "1"
     };
 
-    if (client === "dev") {
-        run("npm", ["run", "build"], baseDir, frontendEnv);
-    } else {
-        run("npm", ["run", "build:client"], baseDir, {
-            ...frontendEnv,
-            CLIENT: client
-        });
-    }
+    withClientTsconfig(client === "dev" ? "dev" : client, () => {
+        if (client === "dev") {
+            run("npm", ["run", "build"], baseDir, frontendEnv);
+        } else {
+            run("npm", ["run", "build:client"], baseDir, {
+                ...frontendEnv,
+                CLIENT: client
+            });
+        }
+    });
 
     compileElectron(baseDir);
     writeRuntimeConfig(baseDir, runtimeConfig);

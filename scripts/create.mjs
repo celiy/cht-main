@@ -159,7 +159,7 @@ function main() {
         }
     }
 
-    console.log("Seguinte: npx chtmain sync-tsconfig && npx chtmain dev --client:" + kebab);
+    console.log("Seguinte: npx chtmain dev --client:" + kebab);
 }
 
 main();

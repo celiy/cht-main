@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { getRootDir, listClientNames, parsePositionalClientArg } from "./lib/clients.mjs";
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
-import { syncTsconfig } from "./sync-tsconfig.mjs";
+import { withClientTsconfig } from "./mount-client-tsconfig.mjs";
 
 function printUsage() {
     const known = ["dev", ...listClientNames()].join(", ");
@@ -65,23 +65,23 @@ function main() {
 
     console.log(`[build] Building client "${client}" in cht-base...`);
 
-    syncTsconfig({ client: client === "dev" ? "dev" : client });
+    withClientTsconfig(client === "dev" ? "dev" : client, () => {
+        if (client === "dev") {
+            run("npm", ["run", "build"], baseDir);
+        } else {
+            run("npm", ["run", "build:client"], baseDir, { CLIENT: client });
+        }
 
-    if (client === "dev") {
-        run("npm", ["run", "build"], baseDir);
-    } else {
-        run("npm", ["run", "build:client"], baseDir, { CLIENT: client });
-    }
+        const distSrc = path.join(baseDir, "dist");
+        const outRoot = path.join(root, "builds", client);
+        const outDist = path.join(outRoot, "dist");
 
-    const distSrc = path.join(baseDir, "dist");
-    const outRoot = path.join(root, "builds", client);
-    const outDist = path.join(outRoot, "dist");
+        fs.rmSync(outDist, { recursive: true, force: true });
+        fs.mkdirSync(outRoot, { recursive: true });
+        copyDirRecursive(distSrc, outDist);
 
-    fs.rmSync(outDist, { recursive: true, force: true });
-    fs.mkdirSync(outRoot, { recursive: true });
-    copyDirRecursive(distSrc, outDist);
-
-    console.log(`[build] Exported artifact to ${path.relative(root, outDist)}`);
+        console.log(`[build] Exported artifact to ${path.relative(root, outDist)}`);
+    });
 }
 
 main();

@@ -78,7 +78,6 @@ npm run cht -- <comando> [args...]
 | `electron`      | abre ou empacota o app desktop                        |
 | `bump`          | incrementa a versão de um repositório                 |
 | `sync-deps`     | normaliza versões de dependências compartilhadas      |
-| `sync-tsconfig` | regenera os paths `@client/*` do tsconfig             |
 
 Cada comando também tem um atalho em `npm run` (`npm run dev`, `npm run build -- mecarvit`, `npm run sync:deps`, …), mas o `npx chtmain` é o que funciona igual nos dois sistemas.
 

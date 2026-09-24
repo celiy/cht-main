@@ -3,7 +3,6 @@ import { render } from "ink";
 import { parseClientFlag, resolveClient, buildProcessList, getVitePorts, listClientNames } from "../lib/clients.mjs";
 import { ProcessManager, freePorts } from "../lib/procManager.mjs";
 import { findFreePort } from "../lib/ports.mjs";
-import { syncTsconfig } from "../sync-tsconfig.mjs";
 import { App } from "./App.jsx";
 
 function printHelp() {
@@ -41,10 +40,6 @@ async function main() {
     }
 
     const specs = buildProcessList(resolved, { clientPort, docsPort });
-
-    // Keep cht-base/tsconfig.app.json in sync with discovered cht.config.json folders.
-    // folders before entering the alternate screen (silent unless something changes).
-    syncTsconfig({ silent: true, client: resolved.name });
 
     if (specs.length === 0) {
         console.error("No processes resolved for client.");

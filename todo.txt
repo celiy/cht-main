@@ -1,21 +1,25 @@
 Recarregar a página tem que fazer com que o ?modal da url suma e não abra nenhum modal.
 
-O tsconfig fica mudando e atualizando de acordo com qual cliete eu estou mexendo, no caso o @client faz isso. Decidir se isso é necessário para o funcionamento
-
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
+        Revise se o modelo de tabelas do backend atual reflete o modelo de tabelas nos diagramas ER lógico e conceitual.
     
     Documentação:
-        Documentar que quando a aplicação for web, vai ter um adminstrador do sistema que terá acesso painel admin de todas as oficinas cadastradas na web.
+        Documentar que para futuras implementações, quando a aplicação for web, vai ter um adminstrador master do sistema que terá acesso painel admin de todas as oficinas cadastradas na web.
 
-        Documentar sobre o requisito, caso de uso e atividades de um usuário (gerente) poder exportar dados de tabelas e entidades para PDF.
+        Documentar sobre o requisito, caso de uso e atividades de um usuário (gerente) poder exportar dados de tabelas de uma entidade (clientes, veículos, funcionários, ordens de serviço, registros) para PDF.
 
-        Documentar sobre o status de orçamento.
+        Documentar sobre o status de orçamento. Uma ordem de serviço pode ser um orçamento, então ela pode ser marcada com o status "Orçamento" que ela só poderá ser usada para orçamentos, sem calculo real de valores e pagamentos.
 
-        Documentar sobre ItemServico e afins terem apenas valor unificado invés de valor peça e valor obra.
+        Documentar sobre ItemServico e afins terem apenas valor unificado invés de valor peça e valor obra. ItemServico não tem mais valorObra e valorPeças, então só existe um valor agora.
+
+        Documentar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
+
+        Documentar sobre como dataInicio da OS foi removida. A data de inicio de uma OS é marcada pela sua data de criação no sistema.
+
+        Documentar sobre como o sistema deve ter um sistema de guardar logs que registra quem fez a ação, qual ação foi feita, o que mudou e outros dados. Apenas o superadmin pode ver estes logs do sistema.
 
         Documentar sobre a mudança nos cargos de nível de acesso: Modelo antigo: cargo.nivel_acesso era uma string de dígitos concatenados (ex.: "34"), cada dígito mapeava áreas do sistema; checagens usavam includes("4") etc.
-
             Modelo novo: o mesmo campo cargo.nivel_acesso (SQLite, coluna text em cargo) guarda um JSON ordenado de chaves nomeadas, ex.: ["clientes.editar","clientes.ver","os.ver"]. Catálogo único em cht-shared (PERMISSIONS, áreas: funcionários, clientes, veículos, OS, financeiro). Níveis por área: nenhum → ver → editar/criar (juntos) → exportar → excluir. Chaves extras: gerente, funcionarios.pii, clientes.pii, os.diagnostico.editar, os.pagamentos, superadmin. Não há tabela de permissões, bitmask nem ACL por linha; continua usuario.cargo_id + flag usuario.fundador para o fundador.
 
             Banco de dados: sem nova tabela nem alteração de schema DDL; só mudança de formato do conteúdo em nivel_acesso. Na abertura do banco da oficina, cargos existentes com dígitos legados são regravados automaticamente para JSON (migrateNivelAcesso). Oficinas novas recebem cargos seed: Superadmin (["superadmin"]), Gerente e Mecânico (presets) se ainda não existirem.
@@ -26,15 +30,8 @@ Mecarvit:
 
             Remova da doc referências a dígitos concatenados como formato vigente e descreva o formulário de cargos e as restrições do Mecânico/Gerente/superadmin acima.
 
-        Documentar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
-
-        Documentar sobre como dataInicio da OS foi removida
-
-
-
-    - Implementar audit log que acontecem no banco de dados
-        Audit logs de cada oficina só podem ser acessados pelo superadmin da oficina. Esta opção aparece no dropdown do perfil dele na side bar onde leva pra uma página que mostra todo os logs. Ele pode filtrar qual ação foi feita, quem fez e etc.
-
     - Elaborar dashboard:
         Apenas gerente/superadmin tem acesso a dashboard.
         Um usuário ao entrar pela primeira vez cai na dashboard, então a dashboard vai se manter como página mas vai ser diferente pra cada usuário.
+
+    - Login quando retorna o select de selecionar a Oficina deve mostrar um toast de warning pra dizer o que aconteceu e o que o usuário deve fazer.

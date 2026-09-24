@@ -54,7 +54,7 @@ Ao adicionar um cliente novo: clonar/criar a pasta irmã com `cht.config.json`, 
 
 ### TypeScript no base
 
-- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`, `@client/*`. O array de `@client/*` é gerado por `scripts/sync-tsconfig.mjs` (runner, install, `build`/`build:client`). O TypeScript usa o **primeiro** path que existe: com `CLIENT` (ou `syncTsconfig({ client })`) esse cliente vem primeiro; sem `CLIENT`, `src/devApp` fica primeiro. O alias de runtime continua no Vite.
+- `cht-base/tsconfig.app.json` — paths incluem `@design/*`, `@shared/*`. O `@client/*` **não** fica no ficheiro por omissão: `scripts/mount-client-tsconfig.mjs` monta o path do cliente só durante `chtmain build` / `electron build` e remove-o no fim. O alias de runtime continua no Vite via `CLIENT`.
 - `cht-base/tsconfig.node.json` — inclui `configs/**/*.ts` para typecheck do Vite/configs.
 - `cht-base/src/env.d.ts` — tipa `import.meta.env.VITE_SITE_TITLE` (entre outros `vite/client`).
 
@@ -236,7 +236,7 @@ scripts/
 
 1. Clonar ou criar uma pasta irmã com `cht.config.json` (`name`, `siteTitle`, `frontend.repo`, e `backend` com `dir` + `cmd` se houver), mais `src/App.vue` e `src/routes.ts`.
 2. `npx chtmain install --client:<name>` clona o backend a partir de `backend.repo` (a pasta do frontend já tem de existir para ler o config, ou o nome tem de estar no catálogo `clients.json`).
-3. Pronto: `npx chtmain dev --client:<name>` já funciona. O `@client/*` em `cht-base/tsconfig.app.json` é regerado automaticamente pelo runner/install (ou via `npx chtmain sync-tsconfig`).
+3. Pronto: `npx chtmain dev --client:<name>` já funciona (runtime via Vite/`CLIENT`). Em `chtmain build` / `electron build`, o `@client/*` é montado temporariamente no tsconfig para o `vue-tsc`.
 
 ### Export de build (artefato web)
 
@@ -256,7 +256,7 @@ scripts/
 - `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.
 - `cht-base/src/main.ts` — cria router a partir de `@client/routes`, monta `@client/App.vue`, plugins, título.
-- `scripts/entry.mjs` — ponto de entrada único: despacha `install`/`dev`/`build`/`electron`/`bump`/`sync-deps`/`sync-tsconfig`.
+- `scripts/entry.mjs` — ponto de entrada único: despacha `install`/`dev`/`build`/`electron`/`bump`/`sync-deps`.
 - `scripts/runner/index.jsx` — dev runner multi-shell (frontend + backend por cliente, alternância com setas).
 - `scripts/build.mjs` — build/export do front para `builds/<cliente>/dist`.
 - `scripts/bump.mjs` — incrementa a versão (`x.y.z`) de um repo; a lógica fica em `scripts/lib/version.mjs`.
