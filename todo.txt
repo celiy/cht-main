@@ -28,8 +28,6 @@ Mecarvit:
 
             Compatibilidade: leitura ainda aceita dígitos legados até migração; documentar o mapeamento legado (2=clientes, 3=veículos, 4=OS+financeiro, 5=funcionários, 6=financeiro, 0=superadmin) apenas como transição, não como modelo atual.
 
-            Remova da doc referências a dígitos concatenados como formato vigente e descreva o formulário de cargos e as restrições do Mecânico/Gerente/superadmin acima.
-
     - Elaborar dashboard:
         
         Um usuário ao entrar pela primeira vez cai na dashboard, então a dashboard vai se manter como página mas vai ser diferente pra cada usuário.
@@ -64,4 +62,4 @@ Mecarvit:
 
         O label que fica em baixo que são para cada barra devem ter a width do container da barra que está associado, o label deve ser centralizado com a barra. Isso no direction vertical.
 
-    Botão exportar Ordem de serviço para PDF no modal da OS.
+    Deixar o PDF da ordem de serviço mais bonito.

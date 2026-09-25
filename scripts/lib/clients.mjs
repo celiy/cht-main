@@ -396,7 +396,7 @@ export function isClientDevToolsEnabled(config) {
 
 /**
  * @param {object} resolved
- * @param {{ clientPort?: number, docsPort?: number }} [options]
+ * @param {{ clientPort?: number, docsPort?: number, noBackend?: boolean }} [options]
  */
 export function buildProcessList(resolved, options = {}) {
     const procs = [];
@@ -440,7 +440,7 @@ export function buildProcessList(resolved, options = {}) {
         });
     }
 
-    if (resolved.backend) {
+    if (resolved.backend && !options.noBackend) {
         procs.push({
             id: "back-end",
             name: "back-end",

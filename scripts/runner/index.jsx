@@ -11,7 +11,10 @@ function printHelp() {
     console.log("cht-runner - dev TUI for the cht-main monorepo");
     console.log("");
     console.log("Usage:");
-    console.log("  node scripts/runner/index.jsx --client:<name>");
+    console.log("  node scripts/runner/index.jsx --client:<name> [--no-backend]");
+    console.log("");
+    console.log("Flags:");
+    console.log("  --no-backend   Skip the backend process (front-end + docs only).");
     console.log("");
     console.log(`Known clients: ${known}`);
 }
@@ -24,6 +27,7 @@ async function main() {
         process.exit(0);
     }
 
+    const noBackend = argv.includes("--no-backend");
     const { client } = parseClientFlag(argv);
     const resolved = resolveClient(client);
     const vitePorts = getVitePorts();
@@ -39,7 +43,7 @@ async function main() {
         docsPort = await findFreePort(startFrom, [clientPort]);
     }
 
-    const specs = buildProcessList(resolved, { clientPort, docsPort });
+    const specs = buildProcessList(resolved, { clientPort, docsPort, noBackend });
 
     if (specs.length === 0) {
         console.error("No processes resolved for client.");
