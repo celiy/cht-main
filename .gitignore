@@ -1,3 +1,4 @@
 /cht-*
 /node_modules
 /builds
+**/*.pyc
