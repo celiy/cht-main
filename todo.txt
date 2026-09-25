@@ -31,5 +31,37 @@ Mecarvit:
             Remova da doc referências a dígitos concatenados como formato vigente e descreva o formulário de cargos e as restrições do Mecânico/Gerente/superadmin acima.
 
     - Elaborar dashboard:
-        Apenas gerente/superadmin tem acesso a dashboard.
+        
         Um usuário ao entrar pela primeira vez cai na dashboard, então a dashboard vai se manter como página mas vai ser diferente pra cada usuário.
+
+        Apenas gerente/superadmin tem acesso à dashboard de dados da oficina.
+            Tab: Entradas e saídas
+                Card do valor bruto pago por entradas. A data de pagamento de uma entrada é definido se a entrada teve seu valor inteiramente pago e a data de pagamento é o pagamento com data mais recente. [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+                Card do valor bruto pago para saídas. A data de pagamento de uma saída é definido se a saída teve seu valor inteiramente pago e a data de pagamento é o pagamento com data mais recente. [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+
+                Card do valor bruto a vencer para entradas. [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+                Card do valor bruto a a vencer para saídas. [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+                Card do valor bruto atrasado para entradas [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+                Card do valor bruto atrasado para saídas [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+
+                Gráfico de barras que mostra o tanto em valor bruto por mês dos valores pagos de entradas [escolher as datas: 6 meses, 12 meses] padrão: 6 meses
+
+                Gráfico de barras que mostra o tanto em valor bruto por mês dos valores pagos de saídas [escolher as datas: 6 meses, 12 meses] padrão: 6 meses
+
+                Gráfico de barras com valores positivos e negativos que é uma comparação de entradas e saídas. No caso para um mês, ele vai juntar o valor bruto das entradas e saídas daquele mês, e comparar os valores. Se o valor das entradas for maior que os das saídas, o gráfico de barras ficará positivo. Se o valor de saídas for maior, o valor da barra ficará negativa.[escolher as datas: 6 meses, 12 meses] padrão: 6 meses
+
+            Tab: Ordens de serviço
+                Gráfico de barras horizontal que mostra o número de ordens de serviço por status (menos Orçamento) que foram criadas/modificadas na data escolhida. [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+
+                Gráfico de barras horizontal que mostra o número de ordens de serviço por status de pagamento (quantas OS tem com status Não pago, pago, atrasado etc). [escolher as datas: esta semana, este mês, 6 meses, em geral] padrão: esta semana
+            
+            Fazer o mock incluir MUITOS mais dados para poder popular bastante para ter bastante visão neste dashboard.
+        
+        Página do funcionário comum só mostra uma mensagem de "Olá, [nome]".
+
+    Charts:
+        O chart de bar recebe um novo prop, direction. Por default é vertical, se for horizontal, mostrar as barras horizontais. Este directio não suporta valores negativos.
+
+        O label que fica em baixo que são para cada barra devem ter a width do container da barra que está associado, o label deve ser centralizado com a barra. Isso no direction vertical.
+
+    Botão exportar Ordem de serviço para PDF no modal da OS.
