@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Temporarily mounts `@client/*` in cht-base/tsconfig.app.json for vue-tsc
- * during build, then removes it so the default file stays clean.
+ * Temporarily mounts `@client/*` (and client ambient `.d.ts`) in
+ * cht-base/tsconfig.app.json for vue-tsc during build, then removes them so
+ * the default file stays clean.
  *
  * Runtime alias is still Vite + CLIENT; this only exists for typecheck.
  */
@@ -16,6 +17,10 @@ const TSCONFIG_PATH = path.join(ROOT_DIR, "cht-base", "tsconfig.app.json");
 const CLIENT_ENTRY_RE =
     /,?\s*(?:\/\/[^\n]*\n\s*)*"@client\/\*"\s*:\s*\[[^\]]*\]/g;
 
+/** Mounted include for client ambient globals (e.g. `$mecarvit`). */
+const CLIENT_DTS_INCLUDE_RE =
+    /,?\s*(?:\/\/[^\n]*\n\s*)*"\.\.\/[^"]+\/src\/\*\*\/\*\.d\.ts"/g;
+
 function resolveClientPath(client) {
     const name = String(client ?? "").trim();
 
@@ -24,6 +29,20 @@ function resolveClientPath(client) {
     }
 
     return `../${getClientDir(name)}/src/*`;
+}
+
+/**
+ * @param {string} client
+ * @returns {string | null}
+ */
+function resolveClientDtsInclude(client) {
+    const name = String(client ?? "").trim();
+
+    if (!name || name === "dev") {
+        return null;
+    }
+
+    return `../${getClientDir(name)}/src/**/*.d.ts`;
 }
 
 function readTsconfig() {
@@ -39,12 +58,14 @@ function writeTsconfig(content) {
 }
 
 /**
- * Removes any `@client/*` path entry (and a comment line immediately above it).
+ * Removes any `@client/*` path entry and mounted client `.d.ts` include.
  * @returns {{ changed: boolean }}
  */
 export function unmountClientTsconfig() {
     const raw = readTsconfig();
-    const updated = raw.replace(CLIENT_ENTRY_RE, "");
+    const updated = raw
+        .replace(CLIENT_ENTRY_RE, "")
+        .replace(CLIENT_DTS_INCLUDE_RE, "");
 
     if (updated === raw) {
         return { changed: false };
@@ -56,7 +77,7 @@ export function unmountClientTsconfig() {
 }
 
 /**
- * Mounts a single `@client/*` path for the given client name (`dev` → devApp).
+ * Mounts a single `@client/*` path (and client ambient `.d.ts`) for typecheck.
  * @param {string} client
  * @returns {{ changed: boolean, clientPath: string }}
  */
@@ -64,8 +85,9 @@ export function mountClientTsconfig(client) {
     unmountClientTsconfig();
 
     const clientPath = resolveClientPath(client);
-    const raw = readTsconfig();
-    const insert = [
+    const dtsInclude = resolveClientDtsInclude(client);
+    let raw = readTsconfig();
+    const pathInsert = [
         ",",
         "            // Mounted for build only; removed when the build finishes.",
         `            "@client/*": ["${clientPath}"]`
@@ -77,9 +99,25 @@ export function mountClientTsconfig(client) {
         );
     }
 
-    const updated = raw.replace(/("vue-router"\s*:\s*\[[^\]]*\])/, `$1${insert}`);
+    raw = raw.replace(/("vue-router"\s*:\s*\[[^\]]*\])/, `$1${pathInsert}`);
 
-    writeTsconfig(updated);
+    if (dtsInclude) {
+        if (!/"electron\/types\.ts"/.test(raw)) {
+            throw new Error(
+                `[mount-client-tsconfig] "electron/types.ts" include not found in ${TSCONFIG_PATH}`
+            );
+        }
+
+        const includeInsert = [
+            ",",
+            "        // Mounted for build only; removed when the build finishes.",
+            `        "${dtsInclude}"`
+        ].join("\n");
+
+        raw = raw.replace(/("electron\/types\.ts")/, `$1${includeInsert}`);
+    }
+
+    writeTsconfig(raw);
 
     return { changed: true, clientPath };
 }

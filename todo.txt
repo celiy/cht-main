@@ -33,7 +33,3 @@ Mecarvit:
     - Elaborar dashboard:
         Apenas gerente/superadmin tem acesso a dashboard.
         Um usuário ao entrar pela primeira vez cai na dashboard, então a dashboard vai se manter como página mas vai ser diferente pra cada usuário.
-
-    - Login quando retorna o select de selecionar a Oficina deve mostrar um toast de warning pra dizer o que aconteceu e o que o usuário deve fazer.
-
-    - comando de install recebe novas flags: --skip-git não da git pull, --force-git força o git a trazer as mudanças mesmo se o usuário tiver arquivos modificados localmente, --skip-npm-install não da npm install nas repos

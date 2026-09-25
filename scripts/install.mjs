@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import {
     clearClientDiscoveryCache,
     getCataloguedClient,
@@ -31,6 +32,48 @@ function assertGitOk(result, message) {
 
 function looksLikeCommitSha(ref) {
     return /^[0-9a-f]{7,40}$/i.test(ref);
+}
+
+/**
+ * @param {string[]} argv
+ * @returns {{
+ *   client: string | null,
+ *   skipGit: boolean,
+ *   forceGit: boolean,
+ *   skipNpmInstall: boolean
+ * }}
+ */
+function parseInstallFlags(argv) {
+    const { client, rest } = parseClientFlag(argv);
+    let skipGit = false;
+    let forceGit = false;
+    let skipNpmInstall = false;
+    const unknown = [];
+
+    for (const arg of rest) {
+        if (arg === "--skip-git") {
+            skipGit = true;
+        } else if (arg === "--force-git") {
+            forceGit = true;
+        } else if (arg === "--skip-npm-install") {
+            skipNpmInstall = true;
+        } else if (arg.startsWith("-")) {
+            unknown.push(arg);
+        }
+    }
+
+    if (unknown.length > 0) {
+        throw new Error(
+            `[install] Unknown flag(s): ${unknown.join(", ")}. ` +
+                "Supported: --skip-git, --force-git, --skip-npm-install, --client:<name>"
+        );
+    }
+
+    if (skipGit && forceGit) {
+        throw new Error("[install] Use either --skip-git or --force-git, not both.");
+    }
+
+    return { client, skipGit, forceGit, skipNpmInstall };
 }
 
 /**
@@ -81,7 +124,58 @@ function addRepoSpec(list, spec) {
     list.push({ url: spec.url, ref: spec.ref });
 }
 
-function gitCheckoutRef(dir, label, ref) {
+/**
+ * Discard local changes and match the tracking remote (or origin default).
+ * @param {string} dir
+ * @param {string} label
+ */
+function gitForceResetToRemote(dir, label) {
+    console.log(`[install] git reset --hard to remote in ${label} (--force-git)`);
+
+    const upstream = spawnSync(
+        "git",
+        ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"],
+        { cwd: dir, encoding: "utf8" }
+    );
+
+    if (upstream.status === 0 && upstream.stdout.trim()) {
+        assertGitOk(
+            spawnSyncInherit("git", ["reset", "--hard", "@{u}"], { cwd: dir }),
+            `git reset --hard @{u} failed in ${label}`
+        );
+
+        return;
+    }
+
+    const originHead = spawnSync(
+        "git",
+        ["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"],
+        { cwd: dir, encoding: "utf8" }
+    );
+
+    if (originHead.status === 0 && originHead.stdout.trim()) {
+        const ref = originHead.stdout.trim();
+
+        assertGitOk(
+            spawnSyncInherit("git", ["reset", "--hard", ref], { cwd: dir }),
+            `git reset --hard ${ref} failed in ${label}`
+        );
+
+        return;
+    }
+
+    throw new Error(
+        `[install] --force-git: no upstream or origin/HEAD in ${label}; set upstream or pass a ref`
+    );
+}
+
+/**
+ * @param {string} dir
+ * @param {string} label
+ * @param {string} ref
+ * @param {boolean} forceGit
+ */
+function gitCheckoutRef(dir, label, ref, forceGit) {
     console.log(`[install] git checkout ${ref} in ${label}`);
 
     const args = looksLikeCommitSha(ref) ? ["checkout", "--detach", ref] : ["checkout", ref];
@@ -93,6 +187,20 @@ function gitCheckoutRef(dir, label, ref) {
         return;
     }
 
+    if (forceGit) {
+        console.log(`[install] git fetch in ${label}`);
+        assertGitOk(
+            spawnSyncInherit("git", ["fetch", "--tags", "--prune"], { cwd: dir }),
+            `git fetch failed in ${label}`
+        );
+        assertGitOk(
+            spawnSyncInherit("git", ["reset", "--hard", `origin/${ref}`], { cwd: dir }),
+            `git reset --hard origin/${ref} failed in ${label}`
+        );
+
+        return;
+    }
+
     const pull = spawnSyncInherit("git", ["pull", "--ff-only"], { cwd: dir });
 
     if (pull.status !== 0) {
@@ -100,7 +208,12 @@ function gitCheckoutRef(dir, label, ref) {
     }
 }
 
-function gitSyncRepo(spec, cwd) {
+/**
+ * @param {{ url: string, ref?: string }} spec
+ * @param {string} cwd
+ * @param {boolean} forceGit
+ */
+function gitSyncRepo(spec, cwd, forceGit) {
     const { url, ref } = spec;
     const name = repoNameFromUrl(url);
     const dest = path.join(cwd, name);
@@ -117,7 +230,9 @@ function gitSyncRepo(spec, cwd) {
         );
 
         if (ref) {
-            gitCheckoutRef(dest, name, ref);
+            gitCheckoutRef(dest, name, ref, forceGit);
+        } else if (forceGit) {
+            gitForceResetToRemote(dest, name);
         } else {
             console.log(`[install] git pull --ff-only in ${name}`);
             assertGitOk(
@@ -133,7 +248,7 @@ function gitSyncRepo(spec, cwd) {
     assertGitOk(spawnSyncInherit("git", ["clone", url], { cwd }), `git clone failed for ${url}`);
 
     if (ref) {
-        gitCheckoutRef(dest, name, ref);
+        gitCheckoutRef(dest, name, ref, forceGit);
     }
 }
 
@@ -245,48 +360,72 @@ function listSubReposWithPackageJson(rootDir) {
         .filter((dir) => fs.existsSync(path.join(dir, "package.json")));
 }
 
+/**
+ * @param {string} root
+ * @param {boolean} forceGit
+ */
+function syncRootGit(root, forceGit) {
+    if (!isGitRepo(root)) {
+        return;
+    }
+
+    const label = path.basename(root) || ".";
+
+    console.log(`[install] git fetch in ${label}`);
+    assertGitOk(
+        spawnSyncInherit("git", ["fetch", "--tags", "--prune"], { cwd: root }),
+        `git fetch failed in ${label}`
+    );
+
+    if (forceGit) {
+        gitForceResetToRemote(root, label);
+
+        return;
+    }
+
+    console.log(`[install] git pull --ff-only in ${label}`);
+    assertGitOk(
+        spawnSyncInherit("git", ["pull", "--ff-only"], { cwd: root }),
+        `git pull failed in ${label}`
+    );
+}
+
 function main() {
-    const argv = process.argv.slice(2);
-    const { client } = parseClientFlag(argv);
+    const { client, skipGit, forceGit, skipNpmInstall } = parseInstallFlags(process.argv.slice(2));
     const root = getRootDir();
 
-    if (isGitRepo(root)) {
-        const label = path.basename(root) || ".";
+    if (skipGit) {
+        console.log("[install] skipping git (--skip-git)");
+    } else {
+        syncRootGit(root, forceGit);
 
-        console.log(`[install] git fetch in ${label}`);
-        assertGitOk(
-            spawnSyncInherit("git", ["fetch", "--tags", "--prune"], { cwd: root }),
-            `git fetch failed in ${label}`
-        );
-        console.log(`[install] git pull --ff-only in ${label}`);
-        assertGitOk(
-            spawnSyncInherit("git", ["pull", "--ff-only"], { cwd: root }),
-            `git pull failed in ${label}`
-        );
+        const repoSpecs = collectInstallRepos(client);
+
+        for (const spec of repoSpecs) {
+            gitSyncRepo(spec, root, forceGit);
+        }
+
+        clearClientDiscoveryCache();
+
+        const afterCloneSpecs = collectInstallRepos(client);
+
+        for (const spec of afterCloneSpecs) {
+            gitSyncRepo(spec, root, forceGit);
+        }
     }
 
-    const repoSpecs = collectInstallRepos(client);
+    if (skipNpmInstall) {
+        console.log("[install] skipping npm install (--skip-npm-install)");
+    } else {
+        if (fs.existsSync(path.join(root, "package.json"))) {
+            npmInstall(root);
+        }
 
-    for (const spec of repoSpecs) {
-        gitSyncRepo(spec, root);
-    }
+        const subRepos = listSubReposWithPackageJson(root);
 
-    clearClientDiscoveryCache();
-
-    const afterCloneSpecs = collectInstallRepos(client);
-
-    for (const spec of afterCloneSpecs) {
-        gitSyncRepo(spec, root);
-    }
-
-    if (fs.existsSync(path.join(root, "package.json"))) {
-        npmInstall(root);
-    }
-
-    const subRepos = listSubReposWithPackageJson(root);
-
-    for (const dir of subRepos) {
-        npmInstall(dir);
+        for (const dir of subRepos) {
+            npmInstall(dir);
+        }
     }
 
     console.log("[install] done.");

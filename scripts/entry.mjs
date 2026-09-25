@@ -49,6 +49,7 @@ function printUsage() {
     console.log("");
     console.log("Commands:");
     console.log("  install        Clone/pull workspace repos and install dependencies.");
+    console.log("                   --skip-git  --force-git  --skip-npm-install  --client:<name>");
     console.log("  dev            Start the dev runner (frontend + backend per client).");
     console.log("  build          Build a client frontend into builds/<client>/dist.");
     console.log("  electron       Open or package a client as a desktop app.");
