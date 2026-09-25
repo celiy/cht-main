@@ -22,6 +22,10 @@ Código (identificadores, comentários técnicos) em **inglês**. Strings de UI 
 
 Grupos separados por linha em branco quando o elemento tem vários atributos.
 
+## Tailwind: bordas
+
+Não usar `border-border`. Todas as classes Tailwind padrão de borda (`border-b`, `border`, `border-x`, etc.) já recebem a cor de borda correta para o projeto.
+
 ## Espaçamento e fluxo
 
 - Linha em branco entre blocos lógicos e entre funções.
