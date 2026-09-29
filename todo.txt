@@ -1,30 +1,19 @@
 Recarregar a página tem que fazer com que o ?modal da url suma e não abra nenhum modal.
 
-Implementar as novas customizações do Card e ItemIcon nos docs
+Implementar as novas customizações do ItemIcon nos docs
 Implementar novas mudanças no BarChart nos docs
 
 Imagens do carousel não estão funcionando no docs
 
-Footer do card recebe a mesma customização que o backgroundSytle
-
-Animação de fechar do Modal
-
-Ao pesquisar no select search e selecionar um item, ao selecionar o select fecha, ok, mas ao abrir o select de novo, o item que era o resultado da procura é o unico que aparece mas o texto no search está vazio.
+Ao pesquisar no select search externo nos docs e selecionar um item com click o select fecha, ok, o search ainda tem o valor procurado mesmo depois do painel fechar. Mas se fizer esta mesma ação só que com Enter numa opção, ao abrir o select de novo, o item que era o resultado da procura é o unico que aparece mas o texto no search está vazio.
     Este caso acontece nos docs do Select, verificar lá e depois no Mecarvit
 
-Remover o combobox sem moldura dos docs
-
-O Select que mostra as opções em baixo (Seleção separada) deve mostrar por default o floating panel na parte de cima, claro que essa regra não deve ser absoluta e o panel deve trocar de baixo pra cima se o panel sair pra fora da tela.
-
-Remover o Botão de ação do select, fazer esse botão deste mesmo estilo e funcionalidade continuar da mesma forma e funcionalidade no Mecarvit, remover do docs também.
-
-Fazer com que o Tabs não faça o componente esquecer o conteúdo de dentro. No momento quando o Tabs troca de tab, o conteúdo de dentro é resetado se ele tinha algum valor dinâmico.
-
-delay de 100ms para tooltip aparecer
-
-Tirar Select com painel vazio do form renderer no docs
-
 Transformar a Sidebar em um componente escalavel e flexivel, retirando os componentes hardcodados dentro dele.
+
+Consertar a borda errada do:
+    Sidebar
+    Togggleable
+    Footer do select (#panel-footer)
 
 Implementar as customizações de estilo do Card para:
     Accordion
@@ -38,7 +27,13 @@ Implementar customização de borda para (fazer o Toggleable ser rounded-full po
     Button
     Toggleable
 
+Novo componente:
+    Scrollable:
+        Componente que é um container normal, mas ele tem uma scrollbar customizada que pode receber varios props tipo sua posição no container (top, bottom, left, right), cor, tamanho e etc.
+
 Mecarvit:
     Form de pagamentos invés de aparecer pelo botão ele deve aparecer no form em si de um registo entrada/saída.
 
     Mostrar os pagamentos por metodo e valor na area de valores do form da OS.
+
+    Testar botão de + no novo select
