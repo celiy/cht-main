@@ -2,27 +2,7 @@ Recarregar a página tem que fazer com que o ?modal da url suma e não abra nenh
 
 Implementar as novas customizações do Card e ItemIcon nos docs
 Implementar novas mudanças no BarChart nos docs
-
-Mecarvit:
-    Revisar se o que foi implementado no sistema bate com o documento.
-
-    Revise se o modelo de tabelas do backend atual reflete o modelo de tabelas nos diagramas ER lógico e conceitual.
-
-    Diagramas:
-        Remover valorObra e valorPeças por valor.
-
-        Modificar o diagrama de login para incluir a atividade em que o usuário seleciona a oficina que ele deseja logar se ele estiver cadastrado em mais de uma oficina ao mesmo tempo.
-
-        Remover dataInicio da OS.
-
-        Caso de uso, atividade:
-            Usuário gerencia logs.
-
-        Nivel de acesso (chaves JSON no cargo; sem entidade Permissão):
-            ER conceitual e lógico: não criar tabela/entidade Permissão, bitmask nem ligação Usuario–Permissão. Cargo continua 1,1 → 0,n Usuario. Se o diagrama listar atributos de Cargo, nivelAcesso é texto (JSON de chaves), não dígitos concatenados. Se Usuario ainda não tiver fundador no lógico, incluir a flag (fundador da oficina ≠ chave superadmin).
-
-            Casos de uso: não criar atores Gerente, Superadmin nem um caso por chave. Manter Gestor e Funcionário. Incluir (se faltar) o gestor gerencia cargos / define as chaves de nivelAcesso do cargo. Nota no diagrama do funcionário: os casos que ele executa dependem das chaves do cargo vigente.
-
-            Atividades: em gerenciar funcionários, o passo de “nível de acesso” é escolher chaves do catálogo (áreas + extras), não marcar dígitos. Em gerenciar sistema (terminal), o acesso aos módulos é “pelas chaves de nivelAcesso”. Dashboard só existe para quem tem a chave gerente — não precisa de figura nova se não houver diagrama de dashboard.
-
-    Em rotas protegidas no frontend (qualquer rota dentro do painel) a cada 1 segundo requisição api para checar se o usuário está logado, se não estar, jogar para tela de login. Apenas se for app local
+Implementar as customizações do estilo do Card para:
+    Button
+    Toggleable
+    Modal
