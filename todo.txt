@@ -5,32 +5,24 @@ Implementar novas mudanças no BarChart nos docs
 
 Mecarvit:
     Revisar se o que foi implementado no sistema bate com o documento.
-        Revise se o modelo de tabelas do backend atual reflete o modelo de tabelas nos diagramas ER lógico e conceitual.
-    
-    Documentação:
-        Documentar que para futuras implementações, quando a aplicação for web, vai ter um adminstrador master do sistema que terá acesso painel admin de todas as oficinas cadastradas na web.
 
-        Documentar sobre como um usuário (gerente) poder exportar dados de tabelas de uma entidade (clientes, veículos, funcionários, ordens de serviço, registros) para PDF. O usuário também poderá exportar uma OS que será visualmente identico a uma folha de OS de verdade.
+    Revise se o modelo de tabelas do backend atual reflete o modelo de tabelas nos diagramas ER lógico e conceitual.
 
-        Documentar sobre o status de orçamento. Uma ordem de serviço pode ser um orçamento, então ela pode ser marcada com o status "Orçamento" que ela só poderá ser usada para orçamentos, sem calculo real de valores e pagamentos.
+    Diagramas:
+        Remover valorObra e valorPeças por valor.
 
-        Documentar sobre ItemServico e afins terem apenas valor unificado invés de valor peça e valor obra. ItemServico não tem mais valorObra e valorPeças, então só existe um valor agora.
+        Modificar o diagrama de login para incluir a atividade em que o usuário seleciona a oficina que ele deseja logar se ele estiver cadastrado em mais de uma oficina ao mesmo tempo.
 
-        Documentar sobre como a seleção de oficinas funciona: Ao inserir as credenciais, ele vai procurar por um usuário com aquele login salvo nos bancos de dados, se achar vai logar, mas se achar o mesmo login em duas oficinas diferentes, o que pode acontecer se duas oficinas compartilharem a mesma rede ou futuramente quando o sistema for web e permitir que exista um caso onde um funcionário pode estar cadastrado em mais de uma oficina, vai aparecer o select pra ele selecionar a empresa que deseja entrar.
+        Remover dataInicio da OS.
 
-        Documentar sobre como dataInicio da OS foi removida. A data de inicio de uma OS é marcada pela sua data de criação no sistema.
+        Caso de uso, atividade:
+            Usuário gerencia logs.
 
-        Documentar sobre como o sistema deve ter um sistema de guardar logs que registra quem fez a ação, qual ação foi feita, o que mudou e outros dados. Apenas o superadmin pode ver estes logs do sistema.
+        Nivel de acesso (chaves JSON no cargo; sem entidade Permissão):
+            ER conceitual e lógico: não criar tabela/entidade Permissão, bitmask nem ligação Usuario–Permissão. Cargo continua 1,1 → 0,n Usuario. Se o diagrama listar atributos de Cargo, nivelAcesso é texto (JSON de chaves), não dígitos concatenados. Se Usuario ainda não tiver fundador no lógico, incluir a flag (fundador da oficina ≠ chave superadmin).
 
-        Documentar sobre a area de dashboard: A area de dashboard para quando o cargo é um cargo de gerente, o usuário consegue ver um resumo com filtros de datas para Entradas/Saídas pagas, a vencer e atrasadas. Juntamente de gráficos de resumo de entradas/saidas pagas por mês, comparativo de entradas e saídas que mostra por mês se teve mais entradas ou saídas e resumo das ordens de serviço por status de funcionamento (Aberta, Pendente, etc.) e pagamento (não pago, a vencer, etc.).
+            Casos de uso: não criar atores Gerente, Superadmin nem um caso por chave. Manter Gestor e Funcionário. Incluir (se faltar) o gestor gerencia cargos / define as chaves de nivelAcesso do cargo. Nota no diagrama do funcionário: os casos que ele executa dependem das chaves do cargo vigente.
 
-        Documentar sobre a mudança nos cargos de nível de acesso: Modelo antigo: cargo.nivel_acesso era uma string de dígitos concatenados (ex.: "34"), cada dígito mapeava áreas do sistema; checagens usavam includes("4") etc.
-            Modelo novo: o mesmo campo cargo.nivel_acesso (SQLite, coluna text em cargo) guarda um JSON ordenado de chaves nomeadas, ex.: ["clientes.editar","clientes.ver","os.ver"]. Catálogo único em cht-shared (PERMISSIONS, áreas: funcionários, clientes, veículos, OS, financeiro). Níveis por área: nenhum → ver → editar/criar (juntos) → exportar → excluir. Chaves extras: gerente, funcionarios.pii, clientes.pii, os.diagnostico.editar, os.pagamentos, superadmin. Não há tabela de permissões, bitmask nem ACL por linha; continua usuario.cargo_id + flag usuario.fundador para o fundador.
-
-            Banco de dados: sem nova tabela nem alteração de schema DDL; só mudança de formato do conteúdo em nivel_acesso. Na abertura do banco da oficina, cargos existentes com dígitos legados são regravados automaticamente para JSON (migrateNivelAcesso). Oficinas novas recebem cargos seed: Superadmin (["superadmin"]), Gerente e Mecânico (presets) se ainda não existirem.
-
-            Comportamento de produto: UI de cargos = nome + nível por área (dropdown) + checkbox “cargo de gerente” (equivale a gerente + PII de funcionários/clientes). Cargos preset Gerente e Mecânico só o superadmin edita/exclui. Mecânico: só OS (ver/editar, diagnóstico mecânico); sem criar OS, sem PII de cliente, sem pagamentos na OS. Gerente: acesso amplo conforme preset. Apenas superadmin reseta senha de outros funcionários; logs de sistema (quando existirem) só superadmin. Visualização sem .editar/.criar não abre o menu da entidade, mas dados limitados podem aparecer em contexto (ex.: nome na OS). Exportação PDF exige permissão .exportar da área.
-
-            Compatibilidade: leitura ainda aceita dígitos legados até migração; documentar o mapeamento legado (2=clientes, 3=veículos, 4=OS+financeiro, 5=funcionários, 6=financeiro, 0=superadmin) apenas como transição, não como modelo atual.
+            Atividades: em gerenciar funcionários, o passo de “nível de acesso” é escolher chaves do catálogo (áreas + extras), não marcar dígitos. Em gerenciar sistema (terminal), o acesso aos módulos é “pelas chaves de nivelAcesso”. Dashboard só existe para quem tem a chave gerente — não precisa de figura nova se não houver diagrama de dashboard.
 
     Em rotas protegidas no frontend (qualquer rota dentro do painel) a cada 1 segundo requisição api para checar se o usuário está logado, se não estar, jogar para tela de login. Apenas se for app local
