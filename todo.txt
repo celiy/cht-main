@@ -27,9 +27,25 @@ Novo componente:
     Scrollable:
         Componente que é um container normal, mas ele tem uma scrollbar customizada que pode receber varios props tipo sua posição no container (top, bottom, left, right), cor, tamanho e etc.
 
+Icone da data no input de data no tema branco esta invisivel
+
 Mecarvit:
     Form de pagamentos invés de aparecer pelo botão ele deve aparecer no form em si de um registo entrada/saída.
 
     Mostrar os pagamentos por metodo e valor na area de valores do form da OS.
 
     Testar botão de + no novo select
+
+    Comparação anual dos charts
+
+    Organização de status:
+        Ordens de serviço tem Status que tem suas validações. No caso uma OS pode ser criada como orçamento, mas se ela mudar de status e tiver um serviço atrelado, não pode voltar a ser um Orçamento.
+            Orçamento,
+            Aberta,
+            Pendente,
+            Em andamento,
+            Concluída,
+            Cancelada,
+            Reaberta
+
+    Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
