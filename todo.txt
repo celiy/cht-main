@@ -5,13 +5,9 @@ Implementar novas mudanças no BarChart nos docs
 
 Imagens do carousel não estão funcionando no docs
 
-Ao pesquisar no select search externo nos docs e selecionar um item com click o select fecha, ok, o search ainda tem o valor procurado mesmo depois do painel fechar. Mas se fizer esta mesma ação só que com Enter numa opção, ao abrir o select de novo, o item que era o resultado da procura é o unico que aparece mas o texto no search está vazio.
-    Este caso acontece nos docs do Select, verificar lá e depois no Mecarvit
-
 Transformar a Sidebar em um componente escalavel e flexivel, retirando os componentes hardcodados dentro dele.
 
 Consertar a borda errada do:
-    Sidebar
     Togggleable
     Footer do select (#panel-footer)
 
