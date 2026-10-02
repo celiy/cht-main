@@ -93,6 +93,71 @@ export function freePorts(ports) {
     }
 }
 
+function waitMs(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function waitForExit(child, timeoutMs) {
+    return new Promise((resolve) => {
+        if (!child || child.exitCode != null || child.signalCode != null) {
+            resolve();
+
+            return;
+        }
+
+        const onExit = () => {
+            clearTimeout(timer);
+            resolve();
+        };
+        const timer = setTimeout(() => {
+            child.off("exit", onExit);
+            resolve();
+        }, timeoutMs);
+
+        child.once("exit", onExit);
+    });
+}
+
+function isGroupAlive(pgid) {
+    if (!Number.isInteger(pgid) || pgid <= 0) {
+        return false;
+    }
+
+    try {
+        process.kill(-pgid, 0);
+
+        return true;
+    } catch {
+        try {
+            process.kill(pgid, 0);
+
+            return true;
+        } catch {
+            return false;
+        }
+    }
+}
+
+async function waitUntilGroupDead(pgid, timeoutMs) {
+    const deadline = Date.now() + timeoutMs;
+
+    while (isGroupAlive(pgid) && Date.now() < deadline) {
+        await waitMs(50);
+    }
+}
+
+function signalGroup(pid, signal) {
+    try {
+        process.kill(-pid, signal);
+    } catch {
+        try {
+            process.kill(pid, signal);
+        } catch {
+            // already gone
+        }
+    }
+}
+
 export class ManagedProcess extends EventEmitter {
     constructor({ id, name, dir, cmd, subtitle, env, ringSize = DEFAULT_RING_SIZE }) {
         super();
@@ -131,7 +196,9 @@ export class ManagedProcess extends EventEmitter {
         } else {
             const shellCmd = buildShellCommand(this.dir, this.cmd);
 
-            this.child = spawn("setsid", ["bash", "-c", shellCmd], {
+            // detached:true already calls setsid() in the child. The `setsid`
+            // binary forks, exits 0, and leaves the real command untracked.
+            this.child = spawn("bash", ["-c", shellCmd], {
                 stdio: ["ignore", "pipe", "pipe"],
                 env,
                 detached: true
@@ -245,42 +312,27 @@ export class ManagedProcess extends EventEmitter {
         }
     }
 
-    async stop({ termTimeoutMs = 200 } = {}) {
+    async stop({ termTimeoutMs = 5000, killTimeoutMs = 1000 } = {}) {
         if (!this.child || this.child.pid == null) {
             return;
         }
 
         const pid = this.child.pid;
+        const child = this.child;
 
         if (IS_WIN) {
             spawnSync("taskkill", ["/PID", String(pid), "/T", "/F"], { stdio: "ignore", shell: true });
-            await new Promise((resolve) => setTimeout(resolve, termTimeoutMs));
+            await waitForExit(child, termTimeoutMs);
 
             return;
         }
 
-        try {
-            process.kill(-pid, "SIGTERM");
-        } catch {
-            try {
-                process.kill(pid, "SIGTERM");
-            } catch {
-                // ignore
-            }
-        }
+        signalGroup(pid, "SIGTERM");
+        await waitUntilGroupDead(pid, termTimeoutMs);
 
-        await new Promise((resolve) => setTimeout(resolve, termTimeoutMs));
-
-        if (this.isAlive()) {
-            try {
-                process.kill(-pid, "SIGKILL");
-            } catch {
-                try {
-                    process.kill(pid, "SIGKILL");
-                } catch {
-                    // ignore
-                }
-            }
+        if (isGroupAlive(pid)) {
+            signalGroup(pid, "SIGKILL");
+            await waitUntilGroupDead(pid, killTimeoutMs);
         }
     }
 

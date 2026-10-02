@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Text } from "ink";
 import { ProcessTab } from "./ProcessTab.jsx";
 
-export function Header({ processes, activeIdx, clientName }) {
+export function Header({ processes, usageById, activeIdx, clientName }) {
     return (
         <Box flexDirection="column">
             <Box paddingX={1}>
@@ -16,6 +16,7 @@ export function Header({ processes, activeIdx, clientName }) {
                     <ProcessTab
                         key={proc.id}
                         proc={proc}
+                        usage={usageById?.[proc.id]}
                         active={idx === activeIdx}
                     />
                 ))}

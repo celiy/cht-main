@@ -52,16 +52,15 @@ async function main() {
 
     const manager = new ProcessManager(specs);
 
-    let cleaningUp = false;
     let exitCode = 0;
+    let cleanupPromise = null;
 
-    const cleanup = async () => {
-        if (cleaningUp) {
-            return;
+    const cleanup = () => {
+        if (!cleanupPromise) {
+            cleanupPromise = manager.stopAll();
         }
 
-        cleaningUp = true;
-        await manager.stopAll();
+        return cleanupPromise;
     };
 
     process.on("SIGINT", async () => {
@@ -75,7 +74,23 @@ async function main() {
     });
 
     process.on("exit", () => {
-        manager.stopAll().catch(() => {});
+        for (const proc of manager.processes) {
+            const pid = proc.child?.pid;
+
+            if (!pid || (proc.status !== "running" && proc.status !== "starting")) {
+                continue;
+            }
+
+            try {
+                process.kill(-pid, "SIGKILL");
+            } catch {
+                try {
+                    process.kill(pid, "SIGKILL");
+                } catch {
+                    // already gone
+                }
+            }
+        }
     });
 
     manager.startAll();

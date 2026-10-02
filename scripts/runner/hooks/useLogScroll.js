@@ -58,11 +58,30 @@ export function useLogScroll(procId, lineCount, viewHeight) {
         });
     }, [procId, lineCount, viewHeight]);
 
-    const scrollPage = useCallback((direction) => {
-        const page = Math.max(1, viewHeight - 1);
+    const scrollPage = useCallback((direction, pages = 1) => {
+        const page = Math.max(1, viewHeight - 1) * Math.max(1, pages);
 
         scrollBy(direction < 0 ? -page : page);
     }, [scrollBy, viewHeight]);
+
+    const scrollToStart = useCallback(() => {
+        if (!procId) {
+            return;
+        }
+
+        write(procId, { follow: false, start: 0 });
+    }, [procId]);
+
+    const scrollToEnd = useCallback(() => {
+        if (!procId) {
+            return;
+        }
+
+        write(procId, {
+            follow: true,
+            start: Math.max(0, lineCount - viewHeight)
+        });
+    }, [procId, lineCount, viewHeight]);
 
     const reset = useCallback((id) => {
         const target = id || procId;
@@ -80,6 +99,8 @@ export function useLogScroll(procId, lineCount, viewHeight) {
         maxStart,
         scrollBy,
         scrollPage,
+        scrollToStart,
+        scrollToEnd,
         reset
     };
 }

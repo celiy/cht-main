@@ -6,7 +6,7 @@ import { StatusBar } from "./components/StatusBar.jsx";
 import { useProcesses } from "./hooks/useProcesses.js";
 import { useKeyboard } from "./hooks/useKeyboard.js";
 import { useLogScroll } from "./hooks/useLogScroll.js";
-import { dedupeUrls, findUrls } from "../lib/ansiUtils.mjs";
+import { urlsByProcess } from "../lib/ansiUtils.mjs";
 
 function useTerminalSize() {
     const { stdout } = useStdout();
@@ -52,7 +52,7 @@ function useAlternateScroll() {
 export function App({ manager, clientName, onQuit }) {
     const { exit } = useApp();
     const [activeIdx, setActiveIdx] = useState(0);
-    const { processes, tick } = useProcesses(manager);
+    const { processes, usageById, tick } = useProcesses(manager);
     const { columns, rows } = useTerminalSize();
 
     useAlternateScroll();
@@ -60,39 +60,25 @@ export function App({ manager, clientName, onQuit }) {
     const goNext = () => setActiveIdx((idx) => (idx + 1) % manager.count);
     const goPrev = () => setActiveIdx((idx) => (idx - 1 + manager.count) % manager.count);
 
-    const quitNow = () => {
+    const quitNow = async () => {
         if (onQuit) {
-            onQuit();
+            await onQuit();
         }
 
         exit();
     };
 
-    const urls = useMemo(() => {
-        const collected = [];
-
-        for (const proc of processes) {
-            for (const line of proc.lines) {
-                const found = findUrls(line);
-
-                for (const url of found) {
-                    collected.push(url);
-                }
-            }
-        }
-
-        return dedupeUrls(collected);
-    }, [processes, tick]);
+    const linkGroups = useMemo(() => urlsByProcess(processes), [processes, tick]);
 
     const headerHeight = 4;
-    const statusHeight = urls.length > 0 ? 4 : 3;
+    const statusHeight = 2 + Math.max(1, linkGroups.length);
     const logHeight = Math.max(5, rows - headerHeight - statusHeight);
     const logViewHeight = getLogViewHeight(logHeight);
 
     const activeProc = processes[activeIdx];
     const lineCount = activeProc ? activeProc.lines.length : 0;
 
-    const { start, follow, scrollBy, scrollPage, reset } = useLogScroll(
+    const { start, follow, scrollBy, scrollPage, scrollToStart, scrollToEnd, reset } = useLogScroll(
         activeProc ? activeProc.id : null,
         lineCount,
         logViewHeight
@@ -124,14 +110,17 @@ export function App({ manager, clientName, onQuit }) {
         onClear: clearActive,
         onScrollUp: () => scrollBy(-1),
         onScrollDown: () => scrollBy(1),
-        onScrollPageUp: () => scrollPage(-1),
-        onScrollPageDown: () => scrollPage(1)
+        onScrollPageUp: (pages) => scrollPage(-1, pages),
+        onScrollPageDown: (pages) => scrollPage(1, pages),
+        onScrollTop: scrollToStart,
+        onScrollBottom: scrollToEnd
     });
 
     return (
         <Box flexDirection="column" width={columns}>
             <Header
                 processes={processes}
+                usageById={usageById}
                 activeIdx={activeIdx}
                 clientName={clientName}
             />
@@ -147,7 +136,7 @@ export function App({ manager, clientName, onQuit }) {
                 />
             )}
 
-            <StatusBar urls={urls} />
+            <StatusBar linkGroups={linkGroups} />
         </Box>
     );
 }

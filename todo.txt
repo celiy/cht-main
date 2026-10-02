@@ -1,51 +1,25 @@
-Recarregar a página tem que fazer com que o ?modal da url suma e não abra nenhum modal.
-
-Implementar as novas customizações do ItemIcon nos docs
-Implementar novas mudanças no BarChart nos docs
-
-Imagens do carousel não estão funcionando no docs
-
-Transformar a Sidebar em um componente escalavel e flexivel, retirando os componentes hardcodados dentro dele.
-
-Consertar a borda errada do:
-    Togggleable
-    Footer do select (#panel-footer)
-
-Implementar as customizações de estilo do Card para:
-    Accordion
-    Button
-    Item
-    Modal
-    Marker
-    Toggleable
-
-Implementar customização de borda para (fazer o Toggleable ser rounded-full por exemplo):
-    Button
-    Toggleable
-
 Novo componente:
     Scrollable:
         Componente que é um container normal, mas ele tem uma scrollbar customizada que pode receber varios props tipo sua posição no container (top, bottom, left, right), cor, tamanho e etc.
 
-Icone da data no input de data no tema branco esta invisivel
+Transformar os props do botão em objeto reutilizaveis exportaveis
+
+Criar uma repo shared separada para as funções do Mecarvit
+
+Documentação de contribuição:
+    Fazer um documento padrão de contribuição, guiar IAs a ler eles caso precisem para fazer alguma contribuição ao repositório.
+
+    A documentação deve ter o padrão de código, como ele deve ser escrito, o que é esperado do código e a sua qualidade. 
+
+    Se o usuário quiser contribuir a um componente, ele tem que ter em conta que o componente não deve ter sua funcionalidade base mudada e sim adicionada ou melhorada. O componente não pode ser mudado num valor profundo que o faça perder sua funcionalidade ou quebrar em casos de uso que ele já exista (como os casos de uso na documentação). Isso significa que um componente tipo o Select já está pronto para uso e implementado, mas se alguma alteração for feita que exige que códigos que usam este componente precisam ser mudados, então este tipo de alteração não será aceita. 
+
+    Agora, componentes que não foram implementados completamente ou estão em processo de evolução, são componentes que podem sim serem mudados e terem certas excessões, componentes que tem o estado de "Em implementação" ou "Em evolução" são os que caem nesta regra de excessões. O status de cada componente está nos docs.
+
+    Avaliar o resto do projeto para decidir o que mais este documento precisa ter.
 
 Mecarvit:
-    Form de pagamentos invés de aparecer pelo botão ele deve aparecer no form em si de um registo entrada/saída.
-
-    Mostrar os pagamentos por metodo e valor na area de valores do form da OS.
-
-    Testar botão de + no novo select
-
-    Comparação anual dos charts
-
-    Organização de status:
-        Ordens de serviço tem Status que tem suas validações. No caso uma OS pode ser criada como orçamento, mas se ela mudar de status e tiver um serviço atrelado, não pode voltar a ser um Orçamento.
-            Orçamento,
-            Aberta,
-            Pendente,
-            Em andamento,
-            Concluída,
-            Cancelada,
-            Reaberta
-
     Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
+        [adicionar]
+
+    Usar Item em:
+        Campos Criado/Modificado em

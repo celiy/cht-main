@@ -1,5 +1,7 @@
 import { useInput } from "ink";
 
+const FAST_PAGE_COUNT = 5;
+
 export function useKeyboard({
     onPrev,
     onNext,
@@ -9,7 +11,9 @@ export function useKeyboard({
     onScrollUp,
     onScrollDown,
     onScrollPageUp,
-    onScrollPageDown
+    onScrollPageDown,
+    onScrollTop,
+    onScrollBottom
 }) {
     useInput((input, key) => {
         if (key.upArrow || input === "k" || input === "K") {
@@ -24,14 +28,26 @@ export function useKeyboard({
             return;
         }
 
+        if (key.home || input === "g") {
+            onScrollTop();
+
+            return;
+        }
+
+        if (key.end || input === "G") {
+            onScrollBottom();
+
+            return;
+        }
+
         if (key.pageUp) {
-            onScrollPageUp();
+            onScrollPageUp(key.shift || key.ctrl ? FAST_PAGE_COUNT : 1);
 
             return;
         }
 
         if (key.pageDown) {
-            onScrollPageDown();
+            onScrollPageDown(key.shift || key.ctrl ? FAST_PAGE_COUNT : 1);
 
             return;
         }

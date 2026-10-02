@@ -15,13 +15,19 @@ export function visibleLength(input) {
 
 export function findUrls(input) {
     const cleaned = stripAnsi(input);
-    const matches = cleaned.match(URL_REGEX);
+    const urls = [];
 
-    if (!matches) {
-        return [];
+    for (const match of cleaned.matchAll(URL_REGEX)) {
+        const idx = match.index ?? 0;
+
+        if (idx > 0 && cleaned[idx - 1] === "=") {
+            continue;
+        }
+
+        urls.push(match[0].replace(/[).,;:]+$/, ""));
     }
 
-    return matches.map((u) => u.replace(/[).,;:]+$/, ""));
+    return urls;
 }
 
 export function dedupeUrls(urls) {
@@ -36,6 +42,38 @@ export function dedupeUrls(urls) {
     }
 
     return out;
+}
+
+/**
+ * Unique http(s) URLs found in each process log, keeping tab order.
+ *
+ * @param {Array<{ id?: string, name: string, lines?: string[] }>} processes
+ * @returns {Array<{ id: string, name: string, urls: string[] }>}
+ */
+export function urlsByProcess(processes) {
+    const groups = [];
+
+    for (const proc of processes ?? []) {
+        const collected = [];
+
+        for (const line of proc.lines ?? []) {
+            collected.push(...findUrls(line));
+        }
+
+        const urls = dedupeUrls(collected);
+
+        if (urls.length === 0) {
+            continue;
+        }
+
+        groups.push({
+            id: proc.id ?? proc.name,
+            name: proc.name,
+            urls
+        });
+    }
+
+    return groups;
 }
 
 export function osc8Link(url, label) {

@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Text } from "ink";
 import Spinner from "ink-spinner";
+import { formatUsage } from "../../lib/procUsage.mjs";
 
 function statusColor(status) {
     if (status === "running") {
@@ -38,10 +39,11 @@ function statusLabel(proc) {
     return proc.status;
 }
 
-export function ProcessTab({ proc, active }) {
+export function ProcessTab({ proc, usage, active }) {
     const color = statusColor(proc.status);
     const label = statusLabel(proc);
     const showSpinner = proc.status === "starting";
+    const usageLabel = formatUsage(usage);
 
     return (
         <Box
@@ -59,6 +61,12 @@ export function ProcessTab({ proc, active }) {
                 {" "}
                 {label}
             </Text>
+            {usageLabel ? (
+                <>
+                    <Text dimColor> · </Text>
+                    <Text dimColor>{usageLabel}</Text>
+                </>
+            ) : null}
         </Box>
     );
 }

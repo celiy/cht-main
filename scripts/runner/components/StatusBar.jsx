@@ -11,30 +11,34 @@ function Hint({ keyLabel, action }) {
     );
 }
 
-export function StatusBar({ urls }) {
+export function StatusBar({ linkGroups }) {
+    const groups = linkGroups ?? [];
+
     return (
         <Box flexDirection="column" paddingX={1}>
             <Box flexDirection="row" flexWrap="wrap">
                 <Hint keyLabel="←/→" action="switch tab" />
                 <Hint keyLabel="↑/↓" action="scroll" />
+                <Hint keyLabel="Home/End" action="top/bot" />
+                <Hint keyLabel="PgUp/Dn" action="page" />
+                <Hint keyLabel="S-PgUp" action="×5" />
                 <Hint keyLabel="r" action="restart" />
                 <Hint keyLabel="c" action="clear" />
                 <Hint keyLabel="q" action="quit" />
             </Box>
 
-            {urls.length > 0 && (
-                <Box flexDirection="row" flexWrap="wrap" marginTop={0}>
-                    <Text dimColor>links: </Text>
-                    {urls.slice(0, 5).map((url, idx) => (
+            {groups.map((group) => (
+                <Box key={group.id} flexDirection="row" flexWrap="wrap">
+                    <Text dimColor>{group.name}: </Text>
+                    {group.urls.map((url) => (
                         <Box key={url} marginRight={2}>
                             <Text color="blueBright" underline>
                                 {osc8Link(url, url)}
                             </Text>
-                            {idx < urls.length - 1 ? null : null}
                         </Box>
                     ))}
                 </Box>
-            )}
+            ))}
         </Box>
     );
 }
