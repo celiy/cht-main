@@ -17,41 +17,18 @@ Revisar a documentação, ler com calma e avaliar se algo precisa ser alterado, 
 
     Na tipografia explorar as outras tags html como <aside></aside> e etc.
 
-Na documentação do http, a parte de login e token fala sobre salvar no storage. Eliminar isso completamente. Sem salvar o token no storage.
-    Na minha experiencia, para salvar o token de login o backend mandava como cookie e o usuário usando usava esse cookie. Fazer essa implementação no Mecarvit atual, e deixar de forma que o usuário é quem lida com o token, mas é claro, dar acesso a ferramenta base se for necessário.
-
 Cada repo principal agora tem um version, o main tem o nome da repo e a versão que ele precisa pra funcionar. Então por exemplo o version do cht-main seria:
     version 1.0.1
     versionCheckUrl https://github.com/celiy/cht-main/blob/main/version
     cht-shared x.x.x
     cht-base x.x.x
-    etc...
+    cht-design-sytem x.x.x
 
-    E ao rodar, o frontend, a notificação que mostra as repos atualizadas agora mostra também um alerta mostrando que o workspace atual está com repos com versões diferentes do que a workspace caso o usuário tenha uma workspace com versão diferenciada. Isso deve se aplicar apenas as repos principais
+    Ele pega a versão que tem no version do main e checa com a version de cada repo local
 
-Instalação a partir do workspace do usuário:
-    Pastas tipo .vscode, .cursor, .prettierignore, .prettierrc.json, netlify.toml agora devem ficar dentro de uma pasta dedicada, comando de install recebe nova flag: --new onde o usuário poderá configurar como ele quer que o projeto siga.
+    Ele deve fazer essa comparação de versões localmente no caso
 
-    Ao executar com esse new, ele irá perguntar a IDE que ele está usando, no momento terá apenas o vscode como opção, então ao selecionar vscode, ele irá criar uma .vscode vazia e básica. Depois a mesma lógica para o prettier, perguntar se ele quer instalar o prettier, criar configuração vazia do prettier. Depois arquivo de configuração de vps, por enquanto temos apenas o netlify.toml, então apenas copiar o netlify atual padrão. 
-
-    Depois de tudo isso, ele irá perguntar se ele quer salvar esta configuração de workspace atual, se sim, ele vai selecionar o cliente que ele quer salvar esta configuração. Então por exemplo, no meu caso de uso, esta configuração atual de arquivos que listei ficaria dentro do devApp. Então se um cliente que utiliza o cht já ter esta pasta com os arquvios de workspace pré montados, ao rodar o install, uma flag para copiar esses arquivos para o root do cht-main: --workspace:[nome].
-
-    Um passo extra: selecionar qual estrutura de docs para IA. No momento existe apenas o .cursor, então dentro desta pasta que teria esses defaults, ter várias pastas, no momento só duas: .cursor e .claude. O .cursor deve ser a base e o .claude deve seguir essa base. Isso é duplicação? sim. Mas no momento é mais simples de se manusear assim.
-
-    Agora, para cada opção, o usuário terá como selecionar New ou Project-Opinionated, que é os arquivos atuais. Então instalar com --new e selecionar o Project-Opinionated, é a mesma coisa que usar o --workspace:devApp.
-
-    Fazer estes arquivos serem ignorados pelo .gitignore apenas na root do cht-main.
-
-Documentação de contribuição:
-    Fazer um documento padrão de contribuição, guiar IAs a ler eles caso precisem para fazer alguma contribuição ao repositório.
-
-    A documentação deve ter o padrão de código, como ele deve ser escrito, o que é esperado do código e a sua qualidade. 
-
-    Se o usuário quiser contribuir a um componente, ele tem que ter em conta que o componente não deve ter sua funcionalidade base mudada e sim adicionada ou melhorada. O componente não pode ser mudado num valor profundo que o faça perder sua funcionalidade ou quebrar em casos de uso que ele já exista (como os casos de uso na documentação). Isso significa que um componente tipo o Select já está pronto para uso e implementado, mas se alguma alteração for feita que exige que códigos que usam este componente precisam ser mudados, então este tipo de alteração não será aceita. 
-
-    Agora, componentes que não foram implementados completamente ou estão em processo de evolução, são componentes que podem sim serem mudados e terem certas excessões, componentes que tem o estado de "Em implementação" ou "Em evolução" são os que caem nesta regra de excessões. O status de cada componente está nos docs.
-
-    Avaliar o resto do projeto para decidir o que mais este documento precisa ter.
+    E ao rodar, o frontend, a notificação que mostra as repos atualizadas agora mostra também um alerta mostrando que o workspace atual está com repos com versões diferentes do que a workspace caso o usuário tenha uma workspace com versão diferenciada. Isso deve se aplicar apenas as repos principais.
 
 Mecarvit:
     Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.

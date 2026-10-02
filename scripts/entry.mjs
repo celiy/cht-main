@@ -27,6 +27,7 @@ const SCRIPT_COMMANDS = {
     build: "build.mjs",
     electron: "electron.mjs",
     bump: "bump.mjs",
+    "bump-core": "bump-core.mjs",
     create: "create.mjs",
     "sync-deps": "sync-common-deps.mjs"
 };
@@ -50,13 +51,15 @@ function printUsage() {
     console.log("Commands:");
     console.log("  install        Clone/pull workspace repos and install dependencies.");
     console.log("                   --skip-git  --force-git  --skip-npm-install  --client:<name>");
-    console.log("                   --new  --workspace:<name>");
+    console.log("                   --new  --workspace:<name>  --workspace-clean");
     console.log("  dev            Start the dev runner (frontend + backend per client).");
     console.log("                   --no-backend  --client:<name>");
     console.log("  build          Build a client frontend into builds/<client>/dist.");
     console.log("  electron       Open or package a client as a desktop app.");
     console.log("  create         Scaffold a client frontend from the cht-base template.");
     console.log("  bump           Bump the version file of one workspace repo.");
+    console.log("  bump-core      Bump core repos, sync cht-main pins, commit and push.");
+    console.log("                   [branch]  --dry-run  --all   (branch default: main)");
     console.log("  sync-deps      Normalize shared dependency versions across repos.");
     console.log("");
     console.log(`Available: ${commands.join(", ")}`);

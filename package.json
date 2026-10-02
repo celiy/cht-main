@@ -12,6 +12,7 @@
         "build": "node scripts/entry.mjs build",
         "electron": "node scripts/entry.mjs electron",
         "bump": "node scripts/entry.mjs bump",
+        "bump-core": "node scripts/entry.mjs bump-core",
         "sync:deps": "node scripts/entry.mjs sync-deps",
         "lint": "eslint cht-base cht-design-system cht-shared",
         "lint:fix": "npm run lint -- --fix",

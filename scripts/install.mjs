@@ -17,6 +17,7 @@ import {
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
 import {
     applyWorkspaceChoices,
+    clearRootWorkspace,
     copyWorkspaceToRoot,
     OPINIONATED_WORKSPACE,
     resolveWorkspaceDir,
@@ -66,7 +67,8 @@ function looksLikeCommitSha(ref) {
  *   forceGit: boolean,
  *   skipNpmInstall: boolean,
  *   isNew: boolean,
- *   workspace: string | null
+ *   workspace: string | null,
+ *   workspaceClean: boolean
  * }}
  */
 function parseInstallFlags(argv) {
@@ -76,6 +78,7 @@ function parseInstallFlags(argv) {
     let skipNpmInstall = false;
     let isNew = false;
     let workspace = null;
+    let workspaceClean = false;
     const unknown = [];
 
     for (let i = 0; i < rest.length; i++) {
@@ -89,6 +92,8 @@ function parseInstallFlags(argv) {
             skipNpmInstall = true;
         } else if (arg === "--new") {
             isNew = true;
+        } else if (arg === "--workspace-clean") {
+            workspaceClean = true;
         } else if (arg.startsWith("--workspace:")) {
             workspace = arg.slice("--workspace:".length);
         } else if (arg === "--workspace") {
@@ -103,7 +108,7 @@ function parseInstallFlags(argv) {
         throw new Error(
             `[install] Unknown flag(s): ${unknown.join(", ")}. ` +
                 "Supported: --skip-git, --force-git, --skip-npm-install, --client:<name>, " +
-                "--new, --workspace:<name>"
+                "--new, --workspace:<name>, --workspace-clean"
         );
     }
 
@@ -111,8 +116,8 @@ function parseInstallFlags(argv) {
         throw new Error("[install] Use either --skip-git or --force-git, not both.");
     }
 
-    if (isNew && workspace) {
-        throw new Error("[install] Use either --new or --workspace:<name>, not both.");
+    if ([isNew, Boolean(workspace), workspaceClean].filter(Boolean).length > 1) {
+        throw new Error("[install] Use only one of --new, --workspace:<name>, --workspace-clean.");
     }
 
     if (workspace !== null && !String(workspace).trim()) {
@@ -125,7 +130,8 @@ function parseInstallFlags(argv) {
         forceGit,
         skipNpmInstall,
         isNew,
-        workspace: workspace ? workspace.trim() : null
+        workspace: workspace ? workspace.trim() : null,
+        workspaceClean
     };
 }
 
@@ -487,7 +493,14 @@ function runNewWorkspaceTui(saveTargets) {
     return payload;
 }
 
-async function applyWorkspaceFlags(root, { isNew, workspace }) {
+async function applyWorkspaceFlags(root, { isNew, workspace, workspaceClean }) {
+    if (workspaceClean) {
+        console.log("[install] cleaning workspace files at root");
+        clearRootWorkspace(root);
+
+        return;
+    }
+
     if (workspace) {
         const from = resolveWorkspaceDir(workspace, root, clientDirLookup);
 
@@ -526,10 +539,16 @@ async function applyWorkspaceFlags(root, { isNew, workspace }) {
 }
 
 async function main() {
-    const { client, skipGit, forceGit, skipNpmInstall, isNew, workspace } = parseInstallFlags(
-        process.argv.slice(2)
-    );
+    const { client, skipGit, forceGit, skipNpmInstall, isNew, workspace, workspaceClean } =
+        parseInstallFlags(process.argv.slice(2));
     const root = getRootDir();
+
+    if (workspaceClean) {
+        await applyWorkspaceFlags(root, { isNew, workspace, workspaceClean });
+        console.log("[install] done.");
+
+        return;
+    }
 
     if (skipGit) {
         console.log("[install] skipping git (--skip-git)");
@@ -551,7 +570,7 @@ async function main() {
         }
     }
 
-    await applyWorkspaceFlags(root, { isNew, workspace });
+    await applyWorkspaceFlags(root, { isNew, workspace, workspaceClean });
 
     if (skipNpmInstall) {
         console.log("[install] skipping npm install (--skip-npm-install)");

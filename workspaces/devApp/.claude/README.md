@@ -6,6 +6,7 @@ Orientação para o agente. Preferir **poucas regras sempre ativas**; o resto ap
 
 | Ficheiro                   | Quando                                              |
 | -------------------------- | --------------------------------------------------- |
+| `contributing.mdc`         | Sempre (ler `CONTRIBUTING.md` antes de alterar código) |
 | `code-guidelines.mdc`      | Sempre                                              |
 | `git-writes.mdc`           | Sempre (commit/push só se pedido)                   |
 | `karpathy-guidelines.mdc`  | Sempre (pensar antes, simplicidade, mudanças cirúrgicas) |

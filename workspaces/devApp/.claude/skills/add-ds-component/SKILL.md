@@ -10,6 +10,7 @@ description: >-
 
 ## Placement
 
+- Read `CONTRIBUTING.md` at the `cht-main` root first (component stability and status).
 - Primitive (Button, Card, Toast): `cht-design-system/src/components/Name.vue`
 - Composite (Chat, Sidebar, Resizable): `cht-design-system/src/components/custom/Name.vue`
 - Apps use them without import (`designSystemPlugin` glob-registers `components/*.vue`, `custom/*.vue`, `custom/charts/*.vue`).

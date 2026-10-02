@@ -55,10 +55,12 @@ rg -n 'sql\.raw|\.exec\(|\+ *req\.' cht-backend-mecarvit/src
 - Senhas com `bcrypt`. Nunca logar senha, nem em erro.
 - Middlewares `protect` e `requirePasswordChanged` já existem — confirme que a rota nova está
   atrás deles (o `privateRouter` em `src/routes/index.ts`).
-- **Decisão conhecida do projeto:** o token JWT fica em `localStorage` (`cht_auth_token`) e vai
-  em `Authorization: Bearer`. Isso é suscetível a XSS, e o ECC recomenda `httpOnly` cookie.
-  É uma troca consciente para o app Electron + API local — **não** troque sem o usuário pedir,
-  mas registre se a mudança aumentar a superfície de XSS.
+- **Decisão conhecida do projeto:** a sessão do browser é cookie httpOnly
+  (`cht_auth`), com `SameSite=None; Secure` para o front e a API em origens
+  diferentes (ex.: `localhost` vs `127.0.0.1`). `protect` aceita o cookie **ou**
+  `Authorization: Bearer` (ferramenta para testes/scripts). O front **não** persiste
+  JWT em `localStorage`. XSS ainda pode disparar pedidos com `credentials`, mas
+  não lê o token. CSRF em JSON é mitigado pelo CORS allowlist + preflight.
 - Toda operação sensível precisa checar autorização pelo usuário autenticado, não por um id
   vindo do corpo da requisição.
 

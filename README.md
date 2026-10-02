@@ -29,8 +29,8 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
 - `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`; cada repo pode ser URL ou `{ "url", "ref" }`) e catálogo `clients` (URLs/`ref` de frontend/backend para `install --client:<name>` mesmo sem a pasta local).
 - `scripts/entry.mjs`: **ponto de entrada único** de todas as tarefas (`npx chtmain <comando>` ou `npm run cht -- <comando>`), idêntico em Windows e Linux.
-- `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`), instala dependências e, com `--new` / `--workspace:`, aplica a workspace de IDE/IA na raiz.
-- `workspaces/devApp/`: pack **Project-Opinionated** (`.vscode`, `.cursor`, `.claude`, Prettier, ESLint, `netlify.toml`). Cópias destes ficheiros na raiz do `cht-main` estão no `.gitignore`.
+- `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`), instala dependências e, com `--new` / `--workspace:` / `--workspace-clean`, aplica ou limpa a workspace de IDE/IA na raiz.
+- `workspaces/devApp/`: pack **Project-Opinionated** deste repo. Clientes guardam o pack em `<cliente>/workspace/` (ex.: `cht-client-mecarvit/workspace`). Cópias na raiz do `cht-main` estão no `.gitignore` (e no manifesto `.cht-workspace.json`).
 - `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
 - `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop instalável (`--win`, `--linux`, `--mac`) com backend embutido, runtime Node próprio e auto-atualização via GitHub Releases.
@@ -78,6 +78,7 @@ npm run cht -- <comando> [args...]
 | `build`         | builda o frontend de um cliente                       |
 | `electron`      | abre ou empacota o app desktop                        |
 | `bump`          | incrementa a versão de um repositório                 |
+| `bump-core`     | bump das repos principais, pins no `cht-main`, push   |
 | `sync-deps`     | normaliza versões de dependências compartilhadas      |
 
 Cada comando também tem um atalho em `npm run` (`npm run dev`, `npm run build -- mecarvit`, `npm run sync:deps`, …), mas o `npx chtmain` é o que funciona igual nos dois sistemas.
@@ -124,26 +125,29 @@ O comando `install` chama `scripts/install.mjs`. Faz **git clone** (se faltar) o
 
 Flags extra: `--skip-git`, `--force-git`, `--skip-npm-install`.
 
-#### Workspace de editor / IA (`--new` e `--workspace`)
+#### Workspace de editor / IA (`--new`, `--workspace` e `--workspace-clean`)
 
-Ficheiros de tooling da **raiz** do `cht-main` (`.vscode`, `.cursor`, `.claude`, `.prettierrc.json`, `.prettierignore`, `netlify.toml`, `eslint.config.js`) não vão no Git. A fonte fica num pack:
+Ficheiros de tooling na **raiz** do `cht-main` não vão no Git. A fonte é um pack: **qualquer ficheiro** no topo do pack é copiado (não só VS Code / Prettier / ESLint / Netlify / docs de IA). O assistente `--new` continua limitado às opções pré-configuradas.
 
 | Onde | O quê |
 | --- | --- |
-| `workspaces/devApp/` | pack deste repo (**Project-Opinionated**): VS Code, Prettier, ESLint, Netlify, docs de IA |
-| `<pasta-do-cliente>/workspace/` | pack opcional de um cliente (`cht.config.json` → `name`) |
+| `workspaces/devApp/` | pack **Project-Opinionated** deste repo |
+| `<pasta-do-cliente>/workspace/` | pack do cliente (`cht.config.json` → `name`) |
 
-`--new` e `--workspace:<nome>` **apagam** esses paths na raiz e só depois escrevem o pack novo (não misturam leftovers).
+`--workspace:<nome>` apaga o que o pack anterior deixou (manifesto `.cht-workspace.json`) e copia **todos** os entries do pack novo. `--workspace-clean` só apaga (manifesto + nomes do wizard). `--new` só escreve as opções do assistente.
 
 ```bash
 # Pack deste repo (Cursor, regras, Prettier, netlify.toml)
 npx chtmain install --workspace:devApp
 
-# Pack de um cliente (pasta workspace/ ao lado do cht.config.json)
+# Pack do cliente (cht-client-mecarvit/workspace)
 npx chtmain install --workspace:mecarvit
 
 # Assistente no terminal: IDE, Prettier, ESLint, VPS, docs de IA
 npx chtmain install --new
+
+# Só remover os ficheiros de tooling da raiz
+npx chtmain install --workspace-clean
 ```
 
 No `--new` abre uma TUI (mesmo estilo do runner): ecrã limpo, setas para mover, **enter** na opção revela New / Project-Opinionated (não aparecem só com as setas). IDE e VPS têm **N/A** (não instalar nada; o texto de ajuda explica). Prettier e ESLint perguntam Não / Sim. As estruturas de IA listam-se em coluna com bolinha; **enter** abre N/A / New / Project-Opinionated ao lado, a bolinha preenche ao escolher New ou Opinionated, e **N/A** desmarca. **Continuar** segue em frente. **backspace** volta, **q** cancela. Em baixo das teclas aparece o resumo das escolhas.
@@ -226,6 +230,28 @@ A versão é sempre `x.y.z`; minor e patch viram `0` ao passar de 10:
 
 O comando reescreve o arquivo `version` do repositório e **não** faz commit.
 
+O `version` do `cht-main` declara também as versões das repos principais que esta workspace espera:
+
+```
+version 1.0.1
+versionCheckUrl https://github.com/celiy/cht-main/blob/main/version
+cht-shared 1.0.1
+cht-base 1.0.1
+cht-design-system 1.0.1
+```
+
+A comparação é local: o número no `cht-main` contra o `version` de cada pasta (`cht-shared`, `cht-base`, `cht-design-system`). Clientes e backends não entram. Se divergirem, o sino de repos no frontend mostra um alerta até as versões coincidirem.
+
+Para incrementar as três repos principais, commitar o bump, copiar esses números para os pins do `cht-main` e fazer push (branch `main` se omitires):
+
+```bash
+npx chtmain bump-core
+npx chtmain bump-core --all
+npx chtmain bump-core --dry-run
+```
+
+Sem `--all`, a working tree rastreada tem de estar limpa e o commit leva só o ficheiro `version`. Com `--all`, também entra o resto das alterações de cada repo (e do `cht-main`) no mesmo commit do bump. Cada repo principal recebe `bump: x.y.z → a.b.c`. O `cht-main` só atualiza as linhas `cht-*` (a linha `version` dele não muda).
+
 Para incrementar e empacotar em um passo só, use a flag `--bump` no build do Electron:
 
 ```bash
@@ -246,3 +272,4 @@ npm run sync:deps
 - Se você editar manualmente `common-dependencies.json`, a próxima execução do sync respeita esse arquivo.
 - Para detalhes completos da sincronização de dependências, veja [`workspaces/devApp/.cursor/docs/deps_sync.md`](./workspaces/devApp/.cursor/docs/deps_sync.md).
 - Contexto do monorepo (aliases, runner, cliente novo): [`workspaces/devApp/.cursor/docs/context.md`](./workspaces/devApp/.cursor/docs/context.md).
+- Contribuir (estilo, qualidade, estabilidade de componentes): [`CONTRIBUTING.md`](./CONTRIBUTING.md).

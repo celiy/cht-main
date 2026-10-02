@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-export const WORKSPACE_ENTRIES = [
+export const WIZARD_WORKSPACE_ENTRIES = [
     ".vscode",
     ".cursor",
     ".claude",
@@ -11,7 +11,81 @@ export const WORKSPACE_ENTRIES = [
     "eslint.config.js"
 ];
 
+/** @deprecated use WIZARD_WORKSPACE_ENTRIES; wizard-only names */
+export const WORKSPACE_ENTRIES = WIZARD_WORKSPACE_ENTRIES;
+
+export const WORKSPACE_MANIFEST = ".cht-workspace.json";
+
 export const OPINIONATED_WORKSPACE = "devApp";
+
+const WORKSPACE_SKIP = new Set([
+    ".git",
+    ".gitkeep",
+    "node_modules",
+    WORKSPACE_MANIFEST,
+    "package.json",
+    "package-lock.json",
+    "README.md",
+    "CONTRIBUTING.md",
+    "AGENTS.md",
+    "clients.json",
+    "common-dependencies.json",
+    "todo.txt",
+    "version",
+    "THIRD_PARTY_NOTICES.md",
+    ".gitignore",
+    ".gitattributes",
+    "scripts",
+    "workspaces",
+    "builds",
+    "eslint-rules",
+    "prettier-plugins"
+]);
+
+/**
+ * Top-level names in a pack (any file or folder except orchestrator/skip).
+ *
+ * @param {string} dir
+ * @returns {string[]}
+ */
+export function listWorkspaceEntries(dir) {
+    if (!fs.existsSync(dir)) {
+        return [];
+    }
+
+    return fs
+        .readdirSync(dir, { withFileTypes: true })
+        .map((entry) => entry.name)
+        .filter((name) => !WORKSPACE_SKIP.has(name) && !name.startsWith("cht-"));
+}
+
+function readManifest(dir) {
+    const filePath = path.join(dir, WORKSPACE_MANIFEST);
+
+    if (!fs.existsSync(filePath)) {
+        return [];
+    }
+
+    try {
+        const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        const entries = parsed?.entries;
+
+        return Array.isArray(entries) ? entries.filter((name) => typeof name === "string") : [];
+    } catch {
+        return [];
+    }
+}
+
+function writeManifest(dir, names) {
+    fs.writeFileSync(
+        path.join(dir, WORKSPACE_MANIFEST),
+        `${JSON.stringify({ entries: names }, null, 4)}\n`
+    );
+}
+
+function namesToClear(dir, extraNames = []) {
+    return [...new Set([...WIZARD_WORKSPACE_ENTRIES, ...readManifest(dir), ...extraNames])];
+}
 
 /**
  * @param {string} name
@@ -49,17 +123,26 @@ function copyEntry(from, to) {
 }
 
 /**
- * Remove IDE/prettier/VPS/AI files from a root (or workspace folder).
+ * Remove whatever the last pack/wizard put on `dir` (manifest + wizard names).
  *
  * @param {string} dir
+ * @param {string[]} [extraNames]
  */
-export function clearRootWorkspace(dir) {
-    for (const entry of WORKSPACE_ENTRIES) {
+export function clearRootWorkspace(dir, extraNames = []) {
+    for (const entry of namesToClear(dir, extraNames)) {
+        if (WORKSPACE_SKIP.has(entry)) {
+            continue;
+        }
+
         fs.rmSync(path.join(dir, entry), { recursive: true, force: true });
     }
+
+    fs.rmSync(path.join(dir, WORKSPACE_MANIFEST), { force: true });
 }
 
 /**
+ * Copy every pack entry (not only wizard names) onto `toDir`.
+ *
  * @param {string} fromDir
  * @param {string} toDir
  */
@@ -68,11 +151,16 @@ export function copyWorkspaceToRoot(fromDir, toDir) {
         throw new Error(`[install] workspace not found: ${fromDir}`);
     }
 
-    clearRootWorkspace(toDir);
+    const entries = listWorkspaceEntries(fromDir);
 
-    for (const entry of WORKSPACE_ENTRIES) {
+    clearRootWorkspace(toDir, entries);
+    fs.mkdirSync(toDir, { recursive: true });
+
+    for (const entry of entries) {
         copyEntry(path.join(fromDir, entry), path.join(toDir, entry));
     }
+
+    writeManifest(toDir, entries);
 }
 
 /**
@@ -80,12 +168,19 @@ export function copyWorkspaceToRoot(fromDir, toDir) {
  * @param {string} destDir
  */
 export function saveWorkspaceFromRoot(root, destDir) {
-    fs.mkdirSync(destDir, { recursive: true });
-    clearRootWorkspace(destDir);
+    const fromManifest = readManifest(root);
+    const entries = fromManifest.length
+        ? fromManifest
+        : WIZARD_WORKSPACE_ENTRIES.filter((entry) => fs.existsSync(path.join(root, entry)));
 
-    for (const entry of WORKSPACE_ENTRIES) {
+    fs.mkdirSync(destDir, { recursive: true });
+    clearRootWorkspace(destDir, entries);
+
+    for (const entry of entries) {
         copyEntry(path.join(root, entry), path.join(destDir, entry));
     }
+
+    writeManifest(destDir, entries);
 }
 
 function writeJson(filePath, value) {
@@ -190,4 +285,9 @@ export function applyWorkspaceChoices(root, templatesDir, choices) {
 
         applyAi(root, templatesDir, kind, flavor);
     }
+
+    writeManifest(
+        root,
+        WIZARD_WORKSPACE_ENTRIES.filter((entry) => fs.existsSync(path.join(root, entry)))
+    );
 }

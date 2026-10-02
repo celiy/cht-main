@@ -1,0 +1,10 @@
+---
+description: Contrato de contribuição. Ler CONTRIBUTING.md antes de alterar código, componentes, scripts ou docs de componente.
+alwaysApply: true
+---
+
+# Contribuição
+
+Antes de escrever ou mudar código neste workspace, lê `CONTRIBUTING.md` na raiz do `cht-main`.
+
+Aplica-se a `cht-main`, `cht-base`, `cht-design-system`, `cht-shared`, clientes e backends. Resumo: diff mínimo, sem breaking em componentes **Prontos para uso**, exceções só em **Em evolução** / **Em implementação** (banner nos docs).

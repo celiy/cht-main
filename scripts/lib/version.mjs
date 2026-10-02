@@ -13,6 +13,9 @@ import path from "node:path";
 export const VERSION_FILE_CANDIDATES = ["version", "version.json", "version.txt"];
 export const VERSION_LINE_PATTERN = /^(\s*version[:\s=]+)(\d+\.\d+\.\d+)\s*$/im;
 export const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+export const CORE_WORKSPACE_REPOS = ["cht-shared", "cht-base", "cht-design-system"];
+const CORE_WORKSPACE_REPO_SET = new Set(CORE_WORKSPACE_REPOS);
+const PIN_LINE_PATTERN = /^(cht-[a-z0-9-]+)[:\s=]+(\d+\.\d+\.\d+)\s*$/i;
 
 /**
  * Rollover limits: the major number is unbounded, while minor and patch wrap
@@ -120,6 +123,101 @@ export function readVersion(dir) {
 }
 
 /**
+ * Parse a version file body: own `version`, optional `versionCheckUrl`,
+ * and `cht-* x.y.z` pins for core workspace repos only.
+ *
+ * @param {string} raw File contents.
+ * @returns {{ version: string | null, versionCheckUrl: string | null, requirements: Record<string, string> }}
+ */
+export function parseVersionFileText(raw) {
+    const requirements = {};
+    let version = null;
+    let versionCheckUrl = null;
+    const text = String(raw ?? "");
+
+    for (const rawLine of text.split(/\r?\n/)) {
+        const line = rawLine.trim();
+
+        if (!line || line.startsWith("#") || line.startsWith("//")) {
+            continue;
+        }
+
+        const versionMatch = line.match(VERSION_LINE_PATTERN);
+
+        if (versionMatch?.[2] && !/^versionCheckUrl/i.test(line)) {
+            version = versionMatch[2].trim();
+            continue;
+        }
+
+        const urlMatch = line.match(/^versionCheckUrl[:\s=]+(.+)$/i);
+
+        if (urlMatch?.[1]) {
+            versionCheckUrl = urlMatch[1].trim();
+            continue;
+        }
+
+        const pinMatch = line.match(PIN_LINE_PATTERN);
+        const repo = pinMatch?.[1]?.toLowerCase();
+        const pin = pinMatch?.[2];
+
+        if (repo && pin && CORE_WORKSPACE_REPO_SET.has(repo)) {
+            requirements[repo] = pin;
+        }
+    }
+
+    return { version, versionCheckUrl, requirements };
+}
+
+/**
+ * Compare cht-main version pins against each core repo's local `version` file.
+ *
+ * @param {string} root Workspace root (`cht-main`).
+ * @returns {Array<{ id: string, name: string, expected: string, actual: string | null }>}
+ */
+export function compareWorkspaceVersions(root) {
+    const mainFile = findVersionFile(root);
+    const mismatches = [];
+
+    if (!mainFile) {
+        return mismatches;
+    }
+
+    let raw;
+
+    try {
+        raw = fs.readFileSync(mainFile, "utf8");
+    } catch {
+        return mismatches;
+    }
+
+    const { requirements } = parseVersionFileText(raw);
+
+    for (const repo of CORE_WORKSPACE_REPOS) {
+        const expected = requirements[repo];
+
+        if (!expected) {
+            continue;
+        }
+
+        const local = readVersion(path.join(root, repo));
+        const actual = local?.version ?? null;
+
+        if (actual === expected) {
+            continue;
+        }
+
+        mismatches.push({
+            id: repo,
+            name: repo,
+            expected,
+            actual
+        });
+    }
+
+    return mismatches;
+}
+
+/**
  * Resolve a repo directory from its name without the `cht-` prefix, so callers
  * pass `client-mecarvit` and `base` instead of `cht-client-mecarvit`.
  *
@@ -213,4 +311,73 @@ export function bumpVersionDir(dir, options = {}) {
     result.written = true;
 
     return result;
+}
+
+/**
+ * Read each core repo's local `version` (throws if a core folder has none).
+ *
+ * @param {string} root Workspace root.
+ * @returns {Record<string, string>}
+ */
+export function readCoreLocalVersions(root) {
+    const pins = {};
+
+    for (const repo of CORE_WORKSPACE_REPOS) {
+        const local = readVersion(path.join(root, repo));
+
+        if (!local) {
+            throw new Error(`No version file for ${repo} in ${path.join(root, repo)}.`);
+        }
+
+        pins[repo] = local.version;
+    }
+
+    return pins;
+}
+
+/**
+ * Write `cht-* x.y.z` pin lines in the workspace `version` file from local
+ * core versions. Leaves the workspace's own `version` line untouched.
+ *
+ * @param {string} root Workspace root.
+ * @param {Record<string, string>} pins
+ * @param {{ dryRun?: boolean }} [options]
+ * @returns {{ filePath: string, written: boolean, changed: boolean }}
+ */
+export function writeCoreVersionPins(root, pins, options = {}) {
+    const filePath = findVersionFile(root);
+
+    if (!filePath) {
+        throw new Error(`No version file found in ${root}.`);
+    }
+
+    let raw = fs.readFileSync(filePath, "utf8");
+    const original = raw;
+
+    for (const repo of CORE_WORKSPACE_REPOS) {
+        const version = pins[repo];
+
+        if (!version || !VERSION_PATTERN.test(version)) {
+            continue;
+        }
+
+        const escaped = repo.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const linePattern = new RegExp(`^(${escaped}[:\\s=]+)\\d+\\.\\d+\\.\\d+\\s*$`, "im");
+
+        if (linePattern.test(raw)) {
+            raw = raw.replace(linePattern, `$1${version}`);
+        } else {
+            raw = `${raw.replace(/\s*$/, "")}\n${repo} ${version}\n`;
+        }
+    }
+
+    const changed = raw !== original;
+
+    if (options.dryRun || !changed) {
+        return { filePath, written: false, changed };
+    }
+
+    fs.writeFileSync(filePath, raw, "utf8");
+
+    return { filePath, written: true, changed };
 }

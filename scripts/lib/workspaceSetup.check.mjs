@@ -3,10 +3,13 @@ import os from "node:os";
 import path from "node:path";
 import {
     applyWorkspaceChoices,
+    clearRootWorkspace,
     copyWorkspaceToRoot,
+    listWorkspaceEntries,
     resolveWorkspaceDir,
     saveWorkspaceFromRoot,
-    WORKSPACE_ENTRIES
+    WORKSPACE_MANIFEST,
+    WIZARD_WORKSPACE_ENTRIES
 } from "./workspaceSetup.mjs";
 
 function assert(cond, label) {
@@ -29,13 +32,15 @@ fs.writeFileSync(path.join(templates, ".prettierrc.json"), "{\"tabWidth\":4}\n")
 fs.writeFileSync(path.join(templates, ".prettierignore"), "dist\n");
 fs.writeFileSync(path.join(templates, "netlify.toml"), "[[redirects]]\n");
 fs.writeFileSync(path.join(templates, "eslint.config.js"), "export default [];\n");
+fs.writeFileSync(path.join(templates, ".env.example"), "PACK=1\n");
+fs.writeFileSync(path.join(templates, "cspell.json"), "{\"words\":[\"cht\"]}\n");
 
 assert(resolveWorkspaceDir("devApp", root) === templates, "devApp dir");
 assert(resolveWorkspaceDir("dev", root) === templates, "dev alias");
 assert(
     resolveWorkspaceDir("acme", root, () => "cht-client-acme") ===
         path.join(root, "cht-client-acme", "workspace"),
-    "client relative dir"
+    "client workspace dir"
 );
 assert(
     resolveWorkspaceDir("ghost", root) === path.join(root, "workspaces", "ghost"),
@@ -47,6 +52,10 @@ assert(fs.readFileSync(path.join(root, ".vscode", "settings.json"), "utf8").incl
 assert(fs.existsSync(path.join(root, ".cursor", "README.md")), "copy cursor");
 assert(fs.existsSync(path.join(root, "netlify.toml")), "copy netlify");
 assert(fs.existsSync(path.join(root, "eslint.config.js")), "copy eslint");
+assert(fs.readFileSync(path.join(root, ".env.example"), "utf8").includes("PACK=1"), "copy extra env");
+assert(fs.existsSync(path.join(root, "cspell.json")), "copy extra cspell");
+assert(fs.existsSync(path.join(root, WORKSPACE_MANIFEST)), "copy writes manifest");
+assert(listWorkspaceEntries(templates).includes(".env.example"), "pack lists extras");
 
 const blank = path.join(tmp, "blank");
 fs.mkdirSync(blank, { recursive: true });
@@ -132,9 +141,18 @@ const saveDest = path.join(tmp, "saved");
 saveWorkspaceFromRoot(root, saveDest);
 assert(fs.existsSync(path.join(saveDest, ".vscode", "settings.json")), "save vscode");
 assert(fs.existsSync(path.join(saveDest, "netlify.toml")), "save netlify");
-assert(WORKSPACE_ENTRIES.includes(".claude"), "claude is a workspace entry");
-assert(WORKSPACE_ENTRIES.includes("eslint.config.js"), "eslint is a workspace entry");
 assert(fs.existsSync(path.join(saveDest, "eslint.config.js")), "save eslint");
+assert(fs.existsSync(path.join(saveDest, ".env.example")), "save extra env");
+assert(WIZARD_WORKSPACE_ENTRIES.includes(".claude"), "claude is a wizard entry");
+
+const leftover = path.join(tmp, "leftover");
+fs.mkdirSync(leftover, { recursive: true });
+copyWorkspaceToRoot(templates, leftover);
+assert(fs.existsSync(path.join(leftover, "cspell.json")), "leftover has extra");
+clearRootWorkspace(leftover);
+assert(!fs.existsSync(path.join(leftover, "cspell.json")), "clean removes extra via manifest");
+assert(!fs.existsSync(path.join(leftover, ".vscode")), "clean removes wizard files");
+assert(!fs.existsSync(path.join(leftover, WORKSPACE_MANIFEST)), "clean removes manifest");
 
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("workspaceSetup ok");
