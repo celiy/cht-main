@@ -24,6 +24,21 @@ function isGitRepo(dir) {
     return fs.existsSync(path.join(dir, ".git"));
 }
 
+/**
+ * Empty when HEAD is detached (CI / Netlify pin a commit, not a branch).
+ *
+ * @param {string} dir
+ * @returns {string}
+ */
+function gitCurrentBranch(dir) {
+    const result = spawnSync("git", ["branch", "--show-current"], {
+        cwd: dir,
+        encoding: "utf8"
+    });
+
+    return (result.status === 0 ? result.stdout : "").trim();
+}
+
 function assertGitOk(result, message) {
     if (result.status !== 0) {
         throw new Error(message);
@@ -233,6 +248,8 @@ function gitSyncRepo(spec, cwd, forceGit) {
             gitCheckoutRef(dest, name, ref, forceGit);
         } else if (forceGit) {
             gitForceResetToRemote(dest, name);
+        } else if (!gitCurrentBranch(dest)) {
+            console.log(`[install] git pull skipped in ${name} (detached HEAD)`);
         } else {
             console.log(`[install] git pull --ff-only in ${name}`);
             assertGitOk(
@@ -370,6 +387,12 @@ function syncRootGit(root, forceGit) {
     }
 
     const label = path.basename(root) || ".";
+
+    if (!forceGit && !gitCurrentBranch(root)) {
+        console.log(`[install] skipping root git sync in ${label} (detached HEAD)`);
+
+        return;
+    }
 
     console.log(`[install] git fetch in ${label}`);
     assertGitOk(
