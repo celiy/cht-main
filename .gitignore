@@ -1,5 +1,12 @@
 /cht-*
 /node_modules
 /builds
+/.vscode/
+/.cursor/
+/.claude/
+/.prettierrc.json
+/.prettierignore
+/netlify.toml
+/eslint.config.js
 **/*.pyc
 **/*__pycache__

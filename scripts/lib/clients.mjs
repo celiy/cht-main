@@ -18,7 +18,8 @@ const SKIP_DISCOVERY_DIRS = new Set([
     "cht-shared",
     "scripts",
     "builds",
-    "dist"
+    "dist",
+    "workspaces"
 ]);
 
 let cachedFile = null;

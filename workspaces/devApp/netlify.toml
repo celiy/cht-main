@@ -1,0 +1,6 @@
+# Vue Router history mode: unknown paths must serve index.html
+# with 200 so the client can resolve the route (not a Netlify 404).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

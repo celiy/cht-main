@@ -29,7 +29,8 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
 - `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`; cada repo pode ser URL ou `{ "url", "ref" }`) e catálogo `clients` (URLs/`ref` de frontend/backend para `install --client:<name>` mesmo sem a pasta local).
 - `scripts/entry.mjs`: **ponto de entrada único** de todas as tarefas (`npx chtmain <comando>` ou `npm run cht -- <comando>`), idêntico em Windows e Linux.
-- `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`) e instala dependências.
+- `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`), instala dependências e, com `--new` / `--workspace:`, aplica a workspace de IDE/IA na raiz.
+- `workspaces/devApp/`: pack **Project-Opinionated** (`.vscode`, `.cursor`, `.claude`, Prettier, ESLint, `netlify.toml`). Cópias destes ficheiros na raiz do `cht-main` estão no `.gitignore`.
 - `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
 - `scripts/electron.mjs`: abre o cliente no Electron (backend + frontend) ou empacota o app desktop instalável (`--win`, `--linux`, `--mac`) com backend embutido, runtime Node próprio e auto-atualização via GitHub Releases.
@@ -43,7 +44,7 @@ Clientes existentes são pastas irmãs com `cht.config.json` na raiz (`name` é 
 - **mecarvit**: frontend (`cht-client-mecarvit`) + backend (`cht-backend-mecarvit`)
 - **dev**: modo de desenvolvimento interno do `cht-base` (cliente virtual, sem backend)
 
-Para adicionar um cliente novo, ver `.cursor/docs/context.md` na seção "Adicionar um cliente novo".
+Para adicionar um cliente novo, ver [`workspaces/devApp/.cursor/docs/context.md`](./workspaces/devApp/.cursor/docs/context.md) na seção "Adicionar um cliente novo".
 
 ## Como funciona (visão geral)
 
@@ -121,6 +122,36 @@ npm run install:repos -- --client:mecarvit
 
 O comando `install` chama `scripts/install.mjs`. Faz **git clone** (se faltar) ou **git fetch** + **git pull --ff-only** (se a pasta já for um repo) nos `shared.repos` e nas URLs do catálogo / `cht.config.json`. Falha de clone, fetch, checkout ou pull **aborta** o install (não continua com o workspace a meio). Pode-se fixar `ref` (branch, tag ou commit) em `shared.repos` (`{ "url", "ref" }`) ou em `frontend.ref` / `backend.ref`. Sem `ref`, usa-se o branch padrão do remoto. Depois corre `npm install` na raiz e em cada pasta irmã com `package.json`.
 
+Flags extra: `--skip-git`, `--force-git`, `--skip-npm-install`.
+
+#### Workspace de editor / IA (`--new` e `--workspace`)
+
+Ficheiros de tooling da **raiz** do `cht-main` (`.vscode`, `.cursor`, `.claude`, `.prettierrc.json`, `.prettierignore`, `netlify.toml`, `eslint.config.js`) não vão no Git. A fonte fica num pack:
+
+| Onde | O quê |
+| --- | --- |
+| `workspaces/devApp/` | pack deste repo (**Project-Opinionated**): VS Code, Prettier, ESLint, Netlify, docs de IA |
+| `<pasta-do-cliente>/workspace/` | pack opcional de um cliente (`cht.config.json` → `name`) |
+
+`--new` e `--workspace:<nome>` **apagam** esses paths na raiz e só depois escrevem o pack novo (não misturam leftovers).
+
+```bash
+# Pack deste repo (Cursor, regras, Prettier, netlify.toml)
+npx chtmain install --workspace:devApp
+
+# Pack de um cliente (pasta workspace/ ao lado do cht.config.json)
+npx chtmain install --workspace:mecarvit
+
+# Assistente no terminal: IDE, Prettier, ESLint, VPS, docs de IA
+npx chtmain install --new
+```
+
+No `--new` abre uma TUI (mesmo estilo do runner): ecrã limpo, setas para mover, **enter** na opção revela New / Project-Opinionated (não aparecem só com as setas). IDE e VPS têm **N/A** (não instalar nada; o texto de ajuda explica). Prettier e ESLint perguntam Não / Sim. As estruturas de IA listam-se em coluna com bolinha; **enter** abre N/A / New / Project-Opinionated ao lado, a bolinha preenche ao escolher New ou Opinionated, e **N/A** desmarca. **Continuar** segue em frente. **backspace** volta, **q** cancela. Em baixo das teclas aparece o resumo das escolhas.
+
+`--new` precisa de TTY. Em CI usa `--workspace:<nome>`.
+
+O Netlify lê `netlify.toml` **antes** do `install`. Com o ficheiro só no pack, ou configuras redirects no painel, ou o comando de build inclui `--workspace:devApp` **e** os redirects estão no UI.
+
 ### 2) Rodar ambiente de desenvolvimento
 
 Modo dev padrão (apenas `cht-base`, sem backend):
@@ -175,7 +206,7 @@ npx chtmain electron build mecarvit --publish  # envia para o GitHub Releases
 
 Os artefatos saem em `builds/<cliente>/desktop`. Alvos disponíveis: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) e `--mac` (`dmg`/`zip`).
 
-Instaladores e atualização automática via GitHub Releases: veja [`.cursor/docs/desktop-release.md`](./.cursor/docs/desktop-release.md).
+Instaladores e atualização automática via GitHub Releases: veja [`workspaces/devApp/.cursor/docs/desktop-release.md`](./workspaces/devApp/.cursor/docs/desktop-release.md).
 
 ### 5) Incrementar a versão de um repositório
 
@@ -213,4 +244,5 @@ npm run sync:deps
 ## Observações rápidas
 
 - Se você editar manualmente `common-dependencies.json`, a próxima execução do sync respeita esse arquivo.
-- Para detalhes completos da sincronização de dependências, veja [`.cursor/docs/deps_sync.md`](./.cursor/docs/deps_sync.md).
+- Para detalhes completos da sincronização de dependências, veja [`workspaces/devApp/.cursor/docs/deps_sync.md`](./workspaces/devApp/.cursor/docs/deps_sync.md).
+- Contexto do monorepo (aliases, runner, cliente novo): [`workspaces/devApp/.cursor/docs/context.md`](./workspaces/devApp/.cursor/docs/context.md).

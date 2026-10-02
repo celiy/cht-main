@@ -6,6 +6,20 @@ Transformar os props do botão em objeto reutilizaveis exportaveis
 
 Criar uma repo shared separada para as funções do Mecarvit
 
+Revisar a documentação, ler com calma e avaliar se algo precisa ser alterado, resumido ou expandido com exemplos.
+    Expandir mais sobre o que já existe (incluir documentação sobre toda customização disponivel, todo caso de uso e exemplos práticos) no:
+        Toast
+        Carousel
+
+    Deixar a escrita menos parecida com de IA.
+
+    Diferenciar na documentação o proposótio do Tooltip que usa v-tooltip e o Tooltip custom.
+
+    Na tipografia explorar as outras tags html como <aside></aside> e etc.
+
+Na documentação do http, a parte de login e token fala sobre salvar no storage. Eliminar isso completamente. Sem salvar o token no storage.
+    Na minha experiencia, para salvar o token de login o backend mandava como cookie e o usuário usando usava esse cookie. Fazer essa implementação no Mecarvit atual, e deixar de forma que o usuário é quem lida com o token, mas é claro, dar acesso a ferramenta base se for necessário.
+
 Cada repo principal agora tem um version, o main tem o nome da repo e a versão que ele precisa pra funcionar. Então por exemplo o version do cht-main seria:
     version 1.0.1
     versionCheckUrl https://github.com/celiy/cht-main/blob/main/version

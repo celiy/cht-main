@@ -15,8 +15,8 @@
         "sync:deps": "node scripts/entry.mjs sync-deps",
         "lint": "eslint cht-base cht-design-system cht-shared",
         "lint:fix": "npm run lint -- --fix",
-        "format": "prettier --write \"cht-base/**/*.{vue,ts,js,css,json,md}\" \"cht-design-system/**/*.{vue,ts}\" \"cht-shared/**/*.{ts,js,json,md}\" \".cursor/**/*.{md,mdc}\"",
-        "format:check": "prettier --check \"cht-base/**/*.{vue,ts,js,css,json,md}\" \"cht-design-system/**/*.{vue,ts}\" \"cht-shared/**/*.{ts,js,json,md}\" \".cursor/**/*.{md,mdc}\""
+        "format": "prettier --write \"cht-base/**/*.{vue,ts,js,css,json,md}\" \"cht-design-system/**/*.{vue,ts}\" \"cht-shared/**/*.{ts,js,json,md}\" \"workspaces/devApp/.cursor/**/*.{md,mdc}\" \"workspaces/devApp/.claude/**/*.{md,mdc}\"",
+        "format:check": "prettier --check \"cht-base/**/*.{vue,ts,js,css,json,md}\" \"cht-design-system/**/*.{vue,ts}\" \"cht-shared/**/*.{ts,js,json,md}\" \"workspaces/devApp/.cursor/**/*.{md,mdc}\" \"workspaces/devApp/.claude/**/*.{md,mdc}\""
     },
     "dependencies": {
         "ink": "^7.0.1",

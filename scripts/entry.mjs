@@ -50,6 +50,7 @@ function printUsage() {
     console.log("Commands:");
     console.log("  install        Clone/pull workspace repos and install dependencies.");
     console.log("                   --skip-git  --force-git  --skip-npm-install  --client:<name>");
+    console.log("                   --new  --workspace:<name>");
     console.log("  dev            Start the dev runner (frontend + backend per client).");
     console.log("                   --no-backend  --client:<name>");
     console.log("  build          Build a client frontend into builds/<client>/dist.");
@@ -140,6 +141,10 @@ function main() {
     }
 
     if (!ensureNodeFromNvmrc(ROOT_DIR) || !assertNodeOnPath()) {
+        process.exit(1);
+    }
+
+    if (command === "install" && args.includes("--new") && !ensureRootDevDependencies()) {
         process.exit(1);
     }
 

@@ -1,0 +1,28 @@
+{
+    "semi": true,
+    "singleQuote": false,
+    "tabWidth": 4,
+    "useTabs": false,
+    "trailingComma": "none",
+    "printWidth": 100,
+    "singleAttributePerLine": true,
+    "plugins": [
+        "./prettier-plugins/vue-attribute-group-newlines.mjs",
+        "./node_modules/prettier-plugin-tailwindcss/dist/index.mjs"
+    ],
+    "tailwindStylesheet": "./cht-base/src/css/style.prettier.css",
+    "overrides": [
+        {
+            "files": "*.vue",
+            "options": {
+                "parser": "vue-attribute-group-newlines"
+            }
+        },
+        {
+            "files": "*.mdc",
+            "options": {
+                "parser": "markdown"
+            }
+        }
+    ]
+}
