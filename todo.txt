@@ -6,6 +6,28 @@ Transformar os props do botão em objeto reutilizaveis exportaveis
 
 Criar uma repo shared separada para as funções do Mecarvit
 
+Cada repo principal agora tem um version, o main tem o nome da repo e a versão que ele precisa pra funcionar. Então por exemplo o version do cht-main seria:
+    version 1.0.1
+    versionCheckUrl https://github.com/celiy/cht-main/blob/main/version
+    cht-shared x.x.x
+    cht-base x.x.x
+    etc...
+
+    E ao rodar, o frontend, a notificação que mostra as repos atualizadas agora mostra também um alerta mostrando que o workspace atual está com repos com versões diferentes do que a workspace caso o usuário tenha uma workspace com versão diferenciada. Isso deve se aplicar apenas as repos principais
+
+Instalação a partir do workspace do usuário:
+    Pastas tipo .vscode, .cursor, .prettierignore, .prettierrc.json, netlify.toml agora devem ficar dentro de uma pasta dedicada, comando de install recebe nova flag: --new onde o usuário poderá configurar como ele quer que o projeto siga.
+
+    Ao executar com esse new, ele irá perguntar a IDE que ele está usando, no momento terá apenas o vscode como opção, então ao selecionar vscode, ele irá criar uma .vscode vazia e básica. Depois a mesma lógica para o prettier, perguntar se ele quer instalar o prettier, criar configuração vazia do prettier. Depois arquivo de configuração de vps, por enquanto temos apenas o netlify.toml, então apenas copiar o netlify atual padrão. 
+
+    Depois de tudo isso, ele irá perguntar se ele quer salvar esta configuração de workspace atual, se sim, ele vai selecionar o cliente que ele quer salvar esta configuração. Então por exemplo, no meu caso de uso, esta configuração atual de arquivos que listei ficaria dentro do devApp. Então se um cliente que utiliza o cht já ter esta pasta com os arquvios de workspace pré montados, ao rodar o install, uma flag para copiar esses arquivos para o root do cht-main: --workspace:[nome].
+
+    Um passo extra: selecionar qual estrutura de docs para IA. No momento existe apenas o .cursor, então dentro desta pasta que teria esses defaults, ter várias pastas, no momento só duas: .cursor e .claude. O .cursor deve ser a base e o .claude deve seguir essa base. Isso é duplicação? sim. Mas no momento é mais simples de se manusear assim.
+
+    Agora, para cada opção, o usuário terá como selecionar New ou Project-Opinionated, que é os arquivos atuais. Então instalar com --new e selecionar o Project-Opinionated, é a mesma coisa que usar o --workspace:devApp.
+
+    Fazer estes arquivos serem ignorados pelo .gitignore apenas na root do cht-main.
+
 Documentação de contribuição:
     Fazer um documento padrão de contribuição, guiar IAs a ler eles caso precisem para fazer alguma contribuição ao repositório.
 
