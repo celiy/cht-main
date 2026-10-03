@@ -1,7 +1,7 @@
 # CHT Main
 
-Workspace principal do template multi-cliente de Diogo Carvalho Viegas (Celi's Herstal Template).  
-Este repositório orquestra front-end base, clientes, backend(s), design system e código compartilhado.
+Workspace principal do template multi-cliente (Celi's Herstal Template).  
+Este repositório monta front-end base com clientes, backend(s), design system e código compartilhado.
 
 - <b>Painel do projeto no Netlify</b>: [cht-dev overview](https://cht-dev.netlify.app/).
 
@@ -25,11 +25,9 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-base`: boot Vue + Vite + router; o cliente (pasta irmã com `cht.config.json`) fornece `App.vue`, `routes.ts` e layouts; sem `CLIENT`, usa `cht-base/src/devApp` para laboratório.
 - `cht-design-system`: componentes e padrões visuais reutilizáveis.
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
-- `cht-client-mecarvit`: frontend específico do cliente Mecarvit.
-- `cht-backend-mecarvit`: backend específico do cliente Mecarvit.
 - `clients.json`: infra compartilhada (`shared.repos`, `shared.vitePorts`; cada repo pode ser URL ou `{ "url", "ref" }`) e catálogo `clients` (URLs/`ref` de frontend/backend para `install --client:<name>` mesmo sem a pasta local).
-- `scripts/entry.mjs`: **ponto de entrada único** de todas as tarefas (`npx chtmain <comando>` ou `npm run cht -- <comando>`), idêntico em Windows e Linux.
-- `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:`), instala dependências e, com `--new` / `--workspace:` / `--workspace-clean`, aplica ou limpa a workspace de IDE/IA na raiz.
+- `scripts/entry.mjs`: **ponto de entrada único** de todas as tarefas (`npx chtmain <comando>` ou `npm run cht -- <comando>`), com suporte à Windows e Linux.
+- `scripts/install.mjs`: clona repositórios shared (+ frontend/backend do cliente se `--client:[nome do cliente]`), instala dependências e, com `--new` / `--workspace:` / `--workspace-clean`, aplica ou limpa a workspace de IDE/IA na raiz.
 - `workspaces/devApp/`: pack **Project-Opinionated** deste repo. Clientes guardam o pack em `<cliente>/workspace/` (ex.: `cht-client-mecarvit/workspace`). Cópias na raiz do `cht-main` estão no `.gitignore` (e no manifesto `.cht-workspace.json`).
 - `scripts/runner/`: runner TUI estilo htop (Node + Ink) com tabs, cores e hyperlinks clicáveis.
 - `scripts/build.mjs`: builda o frontend de um cliente e exporta artefato para `builds/<cliente>/dist`.
@@ -43,8 +41,6 @@ Clientes existentes são pastas irmãs com `cht.config.json` na raiz (`name` é 
 
 - **mecarvit**: frontend (`cht-client-mecarvit`) + backend (`cht-backend-mecarvit`)
 - **dev**: modo de desenvolvimento interno do `cht-base` (cliente virtual, sem backend)
-
-Para adicionar um cliente novo, ver [`workspaces/devApp/.cursor/docs/context.md`](./workspaces/devApp/.cursor/docs/context.md) na seção "Adicionar um cliente novo".
 
 ## Como funciona (visão geral)
 
@@ -61,9 +57,7 @@ Para adicionar um cliente novo, ver [`workspaces/devApp/.cursor/docs/context.md`
 
 No diretório raiz `cht-main`.
 
-### Um só ponto de entrada
-
-Todos os comandos passam por `scripts/entry.mjs`, que fala Node puro — logo o mesmo comando serve para Windows e Linux, sem `.sh` nem `.ps1` separados:
+Todos os comandos passam por `scripts/entry.mjs`, que usam Node puro, logo o mesmo comando serve para Windows e Linux.
 
 ```bash
 npx chtmain <comando> [args...]
@@ -71,15 +65,15 @@ npx chtmain <comando> [args...]
 npm run cht -- <comando> [args...]
 ```
 
-| Comando         | O que faz                                             |
-| --------------- | ----------------------------------------------------- |
-| `install`       | clona/puxa os repositórios e instala dependências     |
-| `dev`           | sobe o runner de desenvolvimento (frontend + backend) |
-| `build`         | builda o frontend de um cliente                       |
-| `electron`      | abre ou empacota o app desktop                        |
-| `bump`          | incrementa a versão de um repositório                 |
-| `bump-core`     | bump das repos principais, pins no `cht-main`, push   |
-| `sync-deps`     | normaliza versões de dependências compartilhadas      |
+| Comando     | O que faz                                             |
+| ----------- | ----------------------------------------------------- |
+| `install`   | clona/puxa os repositórios e instala dependências     |
+| `dev`       | sobe o runner de desenvolvimento (frontend + backend) |
+| `build`     | builda o frontend de um cliente                       |
+| `electron`  | abre ou empacota o app desktop                        |
+| `bump`      | incrementa a versão de um repositório                 |
+| `bump-core` | bump das repos principais, pins no `cht-main`, push   |
+| `sync-deps` | normaliza versões de dependências compartilhadas      |
 
 Cada comando também tem um atalho em `npm run` (`npm run dev`, `npm run build -- mecarvit`, `npm run sync:deps`, …), mas o `npx chtmain` é o que funciona igual nos dois sistemas.
 
@@ -129,12 +123,12 @@ Flags extra: `--skip-git`, `--force-git`, `--skip-npm-install`.
 
 Ficheiros de tooling na **raiz** do `cht-main` não vão no Git. A fonte é um pack: **qualquer ficheiro** no topo do pack é copiado (não só VS Code / Prettier / ESLint / Netlify / docs de IA). O assistente `--new` continua limitado às opções pré-configuradas.
 
-| Onde | O quê |
-| --- | --- |
-| `workspaces/devApp/` | pack **Project-Opinionated** deste repo |
+| Onde                            | O quê                                        |
+| ------------------------------- | -------------------------------------------- |
+| `workspaces/devApp/`            | pack **Project-Opinionated** deste repo      |
 | `<pasta-do-cliente>/workspace/` | pack do cliente (`cht.config.json` → `name`) |
 
-`--workspace:<nome>` apaga o que o pack anterior deixou (manifesto `.cht-workspace.json`) e copia **todos** os entries do pack novo. `--workspace-clean` só apaga (manifesto + nomes do wizard). `--new` só escreve as opções do assistente.
+`--workspace:<name>` apaga o que o pack anterior deixou (manifesto `.cht-workspace.json`) e copia **todos** os entries do pack novo. `--workspace-clean` só apaga (manifesto + nomes do wizard). `--new` só escreve as opções do assistente.
 
 ```bash
 # Pack deste repo (Cursor, regras, Prettier, netlify.toml)
@@ -150,97 +144,62 @@ npx chtmain install --new
 npx chtmain install --workspace-clean
 ```
 
-No `--new` abre uma TUI (mesmo estilo do runner): ecrã limpo, setas para mover, **enter** na opção revela New / Project-Opinionated (não aparecem só com as setas). IDE e VPS têm **N/A** (não instalar nada; o texto de ajuda explica). Prettier e ESLint perguntam Não / Sim. As estruturas de IA listam-se em coluna com bolinha; **enter** abre N/A / New / Project-Opinionated ao lado, a bolinha preenche ao escolher New ou Opinionated, e **N/A** desmarca. **Continuar** segue em frente. **backspace** volta, **q** cancela. Em baixo das teclas aparece o resumo das escolhas.
-
-`--new` precisa de TTY. Em CI usa `--workspace:<nome>`.
-
-O Netlify lê `netlify.toml` **antes** do `install`. Com o ficheiro só no pack, ou configuras redirects no painel, ou o comando de build inclui `--workspace:devApp` **e** os redirects estão no UI.
+`--new` precisa de TTY. Em CI usa `--workspace:<name>`.
 
 ### 2) Rodar ambiente de desenvolvimento
 
-Modo dev padrão (apenas `cht-base`, sem backend):
+Modo dev padrão (Documentação atual):
 
 ```bash
 npx chtmain dev
-# ou: npm run dev
 ```
 
 Cliente específico:
 
 ```bash
-npx chtmain dev --client:mecarvit
-# ou: npm run dev -- --client:mecarvit
+npx chtmain dev --client:<name>
+# <name> campo "name" do cht.config.json
 ```
 
-A sintaxe é genérica: para qualquer pasta irmã com `cht.config.json`, basta `--client:<name>` (o valor de `name` no ficheiro). Não há scripts hardcoded por cliente no `package.json` raiz.
+A sintaxe é genérica: para qualquer pasta irmã com `cht.config.json`, basta `--client:<name>` (o valor de `name` no ficheiro).
 
-O runner abre um TUI estilo htop com tabs por processo. Atalhos: `←`/`→` (ou `h`/`l`) para alternar tabs, `↑`/`↓` (ou `k`/`j`) e PgUp/PgDn para scroll do console, `r` reinicia o processo ativo, `c` limpa o buffer, `q` (ou `Ctrl+C`) encerra. URLs detectados nos logs aparecem como hyperlinks clicáveis na status bar.
+O runner abre um TUI estilo htop com tabs por processo.
 
 ### 3) Build/export de frontend por cliente
 
 ```bash
-npx chtmain build mecarvit
-# ou: npm run build -- mecarvit
+npx chtmain build <name>
 ```
 
 O script executa o build do `cht-base` para o cliente informado e exporta o artefato em:
 
 ```text
-builds/mecarvit/dist
+builds/<name>/dist
 ```
 
-Se `builds/<cliente>/dist` já existir, ele é removido e recriado (replace total).
+Se `builds/<name>/dist` já existir, ele é removido e recriado.
 
 ### 4) App desktop (Electron)
 
-Modo desenvolvimento (abre a janela imediatamente; o frontend mostra loading até o backend responder em `/health`):
+Modo desenvolvimento:
 
 ```bash
-npx chtmain electron mecarvit
-# ou: npm run electron -- mecarvit
+npx chtmain electron <name>
 ```
 
 Empacotar para o sistema hospedeiro (`AppImage`, `deb` e diretório `dir` no Linux):
 
 ```bash
-npx chtmain electron build mecarvit
-npx chtmain electron build mecarvit --win      # Windows (nsis)
-npx chtmain electron build mecarvit --publish  # envia para o GitHub Releases
+npx chtmain electron build <name>
+npx chtmain electron build <name> --win      # Windows (nsis)
+npx chtmain electron build <name> --publish  # envia para o GitHub Releases
 ```
 
-Os artefatos saem em `builds/<cliente>/desktop`. Alvos disponíveis: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) e `--mac` (`dmg`/`zip`).
+Os artefatos saem em `builds/<name>/desktop`. Alvos disponíveis: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) e `--mac` (`dmg`/`zip`).
 
 Instaladores e atualização automática via GitHub Releases: veja [`workspaces/devApp/.cursor/docs/desktop-release.md`](./workspaces/devApp/.cursor/docs/desktop-release.md).
 
-### 5) Incrementar a versão de um repositório
-
-```bash
-npx chtmain bump client-mecarvit          # o nome vai sem o prefixo `cht-`
-npx chtmain bump main                     # o próprio workspace
-npx chtmain bump client-mecarvit --dry-run
-```
-
-A versão é sempre `x.y.z`; minor e patch viram `0` ao passar de 10:
-
-| Antes     | Depois  |
-| --------- | ------- |
-| `1.1.1`   | `1.1.2` |
-| `1.1.10`  | `1.2.0` |
-| `5.10.10` | `6.0.0` |
-
-O comando reescreve o arquivo `version` do repositório e **não** faz commit.
-
-O `version` do `cht-main` declara também as versões das repos principais que esta workspace espera:
-
-```
-version 1.0.1
-versionCheckUrl https://github.com/celiy/cht-main/blob/main/version
-cht-shared 1.0.1
-cht-base 1.0.1
-cht-design-system 1.0.1
-```
-
-A comparação é local: o número no `cht-main` contra o `version` de cada pasta (`cht-shared`, `cht-base`, `cht-design-system`). Clientes e backends não entram. Se divergirem, o sino de repos no frontend mostra um alerta até as versões coincidirem.
+### 5) Incrementar a versão
 
 Para incrementar as três repos principais, commitar o bump, copiar esses números para os pins do `cht-main` e fazer push (branch `main` se omitires):
 
@@ -251,21 +210,6 @@ npx chtmain bump-core --dry-run
 ```
 
 Sem `--all`, a working tree rastreada tem de estar limpa e o commit leva só o ficheiro `version`. Com `--all`, também entra o resto das alterações de cada repo (e do `cht-main`) no mesmo commit do bump. Cada repo principal recebe `bump: x.y.z → a.b.c`. O `cht-main` só atualiza as linhas `cht-*` (a linha `version` dele não muda).
-
-Para incrementar e empacotar em um passo só, use a flag `--bump` no build do Electron:
-
-```bash
-npx chtmain electron build mecarvit --win --bump
-npx chtmain electron build mecarvit --win --bump client-mecarvit
-```
-
-### 6) Sincronizar dependências compartilhadas
-
-```bash
-npx chtmain sync-deps
-# ou:
-npm run sync:deps
-```
 
 ## Observações rápidas
 

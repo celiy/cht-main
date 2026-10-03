@@ -2,27 +2,14 @@ Novo componente:
     Scrollable:
         Componente que é um container normal, mas ele tem uma scrollbar customizada que pode receber varios props tipo sua posição no container (top, bottom, left, right), cor, tamanho e etc.
 
+    Input OTP
+
 Criar uma repo shared separada para as funções do Mecarvit
 
 Revisar a documentação, ler com calma e avaliar se algo precisa ser alterado, resumido ou expandido com exemplos.
-    Expandir mais sobre o que já existe (incluir documentação sobre toda customização disponivel, todo caso de uso e exemplos práticos) no:
-        Toast
-        Carousel
-
-    Documentar sobre nos docs:
-        Keybind: Pronto para uso
-        OptionsList: Pronto para uso
-        ViewportCenter: Pronto para uso
-
-    Deixar a escrita menos parecida com de IA.
-
-    Diferenciar na documentação o proposótio do Tooltip que usa v-tooltip e o Tooltip custom.
-
     Na tipografia explorar as outras tags html como <aside></aside> e etc.
 
-    Documentar como fazer um backend compativel com o que o projeto utiliza para gerenciar backends
-
-    Documentar que toda função e metodo deve ser comentado/docs com os padrões de params, returns e etc
+    Documentar como fazer um backend compativel com o que o projeto utiliza para gerenciar backends, nova secção nos docs Guia
 
 Mecarvit:
     Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
