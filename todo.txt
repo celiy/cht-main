@@ -1,15 +1,71 @@
 Novo componente:
-    Scrollable:
-        Componente que é um container normal, mas ele tem uma scrollbar customizada que pode receber varios props tipo sua posição no container (top, bottom, left, right), cor, tamanho e etc.
-
     Input OTP
+        Props:
+            label
+
+            helperText
+
+            error
+
+            inputsPattern: {
+                // Pattern to decide if the component will accept only numbers, letters, etc.
+                ["letters", "numbers", "symbols", etc...]
+                "/\w+\s/g"
+                // Can accept simplfied fields such as letters, numbers but it can also receive normal JS regular expressions
+            }
+
+            fields: {
+                [
+                    {
+                        type: input
+                        pattern: letters 
+                        //inputsPattern is used as a general pattern, but if a field has a pattern, then it will be used instead of the inputsPattern
+                    },
+                    {
+                        type: input
+                        pattern: numbers
+                    }
+                    {
+                        type: input
+                        pattern: /\w+\s/g
+                    }
+                    {
+                        type: separator
+                    }
+                    {
+                        type: input
+                    }
+                    {
+                        type: input
+                    }
+                    {
+                        type: colon
+                    }
+                    {
+                        type: input
+                    }
+                ]
+                // Will display as [][][]-[][]:[]
+            }
 
 Criar uma repo shared separada para as funções do Mecarvit
 
-Revisar a documentação, ler com calma e avaliar se algo precisa ser alterado, resumido ou expandido com exemplos.
-    Na tipografia explorar as outras tags html como <aside></aside> e etc.
+Documentar melhor a página da Sidebar
+    Implementar lados da sidebar, poder usar na direita ou esquerda
 
-    Documentar como fazer um backend compativel com o que o projeto utiliza para gerenciar backends, nova secção nos docs Guia
+Search de páginas
+
+Expor o localhost do frontend e docs na rede local
+
+Mobile:
+    Usar o site normalmente no mobile e decidir o que tem que ser mudado
+
+    Sidebar:
+        Icone de setinha não deve aparecer no mobile
+        prop que default true, arrastar para o lado no conteudo da sidebar abre a sidebar
+        prop que default true, arrastar sidebar faz ela fechar
+
+    Diminuir resistencia no arrastar do carousel
 
 Mecarvit:
     Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
