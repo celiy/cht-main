@@ -1,3 +1,4 @@
+import React from "react";
 import { render } from "ink";
 import { parseClientFlag, resolveClient, buildProcessList, getVitePorts, listClientNames } from "../lib/clients.mjs";
 import { ProcessManager, freePorts } from "../lib/procManager.mjs";

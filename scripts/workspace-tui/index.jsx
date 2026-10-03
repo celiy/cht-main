@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import React from "react";
 import { render } from "ink";
 import { App } from "./App.jsx";
 
