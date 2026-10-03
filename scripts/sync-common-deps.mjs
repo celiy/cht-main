@@ -16,6 +16,11 @@ const DEP_SECTIONS = [
     "optionalDependencies",
 ];
 
+/**
+ * Check if a directory exists
+ * @param {string} dirPath The directory path.
+ * @returns {boolean} Whether the directory exists.
+ */
 function isDirectory(dirPath) {
     try {
         return fs.statSync(dirPath).isDirectory();
@@ -24,24 +29,51 @@ function isDirectory(dirPath) {
     }
 }
 
+/**
+ * Read a JSON file
+ * @param {string} filePath The file path.
+ * @returns {Object} The JSON data.
+ */
 function readJson(filePath) {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+/**
+ * Write a JSON file
+ * @param {string} filePath The file path.
+ * @param {Object} data The data.
+ * @returns {void}
+ */
 function writeJson(filePath, data) {
     fs.writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 }
 
+/**
+ * Strip the range prefix
+ * @param {string} version The version.
+ * @returns {string} The stripped version.
+ */
 function stripRangePrefix(version) {
     if (typeof version !== "string") return "";
     return version.replace(/^[~^<>=\s]*/, "").trim();
 }
 
+/**
+ * Normalize a semver-like version
+ * @param {string} version The version.
+ * @returns {string | null} The normalized version.
+ */
 function normalizeSemverLike(version) {
     const cleaned = stripRangePrefix(version).match(/\d+\.\d+\.\d+/);
     return cleaned ? cleaned[0] : null;
 }
 
+/**
+ * Compare two semver-like versions
+ * @param {string} a The first version.
+ * @param {string} b The second version.
+ * @returns {number} The comparison result.
+ */
 function compareSemver(a, b) {
     const pa = a.split(".").map(Number);
     const pb = b.split(".").map(Number);
@@ -54,6 +86,11 @@ function compareSemver(a, b) {
     return 0;
 }
 
+/**
+ * List repository directories
+ * @param {string} rootDir The root directory.
+ * @returns {string[]} The list of repository directories.
+ */
 function listRepoDirectories(rootDir) {
     const entries = fs.readdirSync(rootDir, { withFileTypes: true });
 
@@ -63,6 +100,11 @@ function listRepoDirectories(rootDir) {
         .filter((dirPath) => fs.existsSync(path.join(dirPath, "package.json")));
 }
 
+/**
+ * Collect dependency data
+ * @param {string[]} packageJsonFiles The list of package.json files.
+ * @returns {Map<string, Object[]>} The package map.
+ */
 function collectDependencyData(packageJsonFiles) {
     const packageMap = new Map();
 
@@ -95,6 +137,11 @@ function collectDependencyData(packageJsonFiles) {
     return packageMap;
 }
 
+/**
+ * Choose the latest version
+ * @param {Object[]} entries The entries.
+ * @returns {string} The latest version.
+ */
 function chooseLatestVersion(entries) {
     let selected = entries[0];
     let selectedSemver = selected.semver;
@@ -120,6 +167,11 @@ function chooseLatestVersion(entries) {
     return selected.version;
 }
 
+/**
+ * Build the common dependencies file
+ * @param {Map<string, Object[]>} packageMap The package map.
+ * @returns {Object} The common dependencies.
+ */
 function buildCommonDependenciesFile(packageMap) {
     const commonDependencies = {};
 
@@ -145,6 +197,12 @@ function buildCommonDependenciesFile(packageMap) {
     };
 }
 
+/**
+ * Apply version normalization
+ * @param {string[]} packageJsonFiles The list of package.json files.
+ * @param {Object} baseDependencies The base dependencies.
+ * @returns {Object} The result (updatedFiles: number, updatedPackages: number).
+ */
 function applyVersionNormalization(packageJsonFiles, baseDependencies) {
     let updatedFiles = 0;
     let updatedPackages = 0;
@@ -178,6 +236,12 @@ function applyVersionNormalization(packageJsonFiles, baseDependencies) {
     return { updatedFiles, updatedPackages };
 }
 
+/**
+ * Ensure the base file
+ * @param {Map<string, Object[]>} packageMap The package map.
+ * @param {string} baseFilePath The base file path.
+ * @returns {Object} The result (created: boolean, data: Object).
+ */
 function ensureBaseFile(packageMap, baseFilePath) {
     if (!fs.existsSync(baseFilePath) && fs.existsSync(LEGACY_BASE_FILE_PATH)) {
         const legacy = readJson(LEGACY_BASE_FILE_PATH);
@@ -207,6 +271,10 @@ function ensureBaseFile(packageMap, baseFilePath) {
     return { created: true, data: generated };
 }
 
+/**
+ * Main function
+ * @returns {void}
+ */
 function main() {
     const repoDirs = listRepoDirectories(ROOT_DIR);
     const packageJsonFiles = repoDirs.map((repoDir) => path.join(repoDir, "package.json"));

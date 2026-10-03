@@ -2,6 +2,13 @@ import React from "react";
 import { Box, Text } from "ink";
 import { osc8Link } from "../../lib/ansiUtils.mjs";
 
+/**
+ * Hint component
+ * @param {Object} props
+ * @param {string} props.keyLabel The key label.
+ * @param {string} props.action The action.
+ * @returns {React.ReactNode} The hint component.
+ */
 function Hint({ keyLabel, action }) {
     return (
         <Box marginRight={2}>
@@ -11,6 +18,12 @@ function Hint({ keyLabel, action }) {
     );
 }
 
+/**
+ * Status bar component
+ * @param {Object} props
+ * @param {Object[]} props.linkGroups The link groups.
+ * @returns {React.ReactNode} The status bar component.
+ */
 export function StatusBar({ linkGroups }) {
     const groups = linkGroups ?? [];
 

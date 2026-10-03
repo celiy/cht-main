@@ -26,10 +26,18 @@ let cachedFile = null;
 let cachedShared = null;
 let cachedClients = null;
 
+/**
+ * Get the root directory
+ * @returns {string} The root directory.
+ */
 export function getRootDir() {
     return ROOT_DIR;
 }
 
+/**
+ * Clear the client discovery cache
+ * @returns {void}
+ */
 export function clearClientDiscoveryCache() {
     cachedClients = null;
 }
@@ -42,6 +50,11 @@ function getDiscoveredClient(name) {
     return discoverClients().get(name) ?? null;
 }
 
+/**
+ * Get the client config path
+ * @param {string} name
+ * @returns {string} The client config path.
+ */
 export function getClientConfigPath(name) {
     const found = getDiscoveredClient(name);
 
@@ -52,6 +65,11 @@ export function getClientConfigPath(name) {
     return found.configPath;
 }
 
+/**
+ * Get the client directory
+ * @param {string} name
+ * @returns {string} The client directory.
+ */
 export function getClientDir(name) {
     const found = getDiscoveredClient(name);
 
@@ -65,6 +83,10 @@ export function getClientDir(name) {
     return found.dir;
 }
 
+/**
+ * Load the clients file
+ * @returns {object} The clients file.
+ */
 function loadClientsFile() {
     if (cachedFile) {
         return cachedFile;
@@ -93,6 +115,10 @@ function loadClientsFile() {
     return cachedFile;
 }
 
+/**
+ * Load the shared file
+ * @returns {object} The shared file.
+ */
 function loadSharedFile() {
     loadClientsFile();
 
@@ -118,6 +144,10 @@ export function getCataloguedClient(name) {
     return entry;
 }
 
+/**
+ * List the catalogued client names
+ * @returns {string[]} The catalogued client names.
+ */
 export function listCataloguedClientNames() {
     const file = loadClientsFile();
     const catalog = file.clients && typeof file.clients === "object" ? file.clients : {};
@@ -125,6 +155,11 @@ export function listCataloguedClientNames() {
     return Object.keys(catalog).sort();
 }
 
+/**
+ * Parse the client config file
+ * @param {string} configPath
+ * @returns {object} The client config file.
+ */
 function parseClientConfigFile(configPath) {
     const raw = fs.readFileSync(configPath, "utf8");
     let parsed;
@@ -200,6 +235,7 @@ function discoverClients() {
 }
 
 /**
+ * List the client names
  * @returns {string[]} Client ids from `cht.config.json` → `name`
  */
 export function listClientNames() {
@@ -210,7 +246,7 @@ export function listClientNames() {
  * Read `cht.config.json` for a discovered client.
  *
  * @param {string} name Client id (`cht.config.json` → `name`)
- * @returns {object}
+ * @returns {object} The client config.
  */
 export function loadClientConfig(name) {
     const found = getDiscoveredClient(name);
@@ -228,6 +264,7 @@ export function loadClientConfig(name) {
 }
 
 /**
+ * Resolve the backend config
  * @param {object | null | undefined} backend
  * @param {string} name
  * @returns {object | null}
@@ -280,12 +317,20 @@ export function resolveBackendConfig(backend, name) {
     };
 }
 
+/**
+ * Get the shared repos
+ * @returns {string[]} The shared repos.
+ */
 export function getSharedRepos() {
     const shared = loadSharedFile();
 
     return Array.isArray(shared.repos) ? shared.repos : [];
 }
 
+/**
+ * Get the vite ports
+ * @returns {number[]} The vite ports.
+ */
 export function getVitePorts() {
     const shared = loadSharedFile();
 
@@ -296,6 +341,11 @@ export function getVitePorts() {
     return DEFAULT_VITE_PORTS;
 }
 
+/**
+ * Resolve the client
+ * @param {string} name
+ * @returns {object} The client.
+ */
 export function resolveClient(name) {
     if (!name || name === "dev") {
         return {
@@ -333,6 +383,11 @@ export function resolveClient(name) {
     };
 }
 
+/**
+ * Parse the client flag
+ * @param {string[]} argv
+ * @returns {object} The client flag.
+ */
 export function parseClientFlag(argv) {
     let client = null;
     const rest = [];
@@ -367,6 +422,8 @@ export function parseClientFlag(argv) {
  * Parse a positional client argument, e.g.:
  *   npm run build -- mecarvit
  *   npx chtmain build mecarvit
+ * @param {string[]} argv
+ * @returns {string | null} The positional client argument.
  */
 export function parsePositionalClientArg(argv) {
     const args = argv.filter((arg) => !!arg && !arg.startsWith("-"));
@@ -379,7 +436,7 @@ export function parsePositionalClientArg(argv) {
  * (or `{ "enabled": false }`) in cht.config.json.
  *
  * @param {object | null | undefined} config
- * @returns {boolean}
+ * @returns {boolean} True if the client dev tools are enabled.
  */
 export function isClientDevToolsEnabled(config) {
     const flag = config?.devTools;
@@ -396,8 +453,10 @@ export function isClientDevToolsEnabled(config) {
 }
 
 /**
+ * Build the process list
  * @param {object} resolved
  * @param {{ clientPort?: number, docsPort?: number, noBackend?: boolean }} [options]
+ * @returns {object[]} The process list.
  */
 export function buildProcessList(resolved, options = {}) {
     const procs = [];

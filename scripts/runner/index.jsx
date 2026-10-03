@@ -1,10 +1,13 @@
-import React from "react";
 import { render } from "ink";
 import { parseClientFlag, resolveClient, buildProcessList, getVitePorts, listClientNames } from "../lib/clients.mjs";
 import { ProcessManager, freePorts } from "../lib/procManager.mjs";
 import { findFreePort } from "../lib/ports.mjs";
 import { App } from "./App.jsx";
 
+/**
+ * Print the help message
+ * @returns {void}
+ */
 function printHelp() {
     const known = ["dev", ...listClientNames()].join(", ");
 
@@ -19,6 +22,10 @@ function printHelp() {
     console.log(`Known clients: ${known}`);
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 async function main() {
     const argv = process.argv.slice(2);
 

@@ -5,6 +5,11 @@ import { isWindows, spawnWithPipes } from "./runCommand.mjs";
 const DEFAULT_RING_SIZE = 5000;
 const IS_WIN = isWindows();
 
+/**
+ * Check if a command exists
+ * @param {string} name
+ * @returns {boolean} True if the command exists.
+ */
 function hasCommand(name) {
     if (IS_WIN) {
         const probe = spawnSync("where", [name], { stdio: "ignore", shell: true });
@@ -17,6 +22,12 @@ function hasCommand(name) {
     return probe.status === 0;
 }
 
+/**
+ * Build a shell command
+ * @param {string} dir
+ * @param {string} cmd
+ * @returns {string} The shell command.
+ */
 function buildShellCommand(dir, cmd) {
     const useStdbuf = hasCommand("stdbuf");
     const prefix = useStdbuf ? "exec stdbuf -oL -eL " : "exec ";
@@ -25,6 +36,11 @@ function buildShellCommand(dir, cmd) {
     return `cd "${escapedDir}" && ${prefix}${cmd}`;
 }
 
+/**
+ * Kill a Windows port
+ * @param {number} port
+ * @returns {void}
+ */
 function killWindowsPort(port) {
     const result = spawnSync("netstat", ["-ano"], { encoding: "utf8", shell: true });
 
@@ -53,6 +69,11 @@ function killWindowsPort(port) {
     }
 }
 
+/**
+ * Free ports
+ * @param {number[]} ports
+ * @returns {void}
+ */
 export function freePorts(ports) {
     if (!Array.isArray(ports) || ports.length === 0) {
         return;
@@ -93,10 +114,21 @@ export function freePorts(ports) {
     }
 }
 
+/**
+ * Wait for a number of milliseconds
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
 function waitMs(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Wait for a child process to exit
+ * @param {ChildProcess} child
+ * @param {number} timeoutMs
+ * @returns {Promise<void>}
+ */
 function waitForExit(child, timeoutMs) {
     return new Promise((resolve) => {
         if (!child || child.exitCode != null || child.signalCode != null) {
@@ -118,6 +150,11 @@ function waitForExit(child, timeoutMs) {
     });
 }
 
+/**
+ * Check if a process group is alive
+ * @param {number} pgid
+ * @returns {boolean} True if the process group is alive.
+ */
 function isGroupAlive(pgid) {
     if (!Number.isInteger(pgid) || pgid <= 0) {
         return false;
@@ -138,6 +175,12 @@ function isGroupAlive(pgid) {
     }
 }
 
+/**
+ * Wait until a process group is dead
+ * @param {number} pgid
+ * @param {number} timeoutMs
+ * @returns {Promise<void>}
+ */
 async function waitUntilGroupDead(pgid, timeoutMs) {
     const deadline = Date.now() + timeoutMs;
 
@@ -146,6 +189,12 @@ async function waitUntilGroupDead(pgid, timeoutMs) {
     }
 }
 
+/**
+ * Signal a process group
+ * @param {number} pid
+ * @param {string} signal
+ * @returns {void}
+ */
 function signalGroup(pid, signal) {
     try {
         process.kill(-pid, signal);
@@ -158,6 +207,11 @@ function signalGroup(pid, signal) {
     }
 }
 
+/**
+ * Managed process
+ * @param {Object} spec
+ * @returns {ManagedProcess}
+ */
 export class ManagedProcess extends EventEmitter {
     constructor({ id, name, dir, cmd, subtitle, env, ringSize = DEFAULT_RING_SIZE }) {
         super();
@@ -179,6 +233,10 @@ export class ManagedProcess extends EventEmitter {
         this.version = 0;
     }
 
+    /**
+     * Start the process
+     * @returns {void}
+     */
     start() {
         const env = { ...process.env, FORCE_COLOR: "1", ...this.env };
 
@@ -232,6 +290,12 @@ export class ManagedProcess extends EventEmitter {
         });
     }
 
+    /**
+     * Handle a chunk of data
+     * @param {string} chunk
+     * @param {boolean} isErr
+     * @returns {void}
+     */
     handleChunk(chunk, isErr) {
         const buf = isErr ? "partialErr" : "partial";
         const combined = this[buf] + chunk;
@@ -244,6 +308,10 @@ export class ManagedProcess extends EventEmitter {
         }
     }
 
+    /**
+     * Flush the partial data
+     * @returns {void}
+     */
     flushPartial() {
         if (this.partial) {
             this.appendLine(this.partial);
@@ -256,6 +324,11 @@ export class ManagedProcess extends EventEmitter {
         }
     }
 
+    /**
+     * Append a line to the log
+     * @param {string} line
+     * @returns {void}
+     */
     appendLine(line) {
         this.lines.push(line);
 
@@ -267,16 +340,29 @@ export class ManagedProcess extends EventEmitter {
         this.emit("line", line, this);
     }
 
+    /**
+     * Bump the version
+     * @returns {void}
+     */
     bumpVersion() {
         this.version += 1;
     }
 
+    /**
+     * Clear the log
+     * @returns {void}
+     */
     clear() {
         this.lines = [];
         this.bumpVersion();
         this.emit("cleared", this);
     }
 
+    /**
+     * Get the tail of the log
+     * @param {number} n
+     * @returns {string[]} The tail of the log.
+     */
     getTail(n) {
         if (n >= this.lines.length) {
             return this.lines.slice();
@@ -298,6 +384,10 @@ export class ManagedProcess extends EventEmitter {
         return this.lines.slice(from, from + Math.max(0, count));
     }
 
+    /**
+     * Check if the process is alive
+     * @returns {boolean} True if the process is alive.
+     */
     isAlive() {
         if (!this.child || this.child.pid == null) {
             return false;
@@ -312,6 +402,13 @@ export class ManagedProcess extends EventEmitter {
         }
     }
 
+    /**
+     * Stop the process
+     * @param {Object} options
+     * @param {number} options.termTimeoutMs
+     * @param {number} options.killTimeoutMs
+     * @returns {Promise<void>}
+     */
     async stop({ termTimeoutMs = 5000, killTimeoutMs = 1000 } = {}) {
         if (!this.child || this.child.pid == null) {
             return;
@@ -336,6 +433,10 @@ export class ManagedProcess extends EventEmitter {
         }
     }
 
+    /**
+     * Restart the process
+     * @returns {Promise<void>}
+     */
     async restart() {
         await this.stop();
 
@@ -351,6 +452,11 @@ export class ManagedProcess extends EventEmitter {
     }
 }
 
+/**
+ * Process manager
+ * @param {Object[]} specs
+ * @returns {ProcessManager}
+ */
 export class ProcessManager extends EventEmitter {
     constructor(specs) {
         super();
@@ -363,20 +469,37 @@ export class ProcessManager extends EventEmitter {
         }
     }
 
+    /**
+     * Start all processes
+     * @returns {void}
+     */
     startAll() {
         for (const proc of this.processes) {
             proc.start();
         }
     }
 
+    /**
+     * Stop all processes
+     * @returns {Promise<void>}
+     */
     async stopAll() {
         await Promise.all(this.processes.map((proc) => proc.stop()));
     }
 
+    /**
+     * Get a process by index
+     * @param {number} idx
+     * @returns {ManagedProcess}
+     */
     get(idx) {
         return this.processes[idx];
     }
 
+    /**
+     * Get the number of processes
+     * @returns {number} The number of processes.
+     */
     get count() {
         return this.processes.length;
     }

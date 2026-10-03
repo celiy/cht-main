@@ -49,17 +49,29 @@ function gitCurrentBranch(dir) {
     return (result.status === 0 ? result.stdout : "").trim();
 }
 
+/**
+ * Assert the Git result
+ * @param {Object} result The result.
+ * @param {string} message The message.
+ * @returns {void}
+ */
 function assertGitOk(result, message) {
     if (result.status !== 0) {
         throw new Error(message);
     }
 }
 
+/**
+ * Check if a reference looks like a commit SHA
+ * @param {string} ref The reference.
+ * @returns {boolean} Whether the reference looks like a commit SHA.
+ */
 function looksLikeCommitSha(ref) {
     return /^[0-9a-f]{7,40}$/i.test(ref);
 }
 
 /**
+ * Parse the install flags
  * @param {string[]} argv
  * @returns {{
  *   client: string | null,
@@ -136,6 +148,7 @@ function parseInstallFlags(argv) {
 }
 
 /**
+ * Parse the repository specification
  * @param {string | { url?: string, repo?: string, ref?: string } | null | undefined} value
  * @param {string | null | undefined} extraRef
  * @returns {{ url: string, ref?: string } | null}
@@ -165,6 +178,12 @@ function parseRepoSpec(value, extraRef) {
     return { url, ref };
 }
 
+/**
+ * Add a repository specification to the list
+ * @param {Object[]} list The list of repository specifications.
+ * @param {Object} spec The repository specification.
+ * @returns {void}
+ */
 function addRepoSpec(list, spec) {
     if (!spec) {
         return;
@@ -185,8 +204,9 @@ function addRepoSpec(list, spec) {
 
 /**
  * Discard local changes and match the tracking remote (or origin default).
- * @param {string} dir
- * @param {string} label
+ * @param {string} dir The directory.
+ * @param {string} label The label.
+ * @returns {void}
  */
 function gitForceResetToRemote(dir, label) {
     console.log(`[install] git reset --hard to remote in ${label} (--force-git)`);
@@ -229,10 +249,12 @@ function gitForceResetToRemote(dir, label) {
 }
 
 /**
- * @param {string} dir
+ * Checkout a reference
+ * @param {string} dir The directory.
  * @param {string} label
- * @param {string} ref
- * @param {boolean} forceGit
+ * @param {string} ref The reference.
+ * @param {boolean} forceGit Whether to force the checkout.
+ * @returns {void}
  */
 function gitCheckoutRef(dir, label, ref, forceGit) {
     console.log(`[install] git checkout ${ref} in ${label}`);
@@ -268,9 +290,11 @@ function gitCheckoutRef(dir, label, ref, forceGit) {
 }
 
 /**
- * @param {{ url: string, ref?: string }} spec
- * @param {string} cwd
- * @param {boolean} forceGit
+ * Sync a repository
+ * @param {Object} spec The repository specification.
+ * @param {string} cwd The current working directory.
+ * @param {boolean} forceGit Whether to force the checkout.
+ * @returns {void}
  */
 function gitSyncRepo(spec, cwd, forceGit) {
     const { url, ref } = spec;
@@ -317,8 +341,9 @@ function gitSyncRepo(spec, cwd, forceGit) {
  * Collect frontend/backend clone specs from local cht.config.json and the
  * clients.json catalog so `--client:<name>` works before the folder exists.
  *
- * @param {{ url: string, ref?: string }[]} list
- * @param {string} name
+ * @param {Object[]} list The list of repository specifications.
+ * @param {string} name The name.
+ * @returns {void}
  */
 function addClientRepoSpecs(list, name) {
     const catalog = getCataloguedClient(name);
@@ -337,8 +362,9 @@ function addClientRepoSpecs(list, name) {
 }
 
 /**
+ * Collect install repositories
  * @param {string | null} client From `--client:<name>`; when set, only that client's repos are added beyond shared.
- * @returns {{ url: string, ref?: string }[]}
+ * @returns {Object[]} The list of repository specifications.
  */
 function collectInstallRepos(client) {
     const list = [];
@@ -364,6 +390,11 @@ function collectInstallRepos(client) {
 
 const NATIVE_ADDON_PACKAGES = ["better-sqlite3", "bcrypt"];
 
+/**
+ * Check if a package.json uses native addons
+ * @param {string} dir The directory.
+ * @returns {boolean} Whether the package.json uses native addons.
+ */
 function packageJsonUsesNativeAddons(dir) {
     const pkgPath = path.join(dir, "package.json");
 
@@ -384,6 +415,11 @@ function packageJsonUsesNativeAddons(dir) {
     return NATIVE_ADDON_PACKAGES.some((name) => name in deps);
 }
 
+/**
+ * Rebuild native addons
+ * @param {string} dir The directory.
+ * @returns {void}
+ */
 function npmRebuildNativeAddons(dir) {
     if (!packageJsonUsesNativeAddons(dir)) {
         return;
@@ -400,6 +436,11 @@ function npmRebuildNativeAddons(dir) {
     }
 }
 
+/**
+ * Install npm dependencies
+ * @param {string} dir The directory.
+ * @returns {void}
+ */
 function npmInstall(dir) {
     console.log(`[install] npm install in ${path.relative(getRootDir(), dir) || "."}`);
 
@@ -412,6 +453,11 @@ function npmInstall(dir) {
     npmRebuildNativeAddons(dir);
 }
 
+/**
+ * List sub repositories with a package.json
+ * @param {string} rootDir The root directory.
+ * @returns {string[]} The list of sub repositories.
+ */
 function listSubReposWithPackageJson(rootDir) {
     const entries = fs.readdirSync(rootDir, { withFileTypes: true });
 
@@ -422,8 +468,10 @@ function listSubReposWithPackageJson(rootDir) {
 }
 
 /**
- * @param {string} root
- * @param {boolean} forceGit
+ * Sync the root Git repository
+ * @param {string} root The root directory.
+ * @param {boolean} forceGit Whether to force the checkout.
+ * @returns {void}
  */
 function syncRootGit(root, forceGit) {
     if (!isGitRepo(root)) {
@@ -457,6 +505,11 @@ function syncRootGit(root, forceGit) {
     );
 }
 
+/**
+ * Lookup the client directory
+ * @param {string} name The name.
+ * @returns {string | null} The client directory.
+ */
 function clientDirLookup(name) {
     try {
         return getClientDir(name);
@@ -465,6 +518,11 @@ function clientDirLookup(name) {
     }
 }
 
+/**
+ * Run the new workspace TUI
+ * @param {string[]} saveTargets The save targets.
+ * @returns {Object} The payload.
+ */
 function runNewWorkspaceTui(saveTargets) {
     const outFile = path.join(os.tmpdir(), `cht-workspace-new-${process.pid}.json`);
     const tui = path.join(getRootDir(), "scripts", "workspace-tui", "index.jsx");
@@ -493,6 +551,15 @@ function runNewWorkspaceTui(saveTargets) {
     return payload;
 }
 
+/**
+ * Apply workspace flags
+ * @param {string} root The root directory.
+ * @param {Object} flags The flags.
+ * @param {boolean} flags.isNew Whether to create a new workspace.
+ * @param {string | null} flags.workspace The workspace name.
+ * @param {boolean} flags.workspaceClean Whether to clean the workspace.
+ * @returns {void}
+ */
 async function applyWorkspaceFlags(root, { isNew, workspace, workspaceClean }) {
     if (workspaceClean) {
         console.log("[install] cleaning workspace files at root");
@@ -538,6 +605,10 @@ async function applyWorkspaceFlags(root, { isNew, workspace, workspaceClean }) {
     }
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 async function main() {
     const { client, skipGit, forceGit, skipNpmInstall, isNew, workspace, workspaceClean } =
         parseInstallFlags(process.argv.slice(2));

@@ -3,6 +3,10 @@ import fs from "node:fs";
 
 const IS_LINUX = process.platform === "linux";
 
+/**
+ * Read the clock ticks
+ * @returns {number} The clock ticks.
+ */
 function readClkTck() {
     if (!IS_LINUX) {
         return 100;
@@ -46,8 +50,8 @@ export function parseStatTicks(stat) {
 /**
  * VmRSS kilobytes from a `/proc/<pid>/status` blob.
  *
- * @param {string} status
- * @returns {number}
+ * @param {string} status The status blob.
+ * @returns {number} The VmRSS kilobytes.
  */
 export function parseRssKb(status) {
     const match = String(status).match(/^VmRSS:\s+(\d+)/m);
@@ -55,6 +59,11 @@ export function parseRssKb(status) {
     return match ? Number(match[1]) : 0;
 }
 
+/**
+ * List the children of a process
+ * @param {number} pid
+ * @returns {number[]} The children of the process.
+ */
 function listChildren(pid) {
     try {
         const raw = fs.readFileSync(`/proc/${pid}/task/${pid}/children`, "utf8");
@@ -73,6 +82,11 @@ function listChildren(pid) {
     }
 }
 
+/**
+ * Walk the tree of a process
+ * @param {number} rootPid
+ * @returns {number[]} The tree of the process.
+ */
 function walkTree(rootPid) {
     const pids = [];
     const stack = [rootPid];
@@ -93,10 +107,20 @@ function walkTree(rootPid) {
     return pids;
 }
 
+/**
+ * Read the ticks of a process
+ * @param {number} pid
+ * @returns {number} The ticks of the process.
+ */
 function readPidTicks(pid) {
     return parseStatTicks(fs.readFileSync(`/proc/${pid}/stat`, "utf8"));
 }
 
+/**
+ * Read the RSS of a process
+ * @param {number} pid
+ * @returns {number} The RSS of the process.
+ */
 function readPidRssKb(pid) {
     return parseRssKb(fs.readFileSync(`/proc/${pid}/status`, "utf8"));
 }
@@ -108,7 +132,7 @@ function readPidRssKb(pid) {
  * ponytail: tree walk via `/proc/<pid>/task/<pid>/children` — misses threads
  * that never show as processes. Upgrade: smaps_rollup / pidfd on cgroup v2.
  *
- * @param {number} pid
+ * @param {number} pid The process ID.
  * @returns {{ ticks: number, rssKb: number, at: number } | null}
  */
 export function sampleTree(pid) {
@@ -138,9 +162,10 @@ export function sampleTree(pid) {
 }
 
 /**
- * @param {{ ticks: number, rssKb: number, at: number }} prev
- * @param {{ ticks: number, rssKb: number, at: number }} next
- * @returns {{ cpu: number, rssMb: number }}
+ * Calculate the usage delta
+ * @param {{ ticks: number, rssKb: number, at: number }} prev The previous usage.
+ * @param {{ ticks: number, rssKb: number, at: number }} next The next usage.
+ * @returns {{ cpu: number, rssMb: number }} The usage delta.
  */
 export function usageDelta(prev, next) {
     const elapsedSec = (next.at - prev.at) / 1000;
@@ -157,6 +182,11 @@ export function usageDelta(prev, next) {
     };
 }
 
+/**
+ * Format the RSS
+ * @param {number} rssMb The RSS in megabytes.
+ * @returns {string} The formatted RSS.
+ */
 function formatRss(rssMb) {
     if (!Number.isFinite(rssMb) || rssMb < 0) {
         return "0M";
@@ -176,8 +206,8 @@ function formatRss(rssMb) {
 /**
  * Compact `12% 84M` for a process tab.
  *
- * @param {{ cpu: number, rssMb: number } | null | undefined} usage
- * @returns {string}
+ * @param {{ cpu: number, rssMb: number } | null | undefined} usage The usage.
+ * @returns {string} The formatted usage.
  */
 export function formatUsage(usage) {
     if (!usage) {

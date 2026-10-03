@@ -5,6 +5,10 @@ import { getRootDir, listClientNames, parsePositionalClientArg } from "./lib/cli
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
 import { withClientTsconfig } from "./mount-client-tsconfig.mjs";
 
+/**
+ * Print the usage
+ * @returns {void}
+ */
 function printUsage() {
     const known = ["dev", ...listClientNames()].join(", ");
 
@@ -17,6 +21,14 @@ function printUsage() {
     console.log(`Known clients: ${known || "(none)"}`);
 }
 
+/**
+ * Run a command
+ * @param {string} command The command to run.
+ * @param {string[]} args The arguments to pass to the command.
+ * @param {string} cwd The current working directory.
+ * @param {Record<string, string>} extraEnv The extra environment variables.
+ * @returns {void}
+ */
 function run(command, args, cwd, extraEnv = {}) {
     const result = spawnSyncInherit(command, args, { cwd, env: extraEnv });
 
@@ -25,6 +37,12 @@ function run(command, args, cwd, extraEnv = {}) {
     }
 }
 
+/**
+ * Copy a directory recursively
+ * @param {string} src The source directory.
+ * @param {string} dest The destination directory.
+ * @returns {void}
+ */
 function copyDirRecursive(src, dest) {
     if (!fs.existsSync(src)) {
         throw new Error(`Missing build output: ${src}`);
@@ -45,6 +63,10 @@ function copyDirRecursive(src, dest) {
     }
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 function main() {
     const root = getRootDir();
     const baseDir = path.join(root, "cht-base");

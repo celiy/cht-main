@@ -12,6 +12,7 @@ import {
 const DEFAULT_BRANCH = "main";
 
 /**
+ * Execute a git command
  * @param {string} cwd
  * @param {string[]} args
  * @param {NodeJS.ProcessEnv} [extraEnv]
@@ -31,6 +32,13 @@ export function git(cwd, args, extraEnv = {}) {
     };
 }
 
+/**
+ * Execute a git command and throw an error if it fails
+ * @param {string} cwd
+ * @param {string[]} args
+ * @param {string} label
+ * @returns {Object} The result of the git command.
+ */
 function gitOrThrow(cwd, args, label) {
     const result = git(cwd, args);
 
@@ -43,6 +51,12 @@ function gitOrThrow(cwd, args, label) {
     return result;
 }
 
+/**
+ * Assert that a directory is clean
+ * @param {string} dir
+ * @param {string} label
+ * @returns {void}
+ */
 function assertClean(dir, label) {
     const unstaged = git(dir, ["diff", "--quiet"]);
     const staged = git(dir, ["diff", "--cached", "--quiet"]);
@@ -55,6 +69,7 @@ function assertClean(dir, label) {
 }
 
 /**
+ * Checkout a branch
  * @param {string} dir
  * @param {string} branch
  * @param {{ fetch?: boolean }} [options]
@@ -93,6 +108,13 @@ export function checkoutBranch(dir, branch, options = {}) {
     throw new Error(`Branch "${branch}" not found in ${dir} (local or origin).`);
 }
 
+/**
+ * Commit changes
+ * @param {string} dir
+ * @param {string} message
+ * @param {Object} options
+ * @returns {void}
+ */
 function commitChanges(dir, message, options = {}) {
     if (options.all) {
         gitOrThrow(dir, ["add", "-A"], `git add -A in ${dir}`);
@@ -105,14 +127,31 @@ function commitChanges(dir, message, options = {}) {
     gitOrThrow(dir, ["commit", "-m", message], `git commit in ${dir}`);
 }
 
+/**
+ * Push a branch
+ * @param {string} dir
+ * @param {string} branch
+ * @returns {void}
+ */
 function pushBranch(dir, branch) {
     gitOrThrow(dir, ["push", "-u", "origin", branch], `git push origin ${branch} in ${dir}`);
 }
 
+/**
+ * Get the core bump commit message
+ * @param {string} from
+ * @param {string} to
+ * @returns {string} The core bump commit message.
+ */
 export function coreBumpCommitMessage(from, to) {
     return `bump: ${from} → ${to}`;
 }
 
+/**
+ * Get the main pins commit message
+ * @param {Object} pins
+ * @returns {string} The main pins commit message.
+ */
 export function mainPinsCommitMessage(pins) {
     const parts = CORE_WORKSPACE_REPOS.map((repo) => `${repo} ${pins[repo]}`).join(", ");
 

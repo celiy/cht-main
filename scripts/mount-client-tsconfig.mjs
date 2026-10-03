@@ -21,6 +21,11 @@ const CLIENT_ENTRY_RE =
 const CLIENT_DTS_INCLUDE_RE =
     /,?\s*(?:\/\/[^\n]*\n\s*)*"\.\.\/[^"]+\/src\/\*\*\/\*\.d\.ts"/g;
 
+/**
+ * Resolve the client path
+ * @param {string} client The client.
+ * @returns {string} The client path.
+ */
 function resolveClientPath(client) {
     const name = String(client ?? "").trim();
 
@@ -32,7 +37,8 @@ function resolveClientPath(client) {
 }
 
 /**
- * @param {string} client
+ * Resolve the client DTS include
+ * @param {string} client The client.
  * @returns {string | null}
  */
 function resolveClientDtsInclude(client) {
@@ -45,6 +51,10 @@ function resolveClientDtsInclude(client) {
     return `../${getClientDir(name)}/src/**/*.d.ts`;
 }
 
+/**
+ * Read the tsconfig
+ * @returns {string} The tsconfig.
+ */
 function readTsconfig() {
     if (!fs.existsSync(TSCONFIG_PATH)) {
         throw new Error(`[mount-client-tsconfig] missing ${TSCONFIG_PATH}`);
@@ -53,13 +63,18 @@ function readTsconfig() {
     return fs.readFileSync(TSCONFIG_PATH, "utf8");
 }
 
+/**
+ * Write the tsconfig
+ * @param {string} content The content.
+ * @returns {void}
+ */
 function writeTsconfig(content) {
     fs.writeFileSync(TSCONFIG_PATH, content, "utf8");
 }
 
 /**
  * Removes any `@client/*` path entry and mounted client `.d.ts` include.
- * @returns {{ changed: boolean }}
+ * @returns {Object} The result (changed: boolean).
  */
 export function unmountClientTsconfig() {
     const raw = readTsconfig();
@@ -78,7 +93,7 @@ export function unmountClientTsconfig() {
 
 /**
  * Mounts a single `@client/*` path (and client ambient `.d.ts`) for typecheck.
- * @param {string} client
+ * @param {string} client The client.
  * @returns {{ changed: boolean, clientPath: string }}
  */
 export function mountClientTsconfig(client) {

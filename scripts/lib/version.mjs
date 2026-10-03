@@ -30,6 +30,11 @@ export const VERSION_PART_LIMITS = {
     patch: 10
 };
 
+/**
+ * Parse a version string
+ * @param {string} value The version string to parse.
+ * @returns {object | null} The parsed version.
+ */
 export function parseVersion(value) {
     const normalized = String(value ?? "").trim();
 

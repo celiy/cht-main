@@ -8,6 +8,10 @@ import { useKeyboard } from "./hooks/useKeyboard.js";
 import { useLogScroll } from "./hooks/useLogScroll.js";
 import { urlsByProcess } from "../lib/ansiUtils.mjs";
 
+/**
+ * Use terminal size
+ * @returns {Object} The terminal size (columns, rows).
+ */ 
 function useTerminalSize() {
     const { stdout } = useStdout();
     const [size, setSize] = useState({
@@ -49,6 +53,14 @@ function useAlternateScroll() {
     }, [stdout]);
 }
 
+/**
+ * App component
+ * @param {Object} props
+ * @param {Object} props.manager The manager.
+ * @param {string} props.clientName The client name.
+ * @param {Function} props.onQuit The function to call when the app is quit.
+ * @returns {React.ReactNode} The app component (Box with Header, LogPane, and StatusBar).
+ */
 export function App({ manager, clientName, onQuit }) {
     const { exit } = useApp();
     const [activeIdx, setActiveIdx] = useState(0);

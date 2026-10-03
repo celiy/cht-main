@@ -39,6 +39,10 @@ const COMMAND_ALIASES = {
     "version:bump": "bump"
 };
 
+/**
+ * Print the usage
+ * @returns {void}
+ */
 function printUsage() {
     const commands = [...Object.keys(SCRIPT_COMMANDS), "dev"];
 
@@ -65,6 +69,10 @@ function printUsage() {
     console.log(`Available: ${commands.join(", ")}`);
 }
 
+/**
+ * Ensure the root dev dependencies
+ * @returns {boolean} Whether the root dev dependencies are ensured.
+ */
 function ensureRootDevDependencies() {
     const tsxDir = path.join(ROOT_DIR, "node_modules", "tsx");
 
@@ -86,6 +94,7 @@ function ensureRootDevDependencies() {
 }
 
 /**
+ * Run a node script
  * @param {string} scriptName File name inside `scripts/`.
  * @param {string[]} args Arguments forwarded to the script.
  * @returns {never} Exits with the child status.
@@ -101,6 +110,11 @@ function runNodeScript(scriptName, args) {
     process.exit(result.status === null ? 1 : result.status);
 }
 
+/**
+ * Run the dev runner
+ * @param {string[]} args The arguments.
+ * @returns {void}
+ */
 function runDevRunner(args) {
     const runnerPath = path.join(SCRIPTS_DIR, "runner", "index.jsx");
     const result = spawnSync(process.execPath, ["--import", "tsx", runnerPath, ...args], {
@@ -112,6 +126,10 @@ function runDevRunner(args) {
     process.exit(result.status === null ? 1 : result.status);
 }
 
+/**
+ * Main function
+ * @returns {void}
+ */
 function main() {
     const rawCommand = process.argv[2];
     const args = process.argv.slice(3);

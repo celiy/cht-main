@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 
 /**
  * Default state for the log scroll.
- * @returns {Object} The default state.
+ * @returns {Object} The default state (follow: true, start: 0).
  */
 function defaultState() {
     return { follow: true, start: 0 };

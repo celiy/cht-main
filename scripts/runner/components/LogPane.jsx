@@ -2,6 +2,17 @@ import React from "react";
 import { Box, Text } from "ink";
 import { truncateVisible } from "../../lib/ansiUtils.mjs";
 
+/**
+ * Log pane component
+ * @param {Object} props
+ * @param {object} props.proc The process.
+ * @param {number} props.height The height of the pane.
+ * @param {number} props.width The width of the pane.
+ * @param {number} props.start The start line.
+ * @param {boolean} props.follow Whether to follow the log.
+ * @param {number} props.totalLines The total number of lines.
+ * @returns {React.ReactNode} The log pane component.
+ */
 export function LogPane({ proc, height, width, start, follow, totalLines }) {
     const titleRows = 1;
     const innerHeight = Math.max(1, height - 2 - titleRows);
@@ -43,6 +54,11 @@ export function LogPane({ proc, height, width, start, follow, totalLines }) {
     );
 }
 
+/**
+ * Get the height of the log view
+ * @param {number} paneHeight The height of the pane.
+ * @returns {number} The height of the log view.
+ */
 export function getLogViewHeight(paneHeight) {
     return Math.max(1, paneHeight - 3);
 }

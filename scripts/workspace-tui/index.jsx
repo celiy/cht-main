@@ -1,8 +1,12 @@
-import React from "react";
 import fs from "node:fs";
 import { render } from "ink";
 import { App } from "./App.jsx";
 
+/**
+ * Parse the arguments
+ * @param {string[]} argv The arguments.
+ * @returns {Object} The parsed arguments (out, targets).
+ */
 function parseArgs(argv) {
     let out = "";
     let targets = [];
@@ -33,6 +37,10 @@ function parseArgs(argv) {
     return { out, targets };
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 async function main() {
     const { out, targets } = parseArgs(process.argv.slice(2));
 

@@ -3,6 +3,11 @@ import { sampleTree, usageDelta } from "../../lib/procUsage.mjs";
 
 const USAGE_INTERVAL_MS = 1000;
 
+/**
+ * Use processes
+ * @param {Object} manager The manager.
+ * @returns {Object} The processes (processes, usageById, tick).
+ */
 export function useProcesses(manager) {
     const [tick, setTick] = useState(0);
     const [usageById, setUsageById] = useState({});

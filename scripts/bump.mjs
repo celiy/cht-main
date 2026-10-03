@@ -4,6 +4,10 @@ import path from "node:path";
 import { getRootDir } from "./lib/clients.mjs";
 import { bumpVersionDir, listBumpableRepos, readVersion, resolveRepoDir } from "./lib/version.mjs";
 
+/**
+ * Print the usage
+ * @returns {void}
+ */
 function printUsage() {
     const known = listBumpableRepos(getRootDir());
 
@@ -22,6 +26,10 @@ function printUsage() {
     console.log(`Bumpable repos: ${known.join(", ") || "(none)"}`);
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 function main() {
     const argv = process.argv.slice(2);
     const dryRun = argv.includes("--dry-run");

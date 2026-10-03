@@ -5,9 +5,10 @@ import { spawn, spawnSync } from "node:child_process";
 const IS_WIN = process.platform === "win32";
 
 /**
- * @param {string} command
- * @param {string[]} [args]
- * @param {{ cwd?: string, env?: Record<string, string | undefined> }} [options]
+ * Spawn a command and inherit the output
+ * @param {string} command The command to run.
+ * @param {string[]} [args] The arguments to pass to the command.
+ * @param {{ cwd?: string, env?: Record<string, string | undefined> }} [options] The options to pass to the command.
  */
 export function spawnSyncInherit(command, args = [], options = {}) {
     const { cwd, env: extraEnv = {} } = options;
@@ -21,8 +22,9 @@ export function spawnSyncInherit(command, args = [], options = {}) {
 }
 
 /**
- * @param {string} command
- * @param {string[]} [args]
+ * Spawn a command and pipe the output
+ * @param {string} command The command to run.
+ * @param {string[]} [args] The arguments to pass to the command.
  * @param {import("node:child_process").SpawnOptionsWithoutStdio} [options]
  */
 export function spawnWithPipes(command, args = [], options = {}) {

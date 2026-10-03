@@ -20,6 +20,10 @@ const TEXT_EXT = new Set([
     ".d.ts"
 ]);
 
+/**
+ * Print the usage
+ * @returns {void}
+ */
 function printUsage() {
     console.log("Usage: npx chtmain create <nome> <pasta>");
     console.log("");
@@ -29,6 +33,11 @@ function printUsage() {
     console.log("Se a pasta já existir, os ficheiros são copiados para dentro (o .git mantém-se).");
 }
 
+/**
+ * Convert a value to kebab case
+ * @param {string} value The value to convert.
+ * @returns {string} The kebab case value.
+ */
 function toKebab(value) {
     return String(value)
         .trim()
@@ -37,6 +46,11 @@ function toKebab(value) {
         .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Convert a value to title case
+ * @param {string} kebab The kebab case value.
+ * @returns {string} The title case value.
+ */
 function toTitle(kebab) {
     return kebab
         .split("-")
@@ -45,6 +59,11 @@ function toTitle(kebab) {
         .join(" ");
 }
 
+/**
+ * Convert a value to pascal case
+ * @param {string} kebab The kebab case value.
+ * @returns {string} The pascal case value.
+ */
 function toPascal(kebab) {
     return kebab
         .split("-")
@@ -53,6 +72,11 @@ function toPascal(kebab) {
         .join("");
 }
 
+/**
+ * Check if a file is a text file
+ * @param {string} filePath The file path.
+ * @returns {boolean} Whether the file is a text file.
+ */
 function isTextFile(filePath) {
     const base = path.basename(filePath);
 
@@ -69,6 +93,12 @@ function isTextFile(filePath) {
     return TEXT_EXT.has(ext);
 }
 
+/**
+ * Apply placeholders to a content
+ * @param {string} content The content to apply the placeholders to.
+ * @param {Record<string, string>} tokens The tokens to apply.
+ * @returns {string} The content with the placeholders applied.
+ */
 function applyPlaceholders(content, tokens) {
     let next = content;
 
@@ -79,6 +109,13 @@ function applyPlaceholders(content, tokens) {
     return next;
 }
 
+/**
+ * Copy a template
+ * @param {string} fromDir The source directory.
+ * @param {string} toDir The destination directory.
+ * @param {Record<string, string>} tokens The tokens to apply.
+ * @returns {void}
+ */
 function copyTemplate(fromDir, toDir, tokens) {
     fs.mkdirSync(toDir, { recursive: true });
 
@@ -105,6 +142,10 @@ function copyTemplate(fromDir, toDir, tokens) {
     }
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 function main() {
     const args = process.argv.slice(2).filter((arg) => arg !== "--");
 

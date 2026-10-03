@@ -1,6 +1,11 @@
 const ANSI_REGEX = /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g;
 const URL_REGEX = /\bhttps?:\/\/[^\s<>\u001B"']+/g;
 
+/**
+ * Strip ANSI escape codes from a string
+ * @param {string} input The string to strip ANSI escape codes from.
+ * @returns {string} The string without ANSI escape codes.
+ */
 export function stripAnsi(input) {
     if (!input) {
         return "";
@@ -9,10 +14,20 @@ export function stripAnsi(input) {
     return String(input).replace(ANSI_REGEX, "");
 }
 
+/**
+ * Get the visible length of a string
+ * @param {string} input The string to get the visible length of.
+ * @returns {number} The visible length of the string.
+ */
 export function visibleLength(input) {
     return stripAnsi(input).length;
 }
 
+/**
+ * Find URLs in a string
+ * @param {string} input The string to find URLs in.
+ * @returns {string[]} The URLs found in the string.
+ */
 export function findUrls(input) {
     const cleaned = stripAnsi(input);
     const urls = [];
@@ -30,6 +45,11 @@ export function findUrls(input) {
     return urls;
 }
 
+/**
+ * Deduplicate URLs
+ * @param {string[]} urls The URLs to deduplicate.
+ * @returns {string[]} The deduplicated URLs.
+ */
 export function dedupeUrls(urls) {
     const seen = new Set();
     const out = [];
@@ -76,6 +96,12 @@ export function urlsByProcess(processes) {
     return groups;
 }
 
+/**
+ * Create an OSC8 link
+ * @param {string} url The URL to create an OSC8 link for.
+ * @param {string} label The label to create an OSC8 link for.
+ * @returns {string} The OSC8 link.
+ */
 export function osc8Link(url, label) {
     const text = label || url;
     const ESC = "\x1B";
@@ -83,6 +109,12 @@ export function osc8Link(url, label) {
     return `${ESC}]8;;${url}${ESC}\\${text}${ESC}]8;;${ESC}\\`;
 }
 
+/**
+ * Truncate a string to a maximum visible length
+ * @param {string} input The string to truncate.
+ * @param {number} max The maximum visible length.
+ * @returns {string} The truncated string.
+ */
 export function truncateVisible(input, max) {
     if (!input) {
         return "";

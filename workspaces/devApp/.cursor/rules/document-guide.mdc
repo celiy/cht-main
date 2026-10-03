@@ -7,6 +7,17 @@ alwaysApply: false
 
 Referência técnica (JSDoc, READMEs de módulo) em **inglês**. Cópia de UI no idioma do produto.
 
+## Cabeçalho de ficheiro `.ts`
+
+Obrigatório no topo de cada `.ts` / `.d.ts` (não em `.vue`). Ver `ts-module-header.mdc`.
+
+```ts
+/**
+ * The Vue globals types module
+ * This module is responsible for the Vue globals types of the project.
+ */
+```
+
 ## Quando documentar
 
 - O que for **não óbvio**, **sensível a erro** ou **contraintuitivo**.

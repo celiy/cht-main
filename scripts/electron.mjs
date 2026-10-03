@@ -35,6 +35,10 @@ const BACKEND_SKIP_FILES = new Set([
 ]);
 const BACKEND_SKIP_PATTERNS = [/\.sqlite(-journal|-wal)?$/, /\.md$/, /\.test\.ts$/, /\.spec\.ts$/];
 
+/**
+ * Print the usage
+ * @returns {void}
+ */
 function printUsage() {
     const known = ["dev", ...listClientNames()].join(", ");
 
@@ -55,6 +59,14 @@ function printUsage() {
     console.log(`Known clients: ${known || "(none)"}`);
 }
 
+/**
+ * Run a command
+ * @param {string} command The command to run.
+ * @param {string[]} args The arguments to pass to the command.
+ * @param {string} cwd The current working directory.
+ * @param {Record<string, string>} extraEnv The extra environment variables.
+ * @returns {void}
+ */
 function run(command, args, cwd, extraEnv = {}) {
     const result = spawnSyncInherit(command, args, { cwd, env: extraEnv });
 
@@ -63,6 +75,11 @@ function run(command, args, cwd, extraEnv = {}) {
     }
 }
 
+/**
+ * Parse the arguments
+ * @param {string[]} argv The arguments.
+ * @returns {Object} The parsed arguments (isBuild, client, target, shouldPublish, shouldBump, bumpRepo).
+ */
 function parseArgs(argv) {
     const withoutBuild = argv.filter((arg) => arg !== "build");
     const isBuild = argv.includes("build");
@@ -109,10 +126,21 @@ function parseBumpArg(argv) {
     return { shouldBump: true, bumpRepo, rest };
 }
 
+/**
+ * Get the Vite port
+ * @returns {number} The Vite port.
+ */
 function vitePort() {
     return getVitePorts()[0] || 5173;
 }
 
+/**
+ * Get the health URL
+ * @param {string} host The host.
+ * @param {number} port The port.
+ * @param {string} healthPath The health path.
+ * @returns {string} The health URL.
+ */
 function healthUrl(host, port, healthPath) {
     const normalized = healthPath.startsWith("/") ? healthPath : `/${healthPath}`;
 
@@ -137,6 +165,11 @@ function clientApiBaseUrl(entry, target) {
     return null;
 }
 
+/**
+ * Get the API endpoint
+ * @param {string} apiBaseUrl The API base URL.
+ * @returns {Object | null} The API endpoint (host, port).
+ */
 function apiEndpoint(apiBaseUrl) {
     if (!apiBaseUrl) {
         return null;
@@ -156,8 +189,9 @@ function apiEndpoint(apiBaseUrl) {
 }
 
 /**
- * Read the app version from the workspace `version` file so the installer,
- * `app.getVersion()` and the updater feed all agree on one number.
+ * Read the app version
+ * @param {string} root The root directory.
+ * @returns {string | null} The app version.
  */
 function readAppVersion(root) {
     for (const name of VERSION_FILE_CANDIDATES) {
@@ -235,6 +269,10 @@ function applyVersionBump(root, resolved, bumpRepo) {
     );
 }
 
+/**
+ * Get the current platform target
+ * @returns {string} The current platform target.
+ */
 function currentPlatformTarget() {
     if (process.platform === "win32") {
         return "win";
@@ -249,6 +287,8 @@ function currentPlatformTarget() {
 
 /**
  * Accept `--win`, `--linux` or `--mac` to cross-select the packaging target.
+ * @param {string[]} argv The arguments.
+ * @returns {string} The packaging target.
  */
 function parseTarget(argv) {
     for (const arg of argv) {
@@ -262,6 +302,11 @@ function parseTarget(argv) {
     return currentPlatformTarget();
 }
 
+/**
+ * Parse the GitHub repository
+ * @param {string} repoUrl The repository URL.
+ * @returns {Object | null} The GitHub repository (owner, repo).
+ */
 function parseGitHubRepo(repoUrl) {
     if (!repoUrl) {
         return null;
@@ -278,6 +323,8 @@ function parseGitHubRepo(repoUrl) {
 
 /**
  * The update feed defaults to the client repo, since releases ship from there.
+ * @param {Object} entry The client entry.
+ * @returns {Object[] | null} The publish configuration.
  */
 function resolvePublish(entry) {
     const configured = entry?.publish;
@@ -304,14 +351,9 @@ function resolvePublish(entry) {
 /**
  * Windows installers need a real `.ico`; electron-builder can also derive one
  * from a large enough PNG.
- */
-/**
- * Resolve the installer icon per platform. Windows needs `.ico`, Linux and
- * macOS prefer `.png`, so the same `build/` folder can hold both.
- *
- * @param {string} root - Workspace root.
- * @param {object} resolved - Resolved client entry.
- * @returns {{ win: string | null, linux: string | null, mac: string | null } | null}
+ * @param {string} root The root directory.
+ * @param {Object} resolved The resolved client entry.
+ * @returns {{ win: string | null, linux: string | null, mac: string | null } | null} The app icon (win, linux, mac).
  */
 function resolveAppIcon(root, resolved) {
     const clientDir = resolved.frontend?.clientDir
@@ -344,12 +386,10 @@ function resolveAppIcon(root, resolved) {
 }
 
 /**
- * Tray icon used by the desktop shell. A PNG works on every platform and keeps
- * the brand colors, so it is preferred over the `.ico` variant.
- *
- * @param {string} root Workspace root.
- * @param {object} resolved Resolved client entry.
- * @returns {string | null} Absolute path to the source icon.
+ * Resolve the tray icon
+ * @param {string} root The root directory.
+ * @param {Object} resolved The resolved client entry.
+ * @returns {string | null} The tray icon.
  */
 function resolveTrayIcon(root, resolved) {
     const clientDir = resolved.frontend?.clientDir
@@ -373,10 +413,21 @@ function resolveTrayIcon(root, resolved) {
     return null;
 }
 
+/**
+ * Check if a command is an npm family command
+ * @param {string} cmd The command.
+ * @returns {boolean} Whether the command is an npm family command.
+ */
 function isNpmFamilyCommand(cmd) {
     return /^\s*npm(\s|$)/.test(cmd) || /^\s*npx\s/.test(cmd);
 }
 
+/**
+ * Get the backend start command
+ * @param {Object} resolvedBackend The resolved backend.
+ * @param {boolean} packaged Whether the backend is packaged.
+ * @returns {string} The backend start command.
+ */
 function backendStartCmd(resolvedBackend, packaged) {
     if (!resolvedBackend) {
         return "";
@@ -401,6 +452,15 @@ function backendStartCmd(resolvedBackend, packaged) {
     return resolvedBackend.startCmd || resolvedBackend.cmd;
 }
 
+/**
+ * Build the runtime config
+ * @param {Object} params The parameters.
+ * @param {string} params.root The root directory.
+ * @param {Object} params.resolved The resolved client entry.
+ * @param {boolean} params.isDev Whether the client is in development mode.
+ * @param {boolean} params.packaged Whether the client is packaged.
+ * @returns {Object} The runtime config.
+ */
 function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
     const viteUrl = `http://127.0.0.1:${vitePort()}`;
     const entry = resolved.isDev ? null : loadClientConfig(resolved.name);
@@ -446,6 +506,12 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
     };
 }
 
+/**
+ * Write the runtime config
+ * @param {string} baseDir The base directory.
+ * @param {Object} config The runtime config.
+ * @returns {string} The path to the runtime config.
+ */
 function writeRuntimeConfig(baseDir, config) {
     const outDir = path.join(baseDir, "electron-dist");
     fs.mkdirSync(outDir, { recursive: true });
@@ -456,10 +522,21 @@ function writeRuntimeConfig(baseDir, config) {
     return configPath;
 }
 
+/**
+ * Compile the Electron
+ * @param {string} baseDir The base directory.
+ * @returns {void}
+ */
 function compileElectron(baseDir) {
     run("node", ["electron/build.mjs"], baseDir);
 }
 
+/**
+ * Wait for an HTTP request
+ * @param {string} url The URL.
+ * @param {number} timeoutMs The timeout in milliseconds.
+ * @returns {Promise<void>}
+ */
 function waitForHttp(url, timeoutMs) {
     const startedAt = Date.now();
 
@@ -499,6 +576,14 @@ function waitForHttp(url, timeoutMs) {
     });
 }
 
+/**
+ * Spawn the Vite server
+ * @param {string} baseDir The base directory.
+ * @param {string} client The client name.
+ * @param {number} port The port.
+ * @returns {ChildProcess} The Vite server.
+ * @see https://vite.dev/config/server-options.html
+ */
 function spawnVite(baseDir, client, port) {
     const args = [
         "vite",
@@ -527,6 +612,12 @@ function spawnVite(baseDir, client, port) {
     return child;
 }
 
+/**
+ * Check if a backend path should be staged
+ * @param {string} source The source path.
+ * @param {string} root The root directory.
+ * @returns {boolean} Whether the backend path should be staged.
+ */
 function shouldStageBackendPath(source, root) {
     const relative = path.relative(root, source);
 
@@ -556,6 +647,9 @@ function shouldStageBackendPath(source, root) {
  * Ship a plain Node runtime with the installer. Native addons in the backend
  * (`better-sqlite3`, `bcrypt`) are prebuilt for Node's ABI, so reusing Node
  * avoids the Electron ABI rebuild entirely.
+ * @param {string} stageRoot The stage root directory.
+ * @param {string} target The target platform.
+ * @returns {void}
  */
 function stageNodeRuntime(stageRoot, target) {
     if (currentPlatformTarget() !== target) {
@@ -597,6 +691,12 @@ function stageNodeRuntime(stageRoot, target) {
  * `electron-builder` drops the `node_modules` folder sitting at the root of an
  * `extraResources` source, so the backend is staged one level deeper and the
  * whole stage root becomes the resources root.
+ * @param {string} root The root directory.
+ * @param {string} baseDir The base directory.
+ * @param {string} backendAbsDir The absolute path to the backend directory.
+ * @param {string} target The target platform.
+ * @param {string | null} trayIconPath The path to the tray icon.
+ * @returns {Object[]} The desktop resources.
  */
 function prepareDesktopResources(root, baseDir, backendAbsDir, target, trayIconPath) {
     const needsStage = Boolean(backendAbsDir) || Boolean(trayIconPath);
@@ -655,6 +755,18 @@ function prepareDesktopResources(root, baseDir, backendAbsDir, target, trayIconP
     return [{ from: stageRoot, to: "." }];
 }
 
+/**
+ * Write the builder config
+ * @param {Object} params The parameters.
+ * @param {string} params.root The root directory.
+ * @param {string} params.baseDir The base directory.
+ * @param {Object} params.resolved The resolved client entry.
+ * @param {Object[]} params.extraResources The extra resources.
+ * @param {string} params.appVersion The app version.
+ * @param {Object[] | null} params.publish The publish configuration.
+ * @param {Object | null} params.icon The icon configuration.
+ * @returns {Object} The builder config.
+ */
 function writeBuilderConfig({
     root,
     baseDir,
@@ -726,6 +838,11 @@ function writeBuilderConfig({
     return { configPath, outDir };
 }
 
+/**
+ * Assert the known client
+ * @param {string} client The client name.
+ * @returns {void}
+ */
 function assertKnownClient(client) {
     const known = ["dev", ...listClientNames()];
 
@@ -736,6 +853,11 @@ function assertKnownClient(client) {
     }
 }
 
+/**
+ * Run the development server
+ * @param {string} client The client name.
+ * @returns {Promise<void>}
+ */
 async function runDev(client) {
     const root = getRootDir();
     const baseDir = path.join(root, "cht-base");
@@ -820,6 +942,14 @@ async function runDev(client) {
     cleanup();
 }
 
+/**
+ * Run the build
+ * @param {string} client The client name.
+ * @param {string} target The target platform.
+ * @param {boolean} shouldPublish Whether to publish the build.
+ * @param {Object} bump The bump configuration.
+ * @returns {void}
+ */
 function runBuild(client, target, shouldPublish, bump) {
     const root = getRootDir();
     const baseDir = path.join(root, "cht-base");
@@ -919,6 +1049,10 @@ function runBuild(client, target, shouldPublish, bump) {
     console.log(`[electron] Desktop artifacts at ${path.relative(root, outDir)}`);
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 async function main() {
     const argv = process.argv.slice(2);
 

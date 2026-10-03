@@ -1,6 +1,15 @@
 import React from "react";
 import { Box, Text } from "ink";
 
+/**
+ * Chip component
+ * @param {Object} props
+ * @param {string} props.label The label.
+ * @param {boolean} props.active Whether the chip is active.
+ * @param {boolean} props.marked Whether the chip is marked.
+ * @param {boolean} props.stacked Whether the chip is stacked.
+ * @returns {React.ReactNode} The chip component.
+ */
 export function Chip({ label, active, marked, stacked }) {
     const mark = marked === true ? "● " : marked === false ? "○ " : "";
 
@@ -22,6 +31,10 @@ export function Chip({ label, active, marked, stacked }) {
     );
 }
 
+/**
+ * Arrow component
+ * @returns {React.ReactNode} The arrow component.
+ */
 export function Arrow() {
     return (
         <Box
@@ -37,6 +50,13 @@ export function Arrow() {
     );
 }
 
+/**
+ * Hint component
+ * @param {Object} props
+ * @param {string} props.keyLabel The key label.
+ * @param {string} props.action The action.
+ * @returns {React.ReactNode} The hint component.
+ */
 export function Hint({ keyLabel, action }) {
     return (
         <Box marginRight={2}>

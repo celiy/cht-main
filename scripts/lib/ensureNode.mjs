@@ -2,6 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
+/**
+ * Read the NVMRC version
+ * @param {string} rootDir
+ * @returns {string | null} The NVMRC version.
+ */
 function readNvmrcVersion(rootDir) {
     const nvmrcPath = path.join(rootDir, ".nvmrc");
 
@@ -14,6 +19,11 @@ function readNvmrcVersion(rootDir) {
     return wanted || null;
 }
 
+/**
+ * Try to use NVM on Unix
+ * @param {string} wanted
+ * @returns {boolean} True if the NVM is used.
+ */
 function tryUnixNvm(wanted) {
     const nvmDir = process.env.NVM_DIR || path.join(process.env.HOME || "", ".nvm");
     const nvmSh = path.join(nvmDir, "nvm.sh");
@@ -52,12 +62,22 @@ function tryUnixNvm(wanted) {
     return true;
 }
 
+/**
+ * Get the major version from a version string
+ * @param {string} version
+ * @returns {number | null} The major version.
+ */
 function majorFromVersion(version) {
     const match = String(version).match(/\d+/);
 
     return match ? match[0] : null;
 }
 
+/**
+ * Check if the current Node version satisfies the wanted version
+ * @param {string} wanted
+ * @returns {boolean} True if the current Node version satisfies the wanted version.
+ */
 function currentNodeSatisfies(wanted) {
     const wantedMajor = majorFromVersion(wanted);
     const currentMajor = majorFromVersion(process.version);
@@ -65,6 +85,11 @@ function currentNodeSatisfies(wanted) {
     return Boolean(wantedMajor && currentMajor && wantedMajor === currentMajor);
 }
 
+/**
+ * Check if a command exists
+ * @param {string} name
+ * @returns {boolean} True if the command exists.
+ */
 function commandExists(name) {
     const probe = spawnSync(process.platform === "win32" ? "where.exe" : "which", [name], {
         encoding: "utf8",
@@ -74,6 +99,11 @@ function commandExists(name) {
     return probe.status === 0;
 }
 
+/**
+ * Try to use Node on Windows
+ * @param {string} wanted
+ * @returns {boolean} True if the Node is used.
+ */
 function tryWindowsNodeVersion(wanted) {
     if (currentNodeSatisfies(wanted)) {
         return true;
@@ -105,7 +135,7 @@ function tryWindowsNodeVersion(wanted) {
 /**
  * Align Node with `.nvmrc` when nvm/fnm is available.
  *
- * @param {string} rootDir Repo root
+ * @param {string} rootDir The root directory.
  * @returns {boolean} false when version tooling failed hard on Unix nvm
  */
 export function ensureNodeFromNvmrc(rootDir) {
@@ -126,6 +156,10 @@ export function ensureNodeFromNvmrc(rootDir) {
     return tryUnixNvm(wanted);
 }
 
+/**
+ * Assert that Node is on the path
+ * @returns {boolean} True if Node is on the path.
+ */
 export function assertNodeOnPath() {
     const probe = spawnSync("node", ["-v"], { encoding: "utf8", shell: process.platform === "win32" });
 

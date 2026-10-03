@@ -12,6 +12,13 @@ import {
 } from "../lib/wizardState.mjs";
 import { Arrow, Chip, Hint } from "./Chip.jsx";
 
+/**
+ * Workspace TUI component
+ * @param {Object} props
+ * @param {Object[]} props.saveTargets The save targets.
+ * @param {Function} props.onFinish The function to call when the workspace is finished.
+ * @returns {React.ReactNode} The workspace TUI component.
+ */
 export function App({ saveTargets, onFinish }) {
     const { exit } = useApp();
     const { stdout } = useStdout();

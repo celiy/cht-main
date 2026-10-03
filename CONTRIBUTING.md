@@ -28,7 +28,7 @@ Não faças mudanças no núcleo “só porque o Mecarvit precisa”. Extraí um
 - Vue: ordem de atributos em `code-guidelines.mdc`. Tailwind: não uses `border-border`.
 - TypeScript com `noUncheckedIndexedAccess`: `arr[i]` é `T | undefined`.
 - Timers, listeners, observers e subscriptions limpos no unmount (`cleanup-timers.mdc`).
-- Documentação de código só no que não é óbvio (`document-guide.mdc`). A página de docs do componente **é** o contrato de uso: os exemplos têm de continuar a funcionar.
+- Cada ficheiro `.ts` começa com um JSDoc de módulo em inglês (`ts-module-header.mdc`). Comentários **inline** só no que não é óbvio (`document-guide.mdc`). A página de docs do componente **é** o contrato de uso: os exemplos têm de continuar a funcionar.
 - UI: verifica no browser o fluxo real (não chega um screenshot). Acessibilidade e estados vazios/erro fazem parte do trabalho, não são extra.
 - Lógica não trivial deixa **um** check executável (ficheiro `*.check.mjs` ou teste do backend). Front hoje não tem runner de testes; o gate é `vue-tsc`, lint, format e o check que adicionares.
 - Commit e push **só** se o dono do repo pedir (`git-writes.mdc`).
@@ -72,5 +72,5 @@ Flags: `--new`, `--workspace:<nome>`, `--workspace-clean`. Ver o README.
 
 - Cliente a vazar para `cht-base` / `cht-design-system` / `cht-shared`.
 - Guardar tokens de login em `localStorage` / `sessionStorage` nas libs partilhadas.
-- JSDoc em todo o lado, comentários que repetem o código, ou docs de UI em inglês.
+- Comentários que repetem o código, ou docs de UI em inglês.
 - Expandir o âmbito porque “ficava mais completo”.

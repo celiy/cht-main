@@ -3,6 +3,11 @@ import { Box, Text } from "ink";
 import Spinner from "ink-spinner";
 import { formatUsage } from "../../lib/procUsage.mjs";
 
+/**
+ * Get the color of the status
+ * @param {string} status The status.
+ * @returns {string} The color of the status (green, yellow, blueBright, red).
+ */
 function statusColor(status) {
     if (status === "running") {
         return "green";
@@ -19,6 +24,11 @@ function statusColor(status) {
     return "red";
 }
 
+/**
+ * Get the label of the status
+ * @param {Object} proc The process.
+ * @returns {string} The label of the status.
+ */
 function statusLabel(proc) {
     if (proc.status === "running") {
         return "running";
@@ -39,6 +49,14 @@ function statusLabel(proc) {
     return proc.status;
 }
 
+/**
+ * Process tab component
+ * @param {Object} props
+ * @param {Object} props.proc The process.
+ * @param {Object} props.usage The usage.
+ * @param {boolean} props.active Whether the tab is active.
+ * @returns {React.ReactNode} The process tab component.
+ */
 export function ProcessTab({ proc, usage, active }) {
     const color = statusColor(proc.status);
     const label = statusLabel(proc);

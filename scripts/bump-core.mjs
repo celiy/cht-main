@@ -2,6 +2,10 @@
 import { getRootDir } from "./lib/clients.mjs";
 import { bumpCoreAndPush } from "./lib/bumpCore.mjs";
 
+/**
+ * Print the usage
+ * @returns {void}
+ */
 function printUsage() {
     console.log("Bump cht-shared, cht-base and cht-design-system, then sync pins in cht-main.");
     console.log("Commits the bump on each repo and pushes to the given branch (default: main).");
@@ -17,6 +21,10 @@ function printUsage() {
     console.log("  npx chtmain bump-core --dry-run");
 }
 
+/**
+ * Main function
+ * @returns {Promise<void>}
+ */
 function main() {
     const argv = process.argv.slice(2);
     const dryRun = argv.includes("--dry-run");
