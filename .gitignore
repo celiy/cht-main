@@ -2,12 +2,10 @@
 /builds
 **/*.pyc
 **/*__pycache__
+/cht-*
 
 # Só a raiz: clones cht-* e cópias de workspace caem aqui.
 /*
-!/cht-base
-!/cht-design-system
-!/cht-shared
 !/eslint-rules
 !/prettier-plugins
 !/scripts
