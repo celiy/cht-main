@@ -10,7 +10,6 @@
 !/prettier-plugins
 !/scripts
 !/workspaces
-!/.editorconfig
 !/.gitignore
 !/.gitattributes
 !/.nvmrc
