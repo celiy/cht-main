@@ -50,6 +50,14 @@ Novo componente:
 
 Criar uma repo shared separada para as funções do Mecarvit
 
+Input pode receber um prop chamado kbd:
+    kbd: [
+        { key: "enter" },
+        { key: "shift" }
+    ]
+
+    Basicamente recebe keys que o usuário pode apertar, se receber só uma key, esta key foca o input, se receber varias keys, as keys e sua ordem na array devem ser pressionadas para focar o input
+
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
 
