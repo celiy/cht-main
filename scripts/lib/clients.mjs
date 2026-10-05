@@ -5,7 +5,7 @@ import {
     clearClientConfigLoadCache,
     findClientConfigPath,
     loadClientConfigFromDir
-} from "../../cht-base/configs/loadClientConfig.ts";
+} from "./loadClientConfig.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(HERE, "..", "..");
