@@ -53,8 +53,6 @@ Criar uma repo shared separada para as funções do Mecarvit
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
 
-Comando de bump-core pede para inserir uma mensagem de commit caso haja mudanças além da mudança de versão para cada repo se passada prop --manual-commit-message
-
 Mecarvit:
     Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
         [adicionar]
@@ -62,8 +60,9 @@ Mecarvit:
     Usar Item em:
         Campos Criado/Modificado em
 
-    Documentar sobre o novo status reaberto
-
     Não está lembrando login
 
     Usar o estilo hodiernus no inicio da aplicação
+
+    Documentação TCC:
+        Documentar sobre o novo status reaberto
