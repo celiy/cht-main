@@ -1,62 +1,4 @@
-Novo componente:
-    Input OTP
-        Props:
-            label
-
-            helperText
-
-            error
-
-            inputsPattern: {
-                // Pattern to decide if the component will accept only numbers, letters, etc.
-                ["letters", "numbers", "symbols", etc...]
-                "/\w+\s/g"
-                // Can accept simplfied fields such as letters, numbers but it can also receive normal JS regular expressions
-            }
-
-            fields: {
-                [
-                    {
-                        type: input
-                        pattern: letters 
-                        //inputsPattern is used as a general pattern, but if a field has a pattern, then it will be used instead of the inputsPattern
-                    },
-                    {
-                        type: input
-                        pattern: numbers
-                    }
-                    {
-                        type: input
-                        pattern: /\w+\s/g
-                    }
-                    {
-                        type: dash
-                    }
-                    {
-                        type: input
-                    }
-                    {
-                        type: input
-                    }
-                    {
-                        type: colon
-                    }
-                    {
-                        type: input
-                    }
-                ]
-                // Will display as [][][]-[][]:[]
-            }
-
 Criar uma repo shared separada para as funções do Mecarvit
-
-Input pode receber um prop chamado kbd:
-    kbd: [
-        { key: "enter" },
-        { key: "shift" }
-    ]
-
-    Basicamente recebe keys que o usuário pode apertar, se receber só uma key, esta key foca o input, se receber varias keys, as keys e sua ordem na array devem ser pressionadas para focar o input
 
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
@@ -71,6 +13,8 @@ Mecarvit:
     Não está lembrando login
 
     Usar o estilo hodiernus no inicio da aplicação
+
+    Implementar backup do backend
 
     Documentação TCC:
         Documentar sobre o novo status reaberto
