@@ -1,18 +1,13 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
+Adicionar licensa
+
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
 
 Mecarvit:
     Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
         [adicionar]
-
-    Usar Item em:
-        Campos Criado/Modificado em
-
-    Não está lembrando login
-
-    Usar o estilo hodiernus no inicio da aplicação
 
     Implementar backup do backend
 
