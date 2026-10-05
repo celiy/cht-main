@@ -27,7 +27,7 @@ const TEXT_EXT = new Set([
 function printUsage() {
     console.log("Usage: npx chtmain create <nome> <pasta>");
     console.log("");
-    console.log("  nome   Identificador kebab-case (cht.config.json → name)");
+    console.log("  nome   Identificador kebab-case (cht.config.ts / cht.config.json → name)");
     console.log("  pasta  Destino relativo ao cwd, ou caminho absoluto");
     console.log("");
     console.log("Se a pasta já existir, os ficheiros são copiados para dentro (o .git mantém-se).");
@@ -80,7 +80,7 @@ function toPascal(kebab) {
 function isTextFile(filePath) {
     const base = path.basename(filePath);
 
-    if (base === ".gitignore") {
+    if (base === ".gitignore" || base === ".env.example") {
         return true;
     }
 
@@ -121,6 +121,10 @@ function copyTemplate(fromDir, toDir, tokens) {
 
     for (const entry of fs.readdirSync(fromDir, { withFileTypes: true })) {
         if (SKIP_NAMES.has(entry.name)) {
+            continue;
+        }
+
+        if (entry.name === ".env") {
             continue;
         }
 

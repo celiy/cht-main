@@ -206,10 +206,11 @@ Para incrementar as três repos principais, commitar o bump, copiar esses númer
 ```bash
 npx chtmain bump-core
 npx chtmain bump-core --all
+npx chtmain bump-core --manual-commit-message
 npx chtmain bump-core --dry-run
 ```
 
-Sem `--all`, a working tree rastreada tem de estar limpa e o commit leva só o ficheiro `version`. Com `--all`, também entra o resto das alterações de cada repo (e do `cht-main`) no mesmo commit do bump. Cada repo principal recebe `bump: x.y.z → a.b.c`. O `cht-main` só atualiza as linhas `cht-*` (a linha `version` dele não muda).
+Sem `--all`, a working tree rastreada tem de estar limpa e o commit leva só o ficheiro `version`. Com `--all`, também entra o resto das alterações de cada repo (e do `cht-main`) no mesmo commit do bump. Com `--manual-commit-message`, cada repo que tiver alterações além da versão pede a mensagem de commit (e inclui essas alterações). Cada repo principal recebe `bump: x.y.z → a.b.c` quando só muda a versão. O `cht-main` só atualiza as linhas `cht-*` (a linha `version` dele não muda).
 
 ## Observações rápidas
 

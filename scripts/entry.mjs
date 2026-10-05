@@ -63,7 +63,7 @@ function printUsage() {
     console.log("  create         Scaffold a client frontend from the cht-base template.");
     console.log("  bump           Bump the version file of one workspace repo.");
     console.log("  bump-core      Bump core repos, sync cht-main pins, commit and push.");
-    console.log("                   [branch]  --dry-run  --all   (branch default: main)");
+    console.log("                   [branch]  --dry-run  --all  --manual-commit-message");
     console.log("  sync-deps      Normalize shared dependency versions across repos.");
     console.log("");
     console.log(`Available: ${commands.join(", ")}`);

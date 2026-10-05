@@ -5,10 +5,11 @@ import { spawnSync } from "node:child_process";
 import {
     bumpCoreAndPush,
     coreBumpCommitMessage,
+    extraChangePaths,
     git,
     mainPinsCommitMessage
 } from "./bumpCore.mjs";
-import { parseVersionFileText, readVersion } from "./version.mjs";
+import { findVersionFile, parseVersionFileText, readVersion } from "./version.mjs";
 
 function assert(cond, label) {
     if (!cond) {
@@ -58,19 +59,20 @@ assert(
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cht-bump-core-"));
 
 gitInit(tmp, "init main", {
+    ".gitignore": "/cht-*\n",
     version: "version 1.0.1\ncht-shared 1.0.1\ncht-base 1.0.1\ncht-design-system 1.0.1\n"
 });
 gitInit(path.join(tmp, "cht-shared"), "init shared", { version: "version 1.0.1\n" });
 gitInit(path.join(tmp, "cht-base"), "init base", { version: "version 1.0.1\n" });
 gitInit(path.join(tmp, "cht-design-system"), "init ds", { version: "version 1.0.1\n" });
 
-const dry = bumpCoreAndPush(tmp, { branch: "main", dryRun: true, fetch: false, push: false });
+const dry = await bumpCoreAndPush(tmp, { branch: "main", dryRun: true, fetch: false, push: false });
 
 assert(dry.bumps.length === 3, "dry bumps three cores");
 assert(dry.bumps.every((item) => item.to === "1.0.2" && !item.written), "dry does not write");
 assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.1", "dry leaves files");
 
-const live = bumpCoreAndPush(tmp, { branch: "main", fetch: false, push: false });
+const live = await bumpCoreAndPush(tmp, { branch: "main", fetch: false, push: false });
 
 assert(live.pushed === false, "push skipped in check");
 assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.2", "base bumped");
@@ -95,23 +97,49 @@ assert(
     "main pin commit"
 );
 
+const askedClean = [];
+
+const cleanManual = await bumpCoreAndPush(tmp, {
+    branch: "main",
+    fetch: false,
+    push: false,
+    manualCommitMessage: true,
+    askCommitMessage: (repo) => {
+        askedClean.push(repo);
+
+        return `should not prompt ${repo}`;
+    }
+});
+
+assert(cleanManual.manualCommitMessage === true, "manual flag recorded");
+assert(askedClean.length === 0, "clean repos do not prompt");
+assert(
+    git(path.join(tmp, "cht-base"), ["log", "-1", "--pretty=%s"]).stdout === "bump: 1.0.2 → 1.0.3",
+    "clean manual keeps bump message"
+);
+
 fs.writeFileSync(path.join(tmp, "cht-base", "note.txt"), "dirty\n");
 gitIn(path.join(tmp, "cht-base"), ["add", "note.txt"]);
 gitIn(path.join(tmp, "cht-base"), ["commit", "-m", "add note"]);
 fs.writeFileSync(path.join(tmp, "cht-base", "note.txt"), "changed\n");
 
+assert(
+    extraChangePaths(path.join(tmp, "cht-base"), findVersionFile(path.join(tmp, "cht-base"))).includes("note.txt"),
+    "extraChangePaths sees note.txt"
+);
+
 let dirtyFailed = false;
 
 try {
-    bumpCoreAndPush(tmp, { branch: "main", fetch: false, push: false });
+    await bumpCoreAndPush(tmp, { branch: "main", fetch: false, push: false });
 } catch (error) {
     dirtyFailed = String(error.message).includes("dirty working tree");
 }
 
 assert(dirtyFailed, "dirty tree without --all fails");
-assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.2", "failed run did not bump");
+assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.3", "failed run did not bump");
 
-const withAll = bumpCoreAndPush(tmp, {
+const withAll = await bumpCoreAndPush(tmp, {
     branch: "main",
     fetch: false,
     push: false,
@@ -119,12 +147,96 @@ const withAll = bumpCoreAndPush(tmp, {
 });
 
 assert(withAll.all === true, "all flag recorded");
-assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.3", "base bumped with --all");
+assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.4", "base bumped with --all");
+assert(
+    git(path.join(tmp, "cht-base"), ["log", "-1", "--pretty=%s"]).stdout === "bump: 1.0.3 → 1.0.4",
+    "all without manual keeps bump message"
+);
+
+const allFiles = git(path.join(tmp, "cht-base"), ["show", "--name-only", "--pretty=", "HEAD"]).stdout;
+
+assert(allFiles.includes("version"), "commit includes version");
+assert(allFiles.includes("note.txt"), "commit includes extra files");
+
+fs.writeFileSync(path.join(tmp, "cht-base", "note.txt"), "changed again\n");
+
+let emptyFailed = false;
+
+try {
+    await bumpCoreAndPush(tmp, {
+        branch: "main",
+        fetch: false,
+        push: false,
+        manualCommitMessage: true,
+        askCommitMessage: () => "   "
+    });
+} catch (error) {
+    emptyFailed = String(error.message).includes("empty commit message");
+}
+
+assert(emptyFailed, "empty extra commit message fails");
+assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.4", "empty message did not bump");
+
+const asked = [];
+
+const withManual = await bumpCoreAndPush(tmp, {
+    branch: "main",
+    fetch: false,
+    push: false,
+    manualCommitMessage: true,
+    askCommitMessage: (repo) => {
+        asked.push(repo);
+
+        return `feat: extra work in ${repo}`;
+    }
+});
+
+assert(withManual.manualCommitMessage === true, "manual bump recorded");
+assert(asked.join(",") === "cht-base", "only dirty extra repo is prompted");
+assert(readVersion(path.join(tmp, "cht-base")).version === "1.0.5", "base bumped with --manual-commit-message");
+assert(
+    git(path.join(tmp, "cht-base"), ["log", "-1", "--pretty=%s"]).stdout === "feat: extra work in cht-base",
+    "extra changes use prompted message"
+);
+assert(
+    git(path.join(tmp, "cht-shared"), ["log", "-1", "--pretty=%s"]).stdout === "bump: 1.0.4 → 1.0.5",
+    "clean core repo keeps bump message"
+);
 
 const baseFiles = git(path.join(tmp, "cht-base"), ["show", "--name-only", "--pretty=", "HEAD"]).stdout;
 
-assert(baseFiles.includes("version"), "commit includes version");
-assert(baseFiles.includes("note.txt"), "commit includes extra files");
+assert(baseFiles.includes("version"), "manual commit includes version");
+assert(baseFiles.includes("note.txt"), "manual commit includes extra files");
+
+fs.writeFileSync(path.join(tmp, "cht-base", "note.txt"), "changed once more\n");
+fs.writeFileSync(path.join(tmp, "readme-extra.md"), "main extra\n");
+
+const askedBoth = [];
+
+const withAllManual = await bumpCoreAndPush(tmp, {
+    branch: "main",
+    fetch: false,
+    push: false,
+    all: true,
+    manualCommitMessage: true,
+    askCommitMessage: (repo) => {
+        askedBoth.push(repo);
+
+        return `chore: ${repo} extras`;
+    }
+});
+
+assert(withAllManual.all === true, "all flag recorded");
+assert(askedBoth.join(",") === "cht-base,cht-main", "each repo with extras is prompted");
+assert(
+    git(path.join(tmp, "cht-base"), ["log", "-1", "--pretty=%s"]).stdout === "chore: cht-base extras",
+    "core extra message with --all"
+);
+assert(git(tmp, ["log", "-1", "--pretty=%s"]).stdout === "chore: cht-main extras", "cht-main extra message");
+assert(
+    git(tmp, ["show", "--name-only", "--pretty=", "HEAD"]).stdout.includes("readme-extra.md"),
+    "cht-main extras are committed"
+);
 
 fs.rmSync(tmp, { recursive: true, force: true });
 

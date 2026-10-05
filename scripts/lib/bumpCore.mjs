@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import readline from "node:readline/promises";
 import { spawnSync } from "node:child_process";
 import {
     CORE_WORKSPACE_REPOS,
@@ -27,7 +28,7 @@ export function git(cwd, args, extraEnv = {}) {
     return {
         ok: result.status === 0,
         status: result.status ?? 1,
-        stdout: (result.stdout ?? "").trim(),
+        stdout: (result.stdout ?? "").replace(/[\r\n]+$/, ""),
         stderr: (result.stderr ?? "").trim()
     };
 }
@@ -109,6 +110,125 @@ export function checkoutBranch(dir, branch, options = {}) {
 }
 
 /**
+ * Paths in `git status --porcelain` other than the version file.
+ *
+ * @param {string} dir
+ * @param {string} versionFilePath
+ * @returns {string[]}
+ */
+export function extraChangePaths(dir, versionFilePath) {
+    const versionRel = path.relative(dir, versionFilePath).split(path.sep).join("/");
+    const stdout = git(dir, ["status", "--porcelain"]).stdout;
+
+    if (!stdout) {
+        return [];
+    }
+
+    const extras = [];
+
+    for (const line of stdout.split("\n")) {
+        if (!line) {
+            continue;
+        }
+
+        let entry = line.slice(3);
+
+        if (entry.includes(" -> ")) {
+            entry = entry.slice(entry.lastIndexOf(" -> ") + 4);
+        }
+
+        if (entry.startsWith("\"") && entry.endsWith("\"")) {
+            entry = entry.slice(1, -1);
+        }
+
+        const normalized = entry.split(path.sep).join("/");
+
+        if (normalized !== versionRel) {
+            extras.push(normalized);
+        }
+    }
+
+    return extras;
+}
+
+/**
+ * Ask for a commit message on stdout/stdin.
+ *
+ * @param {string} repo
+ * @param {{ input?: NodeJS.ReadableStream, output?: NodeJS.WritableStream }} [io]
+ * @returns {Promise<string>}
+ */
+export async function promptCommitMessage(repo, io = {}) {
+    const rl = readline.createInterface({
+        input: io.input ?? process.stdin,
+        output: io.output ?? process.stdout
+    });
+
+    try {
+        return String(
+            await rl.question(
+                `[bump-core] ${repo} tem alterações além da versão. Mensagem de commit: `
+            )
+        ).trim();
+    } finally {
+        rl.close();
+    }
+}
+
+/**
+ * @param {string} repo
+ * @param {string[]} extras
+ * @param {(repo: string, extras: string[]) => string | Promise<string>} ask
+ * @returns {Promise<string>}
+ */
+async function askedCommitMessage(repo, extras, ask) {
+    const message = String((await ask(repo, extras)) ?? "").trim();
+
+    if (!message) {
+        throw new Error(`${repo}: empty commit message`);
+    }
+
+    return message;
+}
+
+/**
+ * Prompt once per repo that has extra files, before any bump is written.
+ *
+ * @param {{ repo: string, dir: string }[]} dirs
+ * @param {string} root
+ * @param {{ dryRun?: boolean, manualCommitMessage?: boolean, askCommitMessage?: Function }} options
+ * @returns {Promise<Record<string, string>>}
+ */
+async function extraCommitMessages(dirs, root, options) {
+    const messages = {};
+
+    if (!options.manualCommitMessage || options.dryRun) {
+        return messages;
+    }
+
+    const ask = options.askCommitMessage ?? promptCommitMessage;
+    const targets = [...dirs, { repo: "cht-main", dir: root }];
+
+    for (const { repo, dir } of targets) {
+        const versionFile = findVersionFile(dir);
+
+        if (!versionFile) {
+            continue;
+        }
+
+        const extras = extraChangePaths(dir, versionFile);
+
+        if (extras.length === 0) {
+            continue;
+        }
+
+        messages[repo] = await askedCommitMessage(repo, extras, ask);
+    }
+
+    return messages;
+}
+
+/**
  * Commit changes
  * @param {string} dir
  * @param {string} message
@@ -162,12 +282,21 @@ export function mainPinsCommitMessage(pins) {
  * Bump core repos, rewrite cht-main pins from those local versions, commit, push.
  *
  * @param {string} root
- * @param {{ branch?: string, dryRun?: boolean, fetch?: boolean, push?: boolean, all?: boolean }} [options]
+ * @param {{
+ *   branch?: string,
+ *   dryRun?: boolean,
+ *   fetch?: boolean,
+ *   push?: boolean,
+ *   all?: boolean,
+ *   manualCommitMessage?: boolean,
+ *   askCommitMessage?: (repo: string, extras: string[]) => string | Promise<string>
+ * }} [options]
  */
-export function bumpCoreAndPush(root, options = {}) {
+export async function bumpCoreAndPush(root, options = {}) {
     const branch = String(options.branch ?? DEFAULT_BRANCH).trim() || DEFAULT_BRANCH;
     const dryRun = Boolean(options.dryRun);
     const includeAll = Boolean(options.all);
+    const manualCommitMessage = Boolean(options.manualCommitMessage);
     const doFetch = options.fetch !== false && !dryRun;
     const doPush = options.push !== false && !dryRun;
     const dirs = CORE_WORKSPACE_REPOS.map((repo) => ({
@@ -185,13 +314,19 @@ export function bumpCoreAndPush(root, options = {}) {
         throw new Error(`cht-main is not a git repo (${root}).`);
     }
 
-    if (!dryRun && !includeAll) {
+    if (!dryRun && !includeAll && !manualCommitMessage) {
         for (const { repo, dir } of dirs) {
             assertClean(dir, repo);
         }
 
         assertClean(root, "cht-main");
     }
+
+    const extraMessages = await extraCommitMessages(dirs, root, {
+        dryRun,
+        manualCommitMessage,
+        askCommitMessage: options.askCommitMessage
+    });
 
     if (!dryRun) {
         for (const { dir } of dirs) {
@@ -209,8 +344,10 @@ export function bumpCoreAndPush(root, options = {}) {
         bumps.push({ repo, ...result });
 
         if (!dryRun) {
-            commitChanges(dir, coreBumpCommitMessage(result.from, result.to), {
-                all: includeAll,
+            const extraMessage = extraMessages[repo];
+
+            commitChanges(dir, extraMessage || coreBumpCommitMessage(result.from, result.to), {
+                all: includeAll || Boolean(extraMessage),
                 filePath: result.filePath
             });
         }
@@ -221,12 +358,13 @@ export function bumpCoreAndPush(root, options = {}) {
         : readCoreLocalVersions(root);
 
     const pinResult = writeCoreVersionPins(root, pins, { dryRun });
+    const extraMainMessage = extraMessages["cht-main"];
 
-    if (!dryRun && (pinResult.changed || includeAll)) {
+    if (!dryRun && (pinResult.changed || includeAll || extraMainMessage)) {
         const filePath = pinResult.filePath || findVersionFile(root);
 
-        commitChanges(root, mainPinsCommitMessage(pins), {
-            all: includeAll,
+        commitChanges(root, extraMainMessage || mainPinsCommitMessage(pins), {
+            all: includeAll || Boolean(extraMainMessage),
             filePath
         });
     }
@@ -239,5 +377,13 @@ export function bumpCoreAndPush(root, options = {}) {
         pushBranch(root, branch);
     }
 
-    return { branch, dryRun, pushed: doPush, all: includeAll, bumps, pins };
+    return {
+        branch,
+        dryRun,
+        pushed: doPush,
+        all: includeAll,
+        manualCommitMessage,
+        bumps,
+        pins
+    };
 }

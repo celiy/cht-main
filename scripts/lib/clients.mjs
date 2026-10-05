@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+    clearClientConfigLoadCache,
+    findClientConfigPath,
+    loadClientConfigFromDir
+} from "../../cht-base/configs/loadClientConfig.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(HERE, "..", "..");
@@ -40,6 +45,7 @@ export function getRootDir() {
  */
 export function clearClientDiscoveryCache() {
     cachedClients = null;
+    clearClientConfigLoadCache();
 }
 
 /**
@@ -59,7 +65,8 @@ export function getClientConfigPath(name) {
     const found = getDiscoveredClient(name);
 
     if (!found) {
-        return path.join(ROOT_DIR, name, CLIENT_CONFIG_FILE);
+        return findClientConfigPath(path.join(ROOT_DIR, name))
+            ?? path.join(ROOT_DIR, name, CLIENT_CONFIG_FILE);
     }
 
     return found.configPath;
@@ -75,7 +82,7 @@ export function getClientDir(name) {
 
     if (!found) {
         throw new Error(
-            `[clients] No ${CLIENT_CONFIG_FILE} found for "${name}". ` +
+            `[clients] No cht.config.ts or cht.config.json found for "${name}". ` +
                 `Place the file in a sibling folder of cht-main. Known: ${["dev", ...listClientNames()].join(", ")}.`
         );
     }
@@ -156,30 +163,8 @@ export function listCataloguedClientNames() {
 }
 
 /**
- * Parse the client config file
- * @param {string} configPath
- * @returns {object} The client config file.
- */
-function parseClientConfigFile(configPath) {
-    const raw = fs.readFileSync(configPath, "utf8");
-    let parsed;
-
-    try {
-        parsed = JSON.parse(raw);
-    } catch (err) {
-        throw new Error(`[clients] Invalid JSON in ${configPath}: ${err.message}`);
-    }
-
-    if (!parsed || typeof parsed !== "object") {
-        throw new Error(`[clients] Expected an object in ${configPath}.`);
-    }
-
-    return parsed;
-}
-
-/**
- * Discover sibling folders that contain `cht.config.json`. The folder name is
- * free; the client id comes from `name` in that file.
+ * Discover sibling folders that contain `cht.config.ts` or `cht.config.json`.
+ * The folder name is free; the client id comes from `name` in that file.
  *
  * @returns {Map<string, { dir: string, configPath: string, config: object }>}
  */
@@ -201,17 +186,17 @@ function discoverClients() {
             continue;
         }
 
-        const configPath = path.join(ROOT_DIR, entry.name, CLIENT_CONFIG_FILE);
+        const dirPath = path.join(ROOT_DIR, entry.name);
 
-        if (!fs.existsSync(configPath)) {
+        if (!findClientConfigPath(dirPath)) {
             continue;
         }
 
-        const config = parseClientConfigFile(configPath);
-        const name = typeof config.name === "string" ? config.name.trim() : "";
+        const loaded = loadClientConfigFromDir(dirPath);
+        const name = typeof loaded.config.name === "string" ? loaded.config.name.trim() : "";
 
         if (!name) {
-            throw new Error(`[clients] Missing "name" in ${configPath}.`);
+            throw new Error(`[clients] Missing "name" in ${loaded.configPath}.`);
         }
 
         const existing = found.get(name);
@@ -224,8 +209,8 @@ function discoverClients() {
 
         found.set(name, {
             dir: entry.name,
-            configPath,
-            config
+            configPath: loaded.configPath,
+            config: loaded.config
         });
     }
 
@@ -236,16 +221,16 @@ function discoverClients() {
 
 /**
  * List the client names
- * @returns {string[]} Client ids from `cht.config.json` → `name`
+ * @returns {string[]} Client ids from cht.config → `name`
  */
 export function listClientNames() {
     return [...discoverClients().keys()].sort();
 }
 
 /**
- * Read `cht.config.json` for a discovered client.
+ * Read cht.config for a discovered client.
  *
- * @param {string} name Client id (`cht.config.json` → `name`)
+ * @param {string} name Client id (`name` in cht.config.ts or cht.config.json)
  * @returns {object} The client config.
  */
 export function loadClientConfig(name) {
@@ -255,7 +240,7 @@ export function loadClientConfig(name) {
         const known = ["dev", ...listClientNames()].join(", ");
 
         throw new Error(
-            `[clients] Missing ${CLIENT_CONFIG_FILE} for "${name}". ` +
+            `[clients] Missing cht.config.ts or cht.config.json for "${name}". ` +
                 `A repo is a CHT client when that file exists in a sibling folder. Known: ${known}.`
         );
     }
@@ -352,6 +337,7 @@ export function resolveClient(name) {
             name: "dev",
             isDev: true,
             siteTitle: "CHT-Base",
+            lan: true,
             frontend: {
                 dir: DEFAULT_FRONTEND_BASE_DIR,
                 cmd: "npm run dev",
@@ -378,6 +364,7 @@ export function resolveClient(name) {
         name,
         isDev: false,
         siteTitle: entry.siteTitle || name,
+        lan: entry.lan !== false,
         frontend,
         backend: resolveBackendConfig(entry.backend, name)
     };
@@ -453,6 +440,15 @@ export function isClientDevToolsEnabled(config) {
 }
 
 /**
+ * Vite bind address for `npx chtmain dev`. LAN is the default (`lan !== false`).
+ * @param {boolean} lan
+ * @returns {string}
+ */
+export function viteDevHost(lan) {
+    return lan === false ? "127.0.0.1" : "0.0.0.0";
+}
+
+/**
  * Build the process list
  * @param {object} resolved
  * @param {{ clientPort?: number, docsPort?: number, noBackend?: boolean }} [options]
@@ -463,11 +459,12 @@ export function buildProcessList(resolved, options = {}) {
     const clientPort = options.clientPort ?? getVitePorts()[0] ?? 5173;
     const docsPort = options.docsPort;
     const docsUrl = docsPort ? `http://127.0.0.1:${docsPort}` : "";
+    const listenHost = viteDevHost(resolved.lan);
 
     let frontendCmd = resolved.frontend.cmd;
 
     if (resolved.isDev) {
-        frontendCmd = `npm run dev -- --port ${clientPort} --host 127.0.0.1`;
+        frontendCmd = `npm run dev -- --port ${clientPort} --host ${listenHost}`;
     } else {
         const envFlags = [`CLIENT=${resolved.name}`];
 
@@ -476,7 +473,7 @@ export function buildProcessList(resolved, options = {}) {
         }
 
         frontendCmd =
-            `npx cross-env ${envFlags.join(" ")} npm run dev:client -- --port ${clientPort} --host 127.0.0.1`;
+            `npx cross-env ${envFlags.join(" ")} npm run dev:client -- --port ${clientPort} --host ${listenHost}`;
     }
 
     procs.push({
@@ -492,7 +489,7 @@ export function buildProcessList(resolved, options = {}) {
             id: "docs",
             name: "docs",
             dir: path.join(ROOT_DIR, DEFAULT_FRONTEND_BASE_DIR),
-            cmd: `npx cross-env CHT_DEVAPP=1 npm run dev -- --port ${docsPort} --strictPort --host 127.0.0.1`,
+            cmd: `npx cross-env CHT_DEVAPP=1 npm run dev -- --port ${docsPort} --strictPort --host ${listenHost}`,
             subtitle: `devApp :${docsPort}`,
             env: {
                 CHT_DEVAPP: "1"

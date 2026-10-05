@@ -11,13 +11,15 @@ function printUsage() {
     console.log("Commits the bump on each repo and pushes to the given branch (default: main).");
     console.log("");
     console.log("Usage:");
-    console.log("  npx chtmain bump-core [branch] [--dry-run] [--all]");
+    console.log("  npx chtmain bump-core [branch] [--dry-run] [--all] [--manual-commit-message]");
     console.log("");
     console.log("--all also commits non-version changes in each repo (and cht-main).");
+    console.log("--manual-commit-message asks for a commit message per repo that has extra changes.");
     console.log("");
     console.log("Examples:");
     console.log("  npx chtmain bump-core");
     console.log("  npx chtmain bump-core --all");
+    console.log("  npx chtmain bump-core --manual-commit-message");
     console.log("  npx chtmain bump-core --dry-run");
 }
 
@@ -25,10 +27,11 @@ function printUsage() {
  * Main function
  * @returns {Promise<void>}
  */
-function main() {
+async function main() {
     const argv = process.argv.slice(2);
     const dryRun = argv.includes("--dry-run");
     const includeAll = argv.includes("--all");
+    const manualCommitMessage = argv.includes("--manual-commit-message");
     const wantsHelp = argv.includes("-h") || argv.includes("--help");
     const branch = argv.find((arg) => !!arg && !arg.startsWith("-")) || "main";
 
@@ -40,11 +43,12 @@ function main() {
     let result;
 
     try {
-        result = bumpCoreAndPush(getRootDir(), {
+        result = await bumpCoreAndPush(getRootDir(), {
             branch,
             dryRun,
             push: !dryRun,
-            all: includeAll
+            all: includeAll,
+            manualCommitMessage
         });
     } catch (error) {
         console.error(`[bump-core] ${error.message}`);
