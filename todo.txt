@@ -2,7 +2,11 @@ Criar uma repo shared separada para as funções do Mecarvit
 
 Adicionar licensa
 
-Borda estilo borda hover do windows
+Botão de copiar comando para dar update quando ter updates
+
+Otimizar o reveal-highlight
+
+Botão de chat no index do devApp está quebrado
 
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado

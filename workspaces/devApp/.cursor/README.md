@@ -11,6 +11,7 @@ Orientação para o agente. Preferir **poucas regras sempre ativas**; o resto ap
 | `git-writes.mdc`           | Sempre (commit/push só se pedido)                   |
 | `karpathy-guidelines.mdc`  | Sempre (pensar antes, simplicidade, mudanças cirúrgicas) |
 | `ponytail.mdc`             | Sempre (solução mínima / YAGNI)                     |
+| `pt-br.mdc`                | Sempre (falar em português brasileiro)              |
 | `cleanup-timers.mdc`       | Ficheiros `*.{vue,ts,…}`                            |
 | `vue-components.mdc`       | Vue/TS do DS e do base                              |
 | `document-guide.mdc`       | Documentar código (não JSDoc em tudo)               |
