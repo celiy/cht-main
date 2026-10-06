@@ -8,6 +8,8 @@ Otimizar o reveal-highlight
 
 Botão de chat no index do devApp está quebrado
 
+Comando para dar merge da branch beta na main
+
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
 
