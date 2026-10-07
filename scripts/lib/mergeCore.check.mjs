@@ -70,6 +70,14 @@ const skip = mergeBranchInRepo(work, "sample", "beta", "main", { push: false, fe
 
 assert(skip.skipped === true, "second merge skips");
 
+gitIn(work, ["checkout", "beta"]);
+mergeBranchInRepo(work, "sample", "beta", "main", { push: false, fetch: true });
+assert(gitIn(work, ["branch", "--show-current"]).stdout.trim() === "beta", "goes back to the original branch");
+
+gitIn(work, ["checkout", "--detach"]);
+mergeBranchInRepo(work, "sample", "beta", "main", { push: false, fetch: true });
+assert(gitIn(work, ["branch", "--show-current"]).stdout.trim() === "", "detached HEAD is restored");
+
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "cht-merge-core-root-"));
 
 for (const repo of ["cht-shared", "cht-base", "cht-design-system"]) {
