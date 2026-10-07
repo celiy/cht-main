@@ -79,8 +79,8 @@ export function mergeBranchInRepo(dir, repoLabel, sourceBranch, targetBranch, op
     if (refExists(dir, `origin/${targetBranch}`)) {
         gitOrThrow(
             dir,
-            ["pull", "--ff-only", "origin", targetBranch],
-            `git pull origin ${targetBranch} in ${label}`
+            ["merge", "--ff-only", `origin/${targetBranch}`],
+            `git merge --ff-only origin/${targetBranch} in ${label}`
         );
     }
 
