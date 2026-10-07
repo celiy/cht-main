@@ -238,6 +238,40 @@ assert(
     "cht-main extras are committed"
 );
 
+const beta = fs.mkdtempSync(path.join(os.tmpdir(), "cht-bump-core-beta-"));
+
+gitInit(beta, "init main", {
+    ".gitignore": "/cht-*\n",
+    version: "version 1.0.1\ncht-shared 1.0.1\ncht-base 1.0.1\ncht-design-system 1.0.1\n"
+});
+gitInit(path.join(beta, "cht-shared"), "init shared", { version: "version 1.0.1\n" });
+gitInit(path.join(beta, "cht-base"), "init base", { version: "version 1.0.1\n" });
+gitInit(path.join(beta, "cht-design-system"), "init ds", { version: "version 1.0.1\n" });
+
+for (const dir of [beta, ...["cht-shared", "cht-base", "cht-design-system"].map((n) => path.join(beta, n))]) {
+    gitIn(dir, ["checkout", "-b", "beta"]);
+}
+
+const onBeta = await bumpCoreAndPush(beta, { fetch: false, push: false });
+
+assert(onBeta.branches["cht-base"] === "beta" && onBeta.branch === "beta", "no branch arg uses current branch");
+assert(git(path.join(beta, "cht-base"), ["branch", "--show-current"]).stdout === "beta", "no checkout without branch");
+assert(git(path.join(beta, "cht-base"), ["rev-parse", "--verify", "main"]).ok, "main untouched");
+assert(git(path.join(beta, "cht-base"), ["log", "beta", "-1", "--pretty=%s"]).stdout === "bump: 1.0.1 → 1.0.2", "bump committed on beta");
+
+gitIn(path.join(beta, "cht-base"), ["checkout", "--detach"]);
+
+let detachedError = "";
+
+try {
+    await bumpCoreAndPush(beta, { fetch: false, push: false });
+} catch (error) {
+    detachedError = error.message;
+}
+
+assert(detachedError.includes("cht-base is on a detached HEAD"), "detached HEAD is refused");
+
+fs.rmSync(beta, { recursive: true, force: true });
 fs.rmSync(tmp, { recursive: true, force: true });
 
 console.log("bumpCore.check.mjs ok");

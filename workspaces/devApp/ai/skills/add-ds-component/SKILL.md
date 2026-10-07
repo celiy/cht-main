@@ -1,0 +1,37 @@
+---
+name: add-ds-component
+description: >-
+    Add or extend a CHT design-system Vue component and its docs page.
+    Use when creating a primitive or custom component under cht-design-system,
+    wiring docs in cht-base/src/devApp, routes, or componentsNav.
+---
+
+# Add a design-system component
+
+## Placement
+
+- Read `CONTRIBUTING.md` at the `cht-main` root first (component stability and status).
+- Primitive (Button, Card, Toast): `cht-design-system/src/components/Name.vue`
+- Composite (Chat, Sidebar, Resizable): `cht-design-system/src/components/custom/Name.vue`
+- Apps use them without import (`designSystemPlugin` glob-registers `components/*.vue`, `custom/*.vue`, `custom/charts/*.vue`).
+- Add `name` matching the filename (`Button`, `Sidebar`). If a custom file would collide with a primitive, use `CustomName` (see `CustomAvatar`).
+- Update `cht-base/src/global-components.d.ts` so Volar knows the tag.
+- Internal helpers (`components/internal`) stay local imports.
+
+## Implementation
+
+- Options API, English identifiers, Portuguese UI copy.
+- Follow `{{aiDir}}/rules/code-guidelines.md` (attribute order, braces, double quotes).
+- Follow `{{aiDir}}/rules/vue-components.md` (Tailwind 4, tokens, no `Plugin<T>`).
+- Clean timers/observers/listeners on unmount (`{{aiDir}}/rules/cleanup-timers.md`).
+- Global chrome (toast host, similar): mount in the layout, not on each docs page. Plugin APIs live next to the component (see `{{aiDir}}/docs/toast.md`).
+
+## Docs (devApp)
+
+1. Page: `cht-base/src/devApp/pages/docs/components/<kebab-name>.vue` with `DocsExample`.
+2. Route in `cht-base/src/devApp/routes.ts`.
+3. Nav item in `cht-base/src/devApp/ts/componentsNav.ts`.
+4. Exercise the page in the browser before finishing.
+5. Se a página é de componente (não fundamento): entrada em `cht-base/src/devApp/data/componentReadiness.json` e texto em `ts/componentReadiness.ts` (banner `DocsComponentStatus` é automático via `DocsOutline`).
+
+Do not add a `custom/` stub and a primitive stub for the same component unless both are intentional.

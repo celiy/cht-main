@@ -24,10 +24,11 @@ const templates = path.join(root, "workspaces", "devApp");
 
 fs.mkdirSync(path.join(templates, ".vscode"), { recursive: true });
 fs.writeFileSync(path.join(templates, ".vscode", "settings.json"), "{\"opinionated\":true}\n");
-fs.mkdirSync(path.join(templates, ".cursor"), { recursive: true });
-fs.writeFileSync(path.join(templates, ".cursor", "README.md"), "cursor-base\n");
-fs.mkdirSync(path.join(templates, ".claude"), { recursive: true });
-fs.writeFileSync(path.join(templates, ".claude", "README.md"), "claude-from-cursor\n");
+fs.mkdirSync(path.join(templates, "ai", "rules"), { recursive: true });
+fs.writeFileSync(
+    path.join(templates, "ai", "rules", "sample.md"),
+    "---\ndescription: Sample\nalwaysApply: true\n---\n\nSee {{aiDir}}/rules/sample.md\n"
+);
 fs.writeFileSync(path.join(templates, ".prettierrc.json"), "{\"tabWidth\":4}\n");
 fs.writeFileSync(path.join(templates, ".prettierignore"), "dist\n");
 fs.writeFileSync(path.join(templates, "netlify.toml"), "[[redirects]]\n");
@@ -49,7 +50,10 @@ assert(
 
 copyWorkspaceToRoot(templates, root);
 assert(fs.readFileSync(path.join(root, ".vscode", "settings.json"), "utf8").includes("opinionated"), "copy vscode");
-assert(fs.existsSync(path.join(root, ".cursor", "README.md")), "copy cursor");
+assert(fs.existsSync(path.join(root, ".cursor", "rules", "sample.mdc")), "copy generates cursor");
+assert(fs.existsSync(path.join(root, ".claude", "rules", "sample.md")), "copy generates claude");
+assert(!fs.existsSync(path.join(root, "ai")), "copy does not leak ai source");
+assert(fs.readFileSync(path.join(root, WORKSPACE_MANIFEST), "utf8").includes("CLAUDE.md"), "manifest lists generated");
 assert(fs.existsSync(path.join(root, "netlify.toml")), "copy netlify");
 assert(fs.existsSync(path.join(root, "eslint.config.js")), "copy eslint");
 assert(fs.readFileSync(path.join(root, ".env.example"), "utf8").includes("PACK=1"), "copy extra env");
@@ -119,7 +123,7 @@ applyWorkspaceChoices(opinionated, templates, {
 
 assert(fs.readFileSync(path.join(opinionated, ".vscode", "settings.json"), "utf8").includes("opinionated"), "opinionated vscode");
 assert(fs.readFileSync(path.join(opinionated, "eslint.config.js"), "utf8").includes("export default []"), "opinionated eslint");
-assert(fs.readFileSync(path.join(opinionated, ".claude", "README.md"), "utf8").includes("claude-from-cursor"), "opinionated claude");
+assert(fs.existsSync(path.join(opinionated, ".claude", "rules", "sample.md")), "opinionated claude");
 assert(!fs.existsSync(path.join(opinionated, ".cursor")), "claude choice skips root .cursor");
 
 const both = path.join(tmp, "both-ai");
@@ -135,7 +139,8 @@ applyWorkspaceChoices(both, templates, {
 });
 
 assert(fs.existsSync(path.join(both, ".cursor")), "multi ai cursor");
-assert(fs.readFileSync(path.join(both, ".claude", "README.md"), "utf8").includes("claude-from-cursor"), "multi ai claude opinionated");
+assert(fs.existsSync(path.join(both, ".claude", "rules", "sample.md")), "multi ai claude opinionated");
+assert(fs.readdirSync(path.join(both, ".cursor")).length === 0, "multi ai cursor stays empty");
 
 const saveDest = path.join(tmp, "saved");
 saveWorkspaceFromRoot(root, saveDest);

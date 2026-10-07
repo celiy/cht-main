@@ -1,8 +1,6 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Adicionar licensa
-
-Borda estilo borda hover do windows
+Comando para dar merge da branch beta na main
 
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado

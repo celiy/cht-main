@@ -8,11 +8,12 @@ import { bumpCoreAndPush } from "./lib/bumpCore.mjs";
  */
 function printUsage() {
     console.log("Bump cht-shared, cht-base and cht-design-system, then sync pins in cht-main.");
-    console.log("Commits the bump on each repo and pushes to the given branch (default: main).");
+    console.log("Commits the bump on each repo and pushes on the branch each repo has checked out (or on the given branch).");
     console.log("");
     console.log("Usage:");
     console.log("  npx chtmain bump-core [branch] [--dry-run] [--all] [--manual-commit-message]");
     console.log("");
+    console.log("Without [branch], nothing is checked out. With it, every repo switches to that branch first.");
     console.log("--all also commits non-version changes in each repo (and cht-main).");
     console.log("--manual-commit-message asks for a commit message per repo that has extra changes.");
     console.log("");
@@ -33,7 +34,7 @@ async function main() {
     const includeAll = argv.includes("--all");
     const manualCommitMessage = argv.includes("--manual-commit-message");
     const wantsHelp = argv.includes("-h") || argv.includes("--help");
-    const branch = argv.find((arg) => !!arg && !arg.startsWith("-")) || "main";
+    const branch = argv.find((arg) => !!arg && !arg.startsWith("-")) || undefined;
 
     if (wantsHelp) {
         printUsage();
@@ -62,7 +63,10 @@ async function main() {
     }
 
     console.log(`[bump-core] cht-main pins <- ${JSON.stringify(result.pins)}`);
-    console.log(`[bump-core] branch ${result.branch}${result.pushed ? " (pushed)" : ""}`);
+
+    for (const [repo, branch] of Object.entries(result.branches)) {
+        console.log(`[bump-core] ${repo} branch ${branch}${result.pushed ? " (pushed)" : ""}`);
+    }
 }
 
 main();

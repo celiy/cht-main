@@ -76,6 +76,7 @@ export const WIZARD_STEPS = [
         options: [
             { id: "cursor", label: ".cursor" },
             { id: "claude", label: ".claude" },
+            { id: "copilot", label: ".github (Copilot)" },
             CONTINUE_OPTION
         ],
         flavors: "toggle"
@@ -116,7 +117,7 @@ export function createDraft(saveTargets = []) {
             vps: false,
             vpsFlavor: "new",
             ai: [],
-            aiFlavor: { cursor: "new", claude: "new" },
+            aiFlavor: { cursor: "new", claude: "new", copilot: "new" },
             save: false,
             saveAs: targets[0]?.id ?? "devApp"
         }

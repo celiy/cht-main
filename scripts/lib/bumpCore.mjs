@@ -10,8 +10,6 @@ import {
     writeCoreVersionPins
 } from "./version.mjs";
 
-const DEFAULT_BRANCH = "main";
-
 /**
  * Execute a git command
  * @param {string} cwd
@@ -58,7 +56,7 @@ function gitOrThrow(cwd, args, label) {
  * @param {string} label
  * @returns {void}
  */
-function assertClean(dir, label) {
+export function assertClean(dir, label) {
     const unstaged = git(dir, ["diff", "--quiet"]);
     const staged = git(dir, ["diff", "--cached", "--quiet"]);
 
@@ -107,6 +105,23 @@ export function checkoutBranch(dir, branch, options = {}) {
     }
 
     throw new Error(`Branch "${branch}" not found in ${dir} (local or origin).`);
+}
+
+/**
+ * Branch currently checked out in a repo; throws on a detached HEAD.
+ *
+ * @param {string} dir
+ * @param {string} label
+ * @returns {string}
+ */
+function currentBranch(dir, label) {
+    const branch = git(dir, ["branch", "--show-current"]).stdout;
+
+    if (!branch) {
+        throw new Error(`${label} is on a detached HEAD; checkout a branch or pass one explicitly.`);
+    }
+
+    return branch;
 }
 
 /**
@@ -280,6 +295,7 @@ export function mainPinsCommitMessage(pins) {
 
 /**
  * Bump core repos, rewrite cht-main pins from those local versions, commit, push.
+ * Without `options.branch`, each repo commits and pushes on the branch it already has checked out.
  *
  * @param {string} root
  * @param {{
@@ -293,7 +309,7 @@ export function mainPinsCommitMessage(pins) {
  * }} [options]
  */
 export async function bumpCoreAndPush(root, options = {}) {
-    const branch = String(options.branch ?? DEFAULT_BRANCH).trim() || DEFAULT_BRANCH;
+    const explicitBranch = String(options.branch ?? "").trim();
     const dryRun = Boolean(options.dryRun);
     const includeAll = Boolean(options.all);
     const manualCommitMessage = Boolean(options.manualCommitMessage);
@@ -314,6 +330,14 @@ export async function bumpCoreAndPush(root, options = {}) {
         throw new Error(`cht-main is not a git repo (${root}).`);
     }
 
+    const branches = {};
+
+    for (const { repo, dir } of dirs) {
+        branches[repo] = explicitBranch || currentBranch(dir, repo);
+    }
+
+    branches["cht-main"] = explicitBranch || currentBranch(root, "cht-main");
+
     if (!dryRun && !includeAll && !manualCommitMessage) {
         for (const { repo, dir } of dirs) {
             assertClean(dir, repo);
@@ -328,12 +352,12 @@ export async function bumpCoreAndPush(root, options = {}) {
         askCommitMessage: options.askCommitMessage
     });
 
-    if (!dryRun) {
+    if (!dryRun && explicitBranch) {
         for (const { dir } of dirs) {
-            checkoutBranch(dir, branch, { fetch: doFetch });
+            checkoutBranch(dir, explicitBranch, { fetch: doFetch });
         }
 
-        checkoutBranch(root, branch, { fetch: doFetch });
+        checkoutBranch(root, explicitBranch, { fetch: doFetch });
     }
 
     const bumps = [];
@@ -370,15 +394,16 @@ export async function bumpCoreAndPush(root, options = {}) {
     }
 
     if (doPush) {
-        for (const { dir } of dirs) {
-            pushBranch(dir, branch);
+        for (const { repo, dir } of dirs) {
+            pushBranch(dir, branches[repo]);
         }
 
-        pushBranch(root, branch);
+        pushBranch(root, branches["cht-main"]);
     }
 
     return {
-        branch,
+        branch: branches["cht-main"],
+        branches,
         dryRun,
         pushed: doPush,
         all: includeAll,
