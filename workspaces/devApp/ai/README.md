@@ -65,6 +65,7 @@ Preferir **poucas regras sempre ativas**; o resto aplica-se por glob ou quando a
 | Skill               | Quando                                            |
 | ------------------- | ------------------------------------------------- |
 | `add-ds-component`  | Novo componente no design system + página de docs |
+| `build-fix`         | Rodar o build e corrigir o que quebrar            |
 | `code-review`       | Revisar mudanças git por breaking changes         |
 | `verification-loop` | Gate de qualidade antes de dizer que terminou     |
 | `security-review`   | Autenticação, entrada de usuário, segredos, CORS  |
@@ -85,6 +86,7 @@ Não duplicar conteúdo aqui — a fonte é o `SKILL.md`.
 | `/security-review`  | `security-review`   |
 | `/code-review`      | `code-review`       |
 | `/add-ds-component` | `add-ds-component`  |
+| `/build [cliente]`  | `build-fix`         |
 
 ## Fora desta pasta
 

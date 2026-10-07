@@ -1,21 +1,5 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Adicionar licensa
-
-Botão de copiar comando para dar update quando ter updates
-
-Otimizar o reveal-highlight
-    Notas de observação: 
-        Quando o efeito está ativo, se não tiver nenhum componente na tela que utiliza desde efeito, o uso de CPU sobe drasticamente. Parece que o efeito foi otimizado para não funcionar quando o mouse está parado por que quando está, nenhuma atividade na CPU é registrada.
-
-        Eu noto que o "style="color-scheme: dark; --cht-reveal-x: 1373.54296875px; --cht-reveal-y: 387.921875px;" que fica no <html> fica atualizando constantemente quando não há nenhum elemento na tela que tem o efeito.
-
-        Uma sugestão minha é colocar um delay de MS bem pequeno para o efeito não ficar executando todo milisegundo que conseguir mas não muito pro efeito não ficar choppy.
-
-        Outra sugestão é fazer com que o efeito não execute a não ser que um elemento esteja visivel. Se for possivel, fazer com que o efeito só execute se o mouse do usuário estiver perto o suficiente de um componente com este efeito para ativar.
-
-        Se o Agente de IA que está lendo isso conseguir rodar testes de performance para certos casos incluindo o listado acima, por favor faça. Use estes testes de performance para decidir se as alterações novas são mais rápidas que as antigas
-
 Comando para dar merge da branch beta na main
 
 Mobile:
