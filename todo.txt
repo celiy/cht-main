@@ -6,22 +6,12 @@ Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
 
 Mecarvit:
-    Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
-        As repos design-system, base e shared devem ter um readme mais completo. Este readme deve seguir o padrão que já existe.
+    Testar a impressão de uma ordem de serviço que tem campos muito longos
 
-        O client-Mecarvit deve receber o mesmo tratamento, mas o readme dele deve incluir links para as repos main, design, base, shared e o backend dele. Isso também para o backend.
+    Sidebar recebe novo prop nos itens do nav, um item recebe um objeto que são os props de um botão. Este botão fica no lado direito do link.
+        O botão também pode receber props de quando ele fica visivel.
 
-        o Mecarvit client e backend devem ter uma pasta /docs e deve ter vários .md com nome em ptbr e escrita em pt-br. Cada .md deve ser uma secção sobre os pilares e componentes da sua repo e não das externas. Então tipo o client-Mecarvit terá documentação sobre a sua base e código sem diretamente explicar o código do base ou design-system que utiliza.
-
-        É claro que menções são permitidas.
-
-        Garanta de incluir para o cliente .md para cada pagina, componentes principais e sua base
-
-        Para o backend, cada rota, serviço, controller e afins.
-
-        Os readmes do Mecarvit devem referenciar essa documentação no /docs de cada repo
+        Implementar isso no Mecarvit:
+            Funcionários, Clientes, Veículos, Ordens de Serviço não são mais grupos mas sim um botão só com botão de + do seu lado. O botão só aparece quando o usuário acessa o link.
 
     Implementar backup do backend
-
-    Documentação TCC:
-        Documentar sobre o novo status reaberto
