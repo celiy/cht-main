@@ -1,14 +1,14 @@
 # Celi Herstal's Template project context
 
-Índice de arquitetura. Ler este ficheiro ao trabalhar em clientes, runner, aliases ou `cht-base`. Estilo de código: `.cursor/rules/`. Toast: `.cursor/docs/toast.md`.
+Índice de arquitetura. Ler este ficheiro ao trabalhar em clientes, runner, aliases ou `cht-base`. Estilo de código: `{{aiDir}}/rules/`. Toast: `{{aiDir}}/docs/toast.md`.
 
 **Documentação:**
 
 - [context.md](./context.md) — este ficheiro
 - [toast.md](./toast.md) — `$toast` e `<Toast>`
 - [deps_sync.md](./deps_sync.md) — sincronização de dependências
-- [code-guidelines.mdc](../rules/code-guidelines.mdc)
-- [document-guide.mdc](../rules/document-guide.mdc)
+- [{{rule:code-guidelines}}](../{{rulesDir}}/{{rule:code-guidelines}})
+- [{{rule:document-guide}}](../{{rulesDir}}/{{rule:document-guide}})
 
 ---
 
@@ -62,6 +62,7 @@ Ao adicionar um cliente novo: clonar/criar a pasta irmã com `cht.config.json`, 
 
 - `cht-base/src/css/style.css` importa o Tailwind e registra as fontes com `@source`. O cliente entra por `@source "virtual:client-source"`, que **não** é um caminho real: `cht-base/vite-plugins/clientSource.ts` substitui a diretiva pela pasta `src` do cliente ativo (`CLIENT`). Sem `CLIENT`, a diretiva é removida — nos docs, `@source "../../"` já cobre `src/devApp`.
 - **Override CSS:** `src/override.css` no cliente ativo é opcional. `cht-base/vite-plugins/clientOverride.ts` serve o ficheiro como stylesheet extra (depois do CSS compilado), para as regras sem `@layer` ganharem das utilities. Serve para redefinir classes globais (`hover-ring`, `btn-group`, containers) sem alterar o design system. Sem `CLIENT` ou sem o ficheiro, nada é injetado. O template de `npx chtmain create` inclui um `override.css` vazio.
+- **Plugin Tailwind do cliente:** `src/tailwind.plugin.js` opcional. `cht-base/vite-plugins/clientTailwindPlugin.ts` troca `@plugin "virtual:client-tailwind-plugin"` em `style.css` pelo ficheiro do cliente ativo. Sem `CLIENT` ou sem o ficheiro, a diretiva some. Serve para **novas utilities** (não para retocar classes existentes — isso é o override). O template inclui um plugin vazio; o `override-demo` define `.demo-stripe`.
 - **Não** troque o `@source` por um glob como `@source "../../../cht-client-*/src"`. O `*` dentro de um segmento de diretório não expande: o Tailwind ignora a diretiva em silêncio e as classes usadas **só** pelo cliente desaparecem do bundle (um `w-20` ou `right-4` que existe no `.vue` e não sai no CSS). O mesmo vale para `cht-client-*` sem o `/src`; `**` funciona, mas só depois de um trecho literal, e varreria os outros clientes.
 - Sintoma típico: `top-4` funciona e `right-4` não, na mesma linha de `class` — a primeira aparece no `cht-base` ou no design system, a segunda só no cliente.
 - Ao mexer em `@source`, valide olhando o CSS gerado, não o navegador:
@@ -90,7 +91,7 @@ grep -oF '.w-20' dist/assets/*.css   # deve achar; vazio = fonte não registrada
 
 - Plugin próprio em `cht-design-system/src/toast/` (substitui `vue-toastification`).
 - `cht-base/src/main.ts` faz `app.use(toastPlugin, { timeout: 4000 })`.
-- O layout monta `<Toast position width />`. Contrato: `.cursor/docs/toast.md`.
+- O layout monta `<Toast position width />`. Contrato: `{{aiDir}}/docs/toast.md`.
 
 ### Estado global `$project`
 
@@ -208,6 +209,7 @@ scripts/
     version.mjs         # leitura/escrita da versão e regra de bump (x.y.z)
     procManager.mjs     # ProcessManager: spawn setsid + ring buffer + kill tree
     ansiUtils.mjs       # stripAnsi, findUrls, osc8Link
+    mergeCore.mjs       # lógica do merge-core (reutiliza git de bumpCore.mjs)
   runner/
     index.jsx           # entrypoint: parse args, spawn, render Ink App
     App.jsx             # layout (header + log pane + status bar)
@@ -218,6 +220,8 @@ scripts/
   install.mjs           # clona shared.repos + backend.repo do config do cliente, npm i recursivo
   build.mjs             # build/export do front para builds/<cliente>/dist
   bump.mjs              # incrementa o arquivo `version` de um repo (sem commit)
+  bump-core.mjs         # bump + pins + push nas repos principais
+  merge-core.mjs        # merge origem → destino (default beta → main) nas repos principais
 ```
 
 ### Comportamento
@@ -256,7 +260,8 @@ scripts/
 - `cht-client-<nome>/src/App.vue` e `routes.ts` — app e rotas do cliente.
 - `cht-base/src/project.ts` — `$project` e `initProjectRouter`.
 - `cht-base/src/main.ts` — cria router a partir de `@client/routes`, monta `@client/App.vue`, plugins, título.
-- `scripts/entry.mjs` — ponto de entrada único: despacha `install`/`dev`/`build`/`electron`/`bump`/`sync-deps`.
+- `scripts/entry.mjs` — ponto de entrada único: despacha `install`/`dev`/`build`/`electron`/`bump`/`bump-core`/`merge-core`/`sync-deps`.
 - `scripts/runner/index.jsx` — dev runner multi-shell (frontend + backend por cliente, alternância com setas).
 - `scripts/build.mjs` — build/export do front para `builds/<cliente>/dist`.
 - `scripts/bump.mjs` — incrementa a versão (`x.y.z`) de um repo; a lógica fica em `scripts/lib/version.mjs`.
+- `scripts/merge-core.mjs` — merge de branch nas repos `cht-shared`, `cht-design-system`, `cht-base` e `cht-main`; ver [README](../../README.md) § merge-core.

@@ -119,5 +119,5 @@ Pendências:
 1. ...
 ```
 
-Não escreva em git por causa desta skill. `git-writes.mdc` manda: commit e push só quando
+Não escreva em git por causa desta skill. `{{rule:git-writes}}` manda: commit e push só quando
 o usuário pedir naquela mensagem.

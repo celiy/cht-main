@@ -114,7 +114,8 @@ assert(draft.values.ai.includes("claude"), "claude marked");
 assert(draft.values.aiFlavor.claude === "opinionated", "claude flavor stored");
 
 draft = reduceWizard(draft, "right");
-assert(draft.primaryIdx === 2, "continue focused");
+draft = reduceWizard(draft, "right");
+assert(draft.primaryIdx === 3, "continue focused");
 
 draft = reduceWizard(draft, "enter");
 assert(draft.step === 5, "continue advances to save");

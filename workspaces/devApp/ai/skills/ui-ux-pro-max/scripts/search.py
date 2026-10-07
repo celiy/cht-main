@@ -34,7 +34,7 @@ _DISCOURAGED_DOMAINS = frozenset({
 _CHT_DESIGN_SYSTEM_BLOCK = (
     "Blocked in this CHT monorepo: --design-system / --persist invent a parallel "
     "visual system. Use cht-design-system + --domain ux (and --stack vue). "
-    "See .cursor/skills/ui-ux-pro-max/SKILL.md."
+    "See {{aiDir}}/skills/ui-ux-pro-max/SKILL.md."
 )
 
 

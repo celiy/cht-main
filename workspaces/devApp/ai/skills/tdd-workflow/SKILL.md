@@ -78,7 +78,7 @@ Siga a skill `verification-loop`. Tipos, lint e formatação fazem parte do resu
 ## Checkpoints no git
 
 O ECC sugere um commit por estágio. **Neste repositório isso não vale automaticamente:**
-o `.cursor/rules/git-writes.mdc` exige pedido explícito do usuário para qualquer escrita no git.
+o `{{aiDir}}/rules/git-writes.md` exige pedido explícito do usuário para qualquer escrita no git.
 
 Então: ao chegar no fim, **proponha** os commits (um por estágio, com a evidência na mensagem)
 e espere. Não commite nem faça `--amend` por iniciativa própria.

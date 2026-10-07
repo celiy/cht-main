@@ -9,7 +9,7 @@ Referência técnica (JSDoc, READMEs de módulo) em **inglês**. Cópia de UI no
 
 ## Cabeçalho de ficheiro `.ts`
 
-Obrigatório no topo de cada `.ts` / `.d.ts` (não em `.vue`). Ver `ts-module-header.mdc`.
+Obrigatório no topo de cada `.ts` / `.d.ts` (não em `.vue`). Ver `{{rule:ts-module-header}}`.
 
 ```ts
 /**

@@ -19,7 +19,7 @@ UX/acessibilidade** dentro desse sistema — não para gerar landing pages, nova
 ## Fonte de verdade (não negociável)
 
 1. Componentes: `cht-design-system` (primitivos + `custom/`). Novos → skill `add-ds-component`.
-2. Convenções Vue/tokens: `.cursor/rules/vue-components.mdc`, `code-guidelines.mdc`.
+2. Convenções Vue/tokens: `{{aiDir}}/rules/vue-components.md`, `{{aiDir}}/rules/code-guidelines.md`.
 3. Tokens de cor: `cht-base/src/css/style.css` (`success`, `info`, `warning`, `destructive`, …).
 4. Ícones: **Font Awesome** `fa-solid` (não Phosphor/Heroicons/Lucide).
 5. Copy de UI: **português**. Identificadores/comentários técnicos: inglês.
@@ -52,7 +52,7 @@ Python 3 (stdlib only). Se faltar, **não instalar** — pedir ao usuário ou pu
 python3 --version || python --version
 ```
 
-Scripts em `.cursor/skills/ui-ux-pro-max/scripts/` (relativo à raiz do monorepo).
+Scripts em `{{aiDir}}/skills/ui-ux-pro-max/scripts/` (relativo à raiz do monorepo).
 Neste monorepo a CLI **recusa** `--design-system` / `--persist` (ver `search.py`).
 
 ## Buscas úteis neste projeto
@@ -61,16 +61,16 @@ Preferir **uma intenção**, 2–5 termos, um domínio. Stack padrão: `vue`.
 
 ```bash
 # UX / acessibilidade (mais comum aqui)
-python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "keyboard focus modal" --domain ux
-python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "error summary validation" --domain ux
-python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "badge chip label wraps" --domain ux
-python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "focus not obscured" --domain ux
+python3 {{aiDir}}/skills/ui-ux-pro-max/scripts/search.py "keyboard focus modal" --domain ux
+python3 {{aiDir}}/skills/ui-ux-pro-max/scripts/search.py "error summary validation" --domain ux
+python3 {{aiDir}}/skills/ui-ux-pro-max/scripts/search.py "badge chip label wraps" --domain ux
+python3 {{aiDir}}/skills/ui-ux-pro-max/scripts/search.py "focus not obscured" --domain ux
 
 # Implementação Vue (dataset pode sugerir Composition API — ignore; use Options API)
-python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "form accessibility labels" --stack vue
+python3 {{aiDir}}/skills/ui-ux-pro-max/scripts/search.py "form accessibility labels" --stack vue
 
 # Charts (só se a tarefa for chart)
-python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "trend comparison dashboard" --domain chart
+python3 {{aiDir}}/skills/ui-ux-pro-max/scripts/search.py "trend comparison dashboard" --domain chart
 ```
 
 | Domain / flag | Uso neste repo |
@@ -97,7 +97,7 @@ Antes de aplicar um resultado: conferir se encaixa em **produto B2B de oficina**
 - [ ] Controles clicáveis têm feedback e `cursor` adequado
 - [ ] Estados disabled claros e não acionáveis
 - [ ] Focus keyboard visível; ordem de foco sensata
-- [ ] Timers/listeners/observers limpos no unmount (`cleanup-timers.mdc`)
+- [ ] Timers/listeners/observers limpos no unmount (`{{rule:cleanup-timers}}`)
 
 ### Layout
 

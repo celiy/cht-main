@@ -42,4 +42,4 @@ Não usar `border-border`. Classes de largura (`border`, `border-b`, `border-x`,
 
 ## Timers e listeners
 
-`setTimeout`, `setInterval`, `requestAnimationFrame`, `addEventListener`, `ResizeObserver` e subscriptions (`$toast.on`, etc.) **devem** ser limpos no unmount. Ver `cleanup-timers.mdc`.
+`setTimeout`, `setInterval`, `requestAnimationFrame`, `addEventListener`, `ResizeObserver` e subscriptions (`$toast.on`, etc.) **devem** ser limpos no unmount. Ver `{{rule:cleanup-timers}}`.

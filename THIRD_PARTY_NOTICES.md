@@ -2,7 +2,7 @@
 
 ## ECC
 
-Parte das instruções de agente em `.cursor/skills/` foi **adaptada** do projeto ECC:
+Parte das instruções de agente em `workspaces/devApp/ai/skills/` foi **adaptada** do projeto ECC:
 
 - Projeto: ECC — the agent harness operating system
 - Autor: Affaan Mustafa (`affaan-m`)
@@ -14,9 +14,9 @@ Express + SQLite, comandos via `npx chtmain`, `git-writes.mdc`). Não são cópi
 
 | Arquivo neste repositório                   | Origem no ECC              |
 | ------------------------------------------- | -------------------------- |
-| `.cursor/skills/verification-loop/SKILL.md` | `skills/verification-loop` |
-| `.cursor/skills/security-review/SKILL.md`   | `skills/security-review`   |
-| `.cursor/skills/tdd-workflow/SKILL.md`      | `skills/tdd-workflow`      |
+| `workspaces/devApp/ai/skills/verification-loop/SKILL.md` | `skills/verification-loop` |
+| `workspaces/devApp/ai/skills/security-review/SKILL.md`   | `skills/security-review`   |
+| `workspaces/devApp/ai/skills/tdd-workflow/SKILL.md`      | `skills/tdd-workflow`      |
 
 ### Licença MIT do ECC
 
@@ -51,14 +51,14 @@ sob a licença do ECC naquele repositório.
 
 ## Karpathy behavioral guidelines (Multica)
 
-A regra `.cursor/rules/karpathy-guidelines.mdc` foi **copiada** do repositório Multica
+A regra `workspaces/devApp/ai/rules/karpathy-guidelines.md` foi **copiada** do repositório Multica
 (guidelines derivadas das observações públicas de Andrej Karpathy sobre armadilhas
 de coding com LLMs):
 
 - Projeto: andrej-karpathy-skills
 - Mantenedor: Multica (`multica-ai`)
 - Fonte: https://github.com/multica-ai/andrej-karpathy-skills
-- Arquivo de origem: `.cursor/rules/karpathy-guidelines.mdc`
+- Arquivo de origem: `workspaces/devApp/ai/rules/karpathy-guidelines.md`
 - Licença: o repositório upstream não declara LICENSE no momento da inclusão;
   crédito mantido ao Multica e às observações de Andrej Karpathy.
 
@@ -68,13 +68,13 @@ de coding com LLMs):
 
 ## Ponytail
 
-A regra `.cursor/rules/ponytail.mdc` foi **copiada** do projeto Ponytail
+A regra `workspaces/devApp/ai/rules/ponytail.md` foi **copiada** do projeto Ponytail
 (“lazy senior dev mode”):
 
 - Projeto: ponytail
 - Autor: Dietrich Gebert (`DietrichGebert`)
 - Fonte: https://github.com/DietrichGebert/ponytail
-- Arquivo de origem: `.cursor/rules/ponytail.mdc`
+- Arquivo de origem: `workspaces/devApp/ai/rules/ponytail.md`
 - Licença: MIT
 
 | Arquivo neste repositório       | Origem                                 |
@@ -109,7 +109,7 @@ SOFTWARE.
 
 ## UI UX Pro Max
 
-A skill `.cursor/skills/ui-ux-pro-max/` veio do [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+A skill `workspaces/devApp/ai/skills/ui-ux-pro-max/` veio do [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 (instalação via `ui-ux-pro-max-cli` / `uipro init --ai cursor`) e foi **adaptada** a este
 monorepo: o `SKILL.md` prioriza o `cht-design-system`, Vue 3, tokens existentes e review de
 UX/acessibilidade. Skills irmãs do pacote (`ui-styling`, `design`, `brand`, `slides`, etc.)
@@ -123,9 +123,9 @@ foram **removidas** por não se encaixarem no produto.
 
 | Caminho neste repositório                 | Notas                                                         |
 | ----------------------------------------- | ------------------------------------------------------------- |
-| `.cursor/skills/ui-ux-pro-max/SKILL.md`   | Adaptado ao CHT                                               |
-| `.cursor/skills/ui-ux-pro-max/data/`      | Dados de busca do upstream (intactos)                         |
-| `.cursor/skills/ui-ux-pro-max/scripts/`   | Upstream + adaptações locais em `search.py` / fallbacks `ux`  |
+| `workspaces/devApp/ai/skills/ui-ux-pro-max/SKILL.md`   | Adaptado ao CHT                                               |
+| `workspaces/devApp/ai/skills/ui-ux-pro-max/data/`      | Dados de busca do upstream (intactos)                         |
+| `workspaces/devApp/ai/skills/ui-ux-pro-max/scripts/`   | Upstream + adaptações locais em `search.py` / fallbacks `ux`  |
 
 ### Licença MIT do UI UX Pro Max
 

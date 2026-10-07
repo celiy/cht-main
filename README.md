@@ -72,8 +72,9 @@ npm run cht -- <comando> [args...]
 | `build`     | builda o frontend de um cliente                       |
 | `electron`  | abre ou empacota o app desktop                        |
 | `bump`      | incrementa a versão de um repositório                 |
-| `bump-core` | bump das repos principais, pins no `cht-main`, push   |
-| `sync-deps` | normaliza versões de dependências compartilhadas      |
+| `bump-core`  | bump das repos principais, pins no `cht-main`, push   |
+| `merge-core` | merge de uma branch na outra nas repos principais     |
+| `sync-deps`  | normaliza versões de dependências compartilhadas      |
 
 Cada comando também tem um atalho em `npm run` (`npm run dev`, `npm run build -- mecarvit`, `npm run sync:deps`, …), mas o `npx chtmain` é o que funciona igual nos dois sistemas.
 
@@ -127,6 +128,8 @@ Ficheiros de tooling na **raiz** do `cht-main` não vão no Git. A fonte é um p
 | ------------------------------- | -------------------------------------------- |
 | `workspaces/devApp/`            | pack **Project-Opinionated** deste repo      |
 | `<pasta-do-cliente>/workspace/` | pack do cliente (`cht.config.json` → `name`) |
+
+As regras, comandos, skills e docs para agentes vivem **uma só vez**, em formato neutro, em `workspaces/devApp/ai/` (ver o README dessa pasta). No install são convertidos para o formato de cada ferramenta (`scripts/lib/aiDocs.mjs`): `.cursor/` (regras `.mdc`), `.claude/` (+ `CLAUDE.md`) e `.github/` (Copilot). `--workspace:devApp` gera `.cursor` e `.claude`; no `--new`, o assistente gera os marcados na opção Project-Opinionated.
 
 `--workspace:<name>` apaga o que o pack anterior deixou (manifesto `.cht-workspace.json`) e copia **todos** os entries do pack novo. `--workspace-clean` só apaga (manifesto + nomes do wizard). `--new` só escreve as opções do assistente.
 
@@ -197,11 +200,11 @@ npx chtmain electron build <name> --publish  # envia para o GitHub Releases
 
 Os artefatos saem em `builds/<name>/desktop`. Alvos disponíveis: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) e `--mac` (`dmg`/`zip`).
 
-Instaladores e atualização automática via GitHub Releases: veja [`workspaces/devApp/.cursor/docs/desktop-release.md`](./workspaces/devApp/.cursor/docs/desktop-release.md).
+Instaladores e atualização automática via GitHub Releases: veja [`workspaces/devApp/ai/docs/desktop-release.md`](./workspaces/devApp/ai/docs/desktop-release.md).
 
 ### 5) Incrementar a versão
 
-Para incrementar as três repos principais, commitar o bump, copiar esses números para os pins do `cht-main` e fazer push (branch `main` se omitires):
+Para incrementar as três repos principais, commitar o bump, copiar esses números para os pins do `cht-main` e fazer push, cada repo na branch em que já está (ou `bump-core <branch>` para mudar todas para essa branch antes):
 
 ```bash
 npx chtmain bump-core
@@ -212,9 +215,31 @@ npx chtmain bump-core --dry-run
 
 Sem `--all`, a working tree rastreada tem de estar limpa e o commit leva só o ficheiro `version`. Com `--all`, também entra o resto das alterações de cada repo (e do `cht-main`) no mesmo commit do bump. Com `--manual-commit-message`, cada repo que tiver alterações além da versão pede a mensagem de commit (e inclui essas alterações). Cada repo principal recebe `bump: x.y.z → a.b.c` quando só muda a versão. O `cht-main` só atualiza as linhas `cht-*` (a linha `version` dele não muda).
 
+### 6) Integrar branch nas repos principais (`merge-core`)
+
+Para levar o trabalho de uma branch de integração (por omissão **`beta`**) para a branch estável (**`main`**) em todas as repos do núcleo, na ordem:
+
+1. `cht-shared`
+2. `cht-design-system`
+3. `cht-base`
+4. `cht-main` (raiz do workspace)
+
+```bash
+npx chtmain merge-core
+npx chtmain merge-core --dry-run
+npx chtmain merge-core --no-push
+npx chtmain merge-core beta main
+```
+
+Por omissão faz `fetch`, checkout da branch de destino, `pull --ff-only` (quando `origin/<destino>` existir), merge de `origin/<origem>` com mensagem `Merge branch '<origem>' into <destino>` e `push` para `origin`. Use `--no-push` para só merge local. Use `--dry-run` para validar o merge sem alterar commits nem exigir working tree limpa (faz merge de prova e aborta em cada repo).
+
+Requisitos (sem `--dry-run`): cada pasta tem de ser um repositório Git com remoto `origin`, a branch de origem tem de existir em `origin`, e a working tree rastreada tem de estar limpa. Se um repo já contém a origem, o comando imprime *already up to date* e segue. Em conflito, o processo para e indica em qual repo resolver.
+
+Fluxo típico após validar em `beta`: `npx chtmain merge-core --dry-run`, depois `npx chtmain merge-core`. Em seguida costuma-se correr `npx chtmain bump-core` na `main` se ainda precisares de subir versões e pins.
+
 ## Observações rápidas
 
 - Se você editar manualmente `common-dependencies.json`, a próxima execução do sync respeita esse arquivo.
-- Para detalhes completos da sincronização de dependências, veja [`workspaces/devApp/.cursor/docs/deps_sync.md`](./workspaces/devApp/.cursor/docs/deps_sync.md).
-- Contexto do monorepo (aliases, runner, cliente novo): [`workspaces/devApp/.cursor/docs/context.md`](./workspaces/devApp/.cursor/docs/context.md).
+- Para detalhes completos da sincronização de dependências, veja [`workspaces/devApp/ai/docs/deps_sync.md`](./workspaces/devApp/ai/docs/deps_sync.md).
+- Contexto do monorepo (aliases, runner, cliente novo): [`workspaces/devApp/ai/docs/context.md`](./workspaces/devApp/ai/docs/context.md).
 - Contribuir (estilo, qualidade, estabilidade de componentes): [`CONTRIBUTING.md`](./CONTRIBUTING.md).

@@ -28,6 +28,7 @@ const SCRIPT_COMMANDS = {
     electron: "electron.mjs",
     bump: "bump.mjs",
     "bump-core": "bump-core.mjs",
+    "merge-core": "merge-core.mjs",
     create: "create.mjs",
     "sync-deps": "sync-common-deps.mjs"
 };
@@ -64,6 +65,8 @@ function printUsage() {
     console.log("  bump           Bump the version file of one workspace repo.");
     console.log("  bump-core      Bump core repos, sync cht-main pins, commit and push.");
     console.log("                   [branch]  --dry-run  --all  --manual-commit-message");
+    console.log("  merge-core     Merge source branch into target on core repos (+ cht-main).");
+    console.log("                   [source] [target]  --dry-run  --no-push  (default beta → main)");
     console.log("  sync-deps      Normalize shared dependency versions across repos.");
     console.log("");
     console.log(`Available: ${commands.join(", ")}`);

@@ -21,10 +21,10 @@ description: >-
 ## Implementation
 
 - Options API, English identifiers, Portuguese UI copy.
-- Follow `.cursor/rules/code-guidelines.mdc` (attribute order, braces, double quotes).
-- Follow `.cursor/rules/vue-components.mdc` (Tailwind 4, tokens, no `Plugin<T>`).
-- Clean timers/observers/listeners on unmount (`.cursor/rules/cleanup-timers.mdc`).
-- Global chrome (toast host, similar): mount in the layout, not on each docs page. Plugin APIs live next to the component (see `.cursor/docs/toast.md`).
+- Follow `{{aiDir}}/rules/code-guidelines.md` (attribute order, braces, double quotes).
+- Follow `{{aiDir}}/rules/vue-components.md` (Tailwind 4, tokens, no `Plugin<T>`).
+- Clean timers/observers/listeners on unmount (`{{aiDir}}/rules/cleanup-timers.md`).
+- Global chrome (toast host, similar): mount in the layout, not on each docs page. Plugin APIs live next to the component (see `{{aiDir}}/docs/toast.md`).
 
 ## Docs (devApp)
 

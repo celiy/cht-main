@@ -1,10 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
+import { AI_SOURCE_DIR, AI_TARGET_IDS, aiEntryNames, generateAiDocs } from "./aiDocs.mjs";
 
 export const WIZARD_WORKSPACE_ENTRIES = [
     ".vscode",
     ".cursor",
     ".claude",
+    "CLAUDE.md",
+    ".github",
     ".prettierrc.json",
     ".prettierignore",
     "netlify.toml",
@@ -18,11 +21,15 @@ export const WORKSPACE_MANIFEST = ".cht-workspace.json";
 
 export const OPINIONATED_WORKSPACE = "devApp";
 
+/** AI targets generated from a pack's `ai/` folder by `--workspace:<name>`. */
+const PACK_AI_TARGETS = ["cursor", "claude"];
+
 const WORKSPACE_SKIP = new Set([
     ".git",
     ".gitkeep",
     "node_modules",
     WORKSPACE_MANIFEST,
+    AI_SOURCE_DIR,
     "package.json",
     "package-lock.json",
     "README.md",
@@ -151,13 +158,21 @@ export function copyWorkspaceToRoot(fromDir, toDir) {
         throw new Error(`[install] workspace not found: ${fromDir}`);
     }
 
-    const entries = listWorkspaceEntries(fromDir);
+    const aiDir = path.join(fromDir, AI_SOURCE_DIR);
+    const aiTargets = fs.existsSync(aiDir) ? PACK_AI_TARGETS : [];
+    const entries = [
+        ...new Set([...listWorkspaceEntries(fromDir), ...aiTargets.flatMap(aiEntryNames)])
+    ];
 
     clearRootWorkspace(toDir, entries);
     fs.mkdirSync(toDir, { recursive: true });
 
     for (const entry of entries) {
         copyEntry(path.join(fromDir, entry), path.join(toDir, entry));
+    }
+
+    for (const kind of aiTargets) {
+        generateAiDocs(aiDir, toDir, kind);
     }
 
     writeManifest(toDir, entries);
@@ -226,15 +241,13 @@ function applyVps(root, templatesDir) {
 }
 
 function applyAi(root, templatesDir, kind, flavor) {
-    const name = kind === "claude" ? ".claude" : ".cursor";
-
     if (flavor === "opinionated") {
-        copyEntry(path.join(templatesDir, name), path.join(root, name));
+        generateAiDocs(path.join(templatesDir, AI_SOURCE_DIR), root, kind);
 
         return;
     }
 
-    fs.mkdirSync(path.join(root, name), { recursive: true });
+    fs.mkdirSync(path.join(root, aiEntryNames(kind)[0]), { recursive: true });
 }
 
 /**
@@ -249,7 +262,7 @@ function applyAi(root, templatesDir, kind, flavor) {
  *   eslintFlavor?: "new" | "opinionated",
  *   vps?: boolean,
  *   vpsFlavor?: "new" | "opinionated",
- *   ai?: "cursor" | "claude" | "none" | string[],
+ *   ai?: "cursor" | "claude" | "copilot" | "none" | string[],
  *   aiFlavor?: "new" | "opinionated",
  *   aiFlavors?: { cursor?: "new" | "opinionated", claude?: "new" | "opinionated" }
  * }} choices
@@ -276,7 +289,7 @@ export function applyWorkspaceChoices(root, templatesDir, choices) {
 
     const aiKinds = Array.isArray(choices.ai)
         ? choices.ai
-        : choices.ai === "cursor" || choices.ai === "claude"
+        : AI_TARGET_IDS.includes(choices.ai)
             ? [choices.ai]
             : [];
 

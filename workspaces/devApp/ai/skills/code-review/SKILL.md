@@ -19,7 +19,7 @@ Do not review style, naming, or unrelated quality unless the user asks.
 1. **Collect changes** from every git repository under the workspace root (not only `cht-main`):
 
     ```bash
-    bash .cursor/skills/code-review/scripts/collect-git-changes.sh
+    bash {{aiDir}}/skills/code-review/scripts/collect-git-changes.sh
     ```
 
     Run from the workspace root. The script scans repos up to depth 2 (`cht-main`, `cht-base`, `cht-design-system`, `cht-shared`, `cht-client-*`, …).

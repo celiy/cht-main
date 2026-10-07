@@ -28,7 +28,7 @@ alwaysApply: false
 
 - Instalar com objeto `{ install(app, options?) { ... } }` **sem** anotar como `Plugin` / `Plugin<T>`. O `app.use` do Vue 3.5 falha nessas anotações (união FunctionPlugin vs ObjectPlugin).
 - Expor API em `app.config.globalProperties` e tipos em `cht-base/src/env.d.ts` + `cht-design-system/src/types/vue-globals.d.ts`.
-- Toast: ver `.cursor/docs/toast.md`.
+- Toast: ver `{{aiDir}}/docs/toast.md`.
 
 ## UI
 
