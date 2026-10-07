@@ -51,15 +51,16 @@ function isAncestor(dir, ancestor, head) {
 }
 
 /**
- * Merge `origin/source` into the current branch in `dir`.
+ * Merge `origin/source` into the target branch (checks it out first).
  *
  * @param {string} dir
+ * @param {string} repoLabel
  * @param {string} sourceBranch
  * @param {string} targetBranch
  * @param {{ dryRun?: boolean, push?: boolean, fetch?: boolean }} options
  * @returns {{ repo: string, merged: boolean, pushed: boolean, skipped: boolean }}
  */
-export function mergeBranchInRepo(dir, repoLabel, sourceBranch, targetBranch, options = {}) {
+function mergeOnTarget(dir, repoLabel, sourceBranch, targetBranch, options = {}) {
     const dryRun = Boolean(options.dryRun);
     const doPush = options.push !== false && !dryRun;
     const doFetch = options.fetch !== false;
@@ -124,6 +125,34 @@ export function mergeBranchInRepo(dir, repoLabel, sourceBranch, targetBranch, op
     }
 
     return { repo: label, merged: true, pushed, skipped: false };
+}
+
+/**
+ * Merge `origin/source` into the target branch in `dir`, then go back to whatever was
+ * checked out before (a branch name, or the commit on a detached HEAD).
+ *
+ * @param {string} dir
+ * @param {string} repoLabel
+ * @param {string} sourceBranch
+ * @param {string} targetBranch
+ * @param {{ dryRun?: boolean, push?: boolean, fetch?: boolean }} options
+ * @returns {{ repo: string, merged: boolean, pushed: boolean, skipped: boolean }}
+ */
+export function mergeBranchInRepo(dir, repoLabel, sourceBranch, targetBranch, options = {}) {
+    const original =
+        git(dir, ["branch", "--show-current"]).stdout || git(dir, ["rev-parse", "HEAD"]).stdout;
+
+    try {
+        return mergeOnTarget(dir, repoLabel, sourceBranch, targetBranch, options);
+    } catch (error) {
+        git(dir, ["merge", "--abort"]);
+
+        throw error;
+    } finally {
+        if (original && !git(dir, ["checkout", original]).ok) {
+            console.warn(`[merge-core] ${repoLabel}: could not go back to ${original}`);
+        }
+    }
 }
 
 /**
