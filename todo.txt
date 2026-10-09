@@ -1,6 +1,10 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Comando para dar merge da branch beta na main
+Fazer a animação da barra de timing do toast mais smooth
+
+Fazer Icone para o cht
+
+Testar se o style.css de um cliente funciona, testar a troca de fontes
 
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
@@ -13,5 +17,11 @@ Mecarvit:
 
         Implementar isso no Mecarvit:
             Funcionários, Clientes, Veículos, Ordens de Serviço não são mais grupos mas sim um botão só com botão de + do seu lado. O botão só aparece quando o usuário acessa o link.
+
+    Input do valor de um serviço não está sendo formatado como dinheiro corretamente
+
+    Inputs dos serviços ficam muito grandes quando é um item salvo
+
+    O cliente Mecarvit demora muito tempo pra carregar quando dou reload diferente do docs que é instantaneo
 
     Implementar backup do backend
