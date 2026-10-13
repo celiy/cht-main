@@ -1,15 +1,7 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Comando para dar merge da branch beta na main
-
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
 
 Mecarvit:
-    Arquivo de documentação EXTENSO sobre tudo do sistema no frontend e backend.
-        [adicionar]
-
     Implementar backup do backend
-
-    Documentação TCC:
-        Documentar sobre o novo status reaberto
