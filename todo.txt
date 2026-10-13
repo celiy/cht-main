@@ -1,7 +1,5 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Fazer Icone para o cht
-
 Mobile:
     Usar o site normalmente no mobile e decidir o que tem que ser mudado
 
