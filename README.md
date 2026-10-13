@@ -1,6 +1,6 @@
 <div align="center">
 
-<img alt="CHT logo" src="cht-base/assets/CHT-Logo-4000.png" width="160">
+<img alt="CHT logo" src="https://github.com/celiy/cht-base/blob/main/assets/CHT-Logo-1000.png" width="160">
 
 # CHT
 
