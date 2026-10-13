@@ -168,7 +168,9 @@ A sintaxe é genérica: para qualquer pasta irmã com `cht.config.json`, basta `
 
 O runner abre um TUI estilo htop com tabs por processo.
 
-### 3) Build/export de frontend por cliente
+### 3) Build e app desktop
+
+#### Build do frontend
 
 ```bash
 npx chtmain build <name>
@@ -182,7 +184,7 @@ builds/<name>/dist
 
 Se `builds/<name>/dist` já existir, ele é removido e recriado.
 
-### 4) App desktop (Electron)
+#### App desktop (Electron)
 
 Modo desenvolvimento:
 
@@ -202,20 +204,40 @@ Os artefatos saem em `builds/<name>/desktop`. Alvos disponíveis: `--win` (`nsis
 
 Instaladores e atualização automática via GitHub Releases: veja [`workspaces/devApp/ai/docs/desktop-release.md`](./workspaces/devApp/ai/docs/desktop-release.md).
 
-### 5) Incrementar a versão
+### 4) Referência de comandos
 
-Para incrementar as três repos principais, commitar o bump, copiar esses números para os pins do `cht-main` e fazer push, cada repo na branch em que já está (ou `bump-core <branch>` para mudar todas para essa branch antes):
+Todos os comandos seguem `npx chtmain <comando> [args...]` (ou `npm run cht -- <comando> [args...]`). Ajuda rápida: `npx chtmain help`.
 
-```bash
-npx chtmain bump-core
-npx chtmain bump-core --all
-npx chtmain bump-core --manual-commit-message
-npx chtmain bump-core --dry-run
-```
+| Comando      | Flags / argumentos                                  | Descrição                                                                                                                                                                                                  |
+| ------------ | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `install`    | `--client:<name>`                                   | Clona (ou faz `fetch` + `pull --ff-only`) os repos compartilhados e os do cliente, e roda `npm install` na raiz e nas pastas irmãs. Alias: `install:repos`.                                                |
+| `install`    | `--skip-git`                                        | Não clona nem atualiza repos; só instala dependências.                                                                                                                                                     |
+| `install`    | `--force-git`                                       | Faz `fetch` e `git reset --hard origin/<ref>` nos repos. **Descarta alterações locais** não commitadas. Não pode ser usado com `--skip-git`.                                                               |
+| `install`    | `--skip-npm-install`                                | Clona/atualiza os repos, mas não roda `npm install`.                                                                                                                                                       |
+| `install`    | `--new`                                             | Abre o assistente interativo de workspace de IDE/IA (exige TTY).                                                                                                                                           |
+| `install`    | `--workspace:<name>`                                | Aplica o pack de workspace (`devApp` ou nome de cliente), apagando antes o que o pack anterior deixou.                                                                                                     |
+| `install`    | `--workspace-clean`                                 | Só remove os ficheiros de tooling da raiz (manifesto `.cht-workspace.json` e nomes do assistente).                                                                                                         |
+| `dev`        | `--client:<name>`                                   | Sobe o runner TUI (frontend + backend) do cliente. Sem cliente, usa o modo `dev` do `cht-base`.                                                                                                            |
+| `dev`        | `--no-backend`                                      | Sobe só o frontend (e a documentação), sem o processo do backend.                                                                                                                                          |
+| `build`      | `<name>`                                            | Builda o frontend do cliente com o `cht-base` e exporta para `builds/<name>/dist` (apaga a pasta antes). Aceita `dev` como nome.                                                                          |
+| `build`      | `--bump [repo]`                                     | Incrementa a versão antes do build. Sem `repo`, usa o arquivo de versão do cliente; com `repo` (sem o prefixo `cht-`), bumpa outro repo.                                                                    |
+| `electron`   | `<name>`                                            | Abre o cliente no Electron em modo desenvolvimento (backend + frontend).                                                                                                                                   |
+| `electron build` | `<name>`                                        | Empacota o app desktop em `builds/<name>/desktop`. Alvo padrão: o sistema hospedeiro.                                                                                                                      |
+| `electron build` | `--win` / `--linux` / `--mac`                   | Escolhe o alvo: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) ou `--mac` (`dmg`/`zip`).                                                                                                                   |
+| `electron build` | `--publish`                                     | Envia os artefatos e o `latest.yml` para o feed de releases do GitHub.                                                                                                                                     |
+| `electron build` | `--bump [repo]`                                 | Igual ao `build --bump`: incrementa a versão do app antes de empacotar.                                                                                                                                    |
+| `create`     | `<nome> <pasta>`                                    | Cria um cliente novo a partir do template do `cht-base`. `nome` é kebab-case; `pasta` é relativa ao cwd ou absoluta. Se a pasta existir, copia os ficheiros para dentro (o `.git` é mantido).             |
+| `bump`       | `<repo> [--dry-run]`                                | Incrementa a versão (patch/minor/major, conforme o arquivo de versão) de um repo do workspace. `--dry-run` só mostra a mudança.                                                                            |
+| `bump-core`  | `[branch]`                                          | Faz bump das três repos principais, commita, copia os números para os pins do `cht-main` e faz push. Sem `branch`, cada repo fica na branch em que já está; com `branch`, muda todas para ela antes.      |
+| `bump-core`  | `--dry-run`                                         | Mostra o que faria, sem alterar nada.                                                                                                                                                                      |
+| `bump-core`  | `--all`                                             | Inclui no commit do bump as demais alterações de cada repo (e do `cht-main`). Sem a flag, a working tree rastreada tem de estar limpa e o commit leva só o ficheiro `version`.                             |
+| `bump-core`  | `--manual-commit-message`                           | Pede a mensagem de commit para cada repo com alterações além da versão.                                                                                                                                    |
+| `merge-core` | `[source] [target]`                                 | Faz merge de `source` em `target` nas repos principais, na ordem `cht-shared` → `cht-design-system` → `cht-base` → `cht-main`. Padrão: `beta` → `main`.                                                  |
+| `merge-core` | `--dry-run`                                         | Valida o merge fazendo um merge de prova e abortando em cada repo; não altera commits nem exige working tree limpa.                                                                                        |
+| `merge-core` | `--no-push`                                         | Faz só o merge local, sem `push` para `origin`.                                                                                                                                                            |
+| `sync-deps`  | —                                                   | Normaliza as versões de dependências compartilhadas entre os repos, usando o `common-dependencies.json` como fonte da verdade. Alias: `sync:deps`.                                                       |
 
-Sem `--all`, a working tree rastreada tem de estar limpa e o commit leva só o ficheiro `version`. Com `--all`, também entra o resto das alterações de cada repo (e do `cht-main`) no mesmo commit do bump. Com `--manual-commit-message`, cada repo que tiver alterações além da versão pede a mensagem de commit (e inclui essas alterações). Cada repo principal recebe `bump: x.y.z → a.b.c` quando só muda a versão. O `cht-main` só atualiza as linhas `cht-*` (a linha `version` dele não muda).
-
-### 6) Integrar branch nas repos principais (`merge-core`)
+### 5) Integrar branch nas repos principais (`merge-core`)
 
 Para levar o trabalho de uma branch de integração (por omissão **`beta`**) para a branch estável (**`main`**) em todas as repos do núcleo, na ordem:
 
