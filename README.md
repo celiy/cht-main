@@ -24,7 +24,7 @@
   <a href="https://developers.openai.com/codex/skills"><img alt="Codex" src="https://img.shields.io/badge/Codex-000000?style=for-the-badge"></a>
   <a href="https://cursor.com/docs/skills"><img alt="Cursor" src="https://img.shields.io/badge/Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white"></a>
   <a href="https://docs.github.com/en/copilot/concepts/agents/about-agent-skills"><img alt="GitHub Copilot" src="https://img.shields.io/badge/GitHub%20Copilot-000000?style=for-the-badge&logo=githubcopilot&logoColor=white"></a>
-  <br><sub>…e qualquer outro agente que consia ler <code>AGENTS.md</code> e rodar commandos no terminal.</sub>
+  <br><sub>…e qualquer outro agente que consiga ler <code>AGENTS.md</code> e rodar commandos no terminal.</sub>
 </p>
 
 </div>
