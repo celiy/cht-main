@@ -1,6 +1,1 @@
 Criar uma repo shared separada para as funções do Mecarvit
-
-Olhar os charts de bar e wave no shadcn, analisar todo caso de uso diferente, cada modificação e tal e implementar isso nos charts atuais
-
-Mecarvit:
-    Implementar backup do backend
