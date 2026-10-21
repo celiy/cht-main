@@ -1,1 +1,5 @@
+Deixar o Toggleable mais bonito
+
+Fazer o link da sidebar um componente separado, estilo os do discord
+
 Criar uma repo shared separada para as funções do Mecarvit

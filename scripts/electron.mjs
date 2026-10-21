@@ -523,12 +523,18 @@ function writeRuntimeConfig(baseDir, config) {
 }
 
 /**
- * Compile the Electron
+ * Compile the Electron main and preload, bundling the client hooks in `<client>/electron/`
  * @param {string} baseDir The base directory.
+ * @param {string} root The workspace root.
+ * @param {Object} resolved The resolved client.
  * @returns {void}
  */
-function compileElectron(baseDir) {
-    run("node", ["electron/build.mjs"], baseDir);
+function compileElectron(baseDir, root, resolved) {
+    const clientDir = resolved.frontend?.clientDir;
+
+    run("node", ["electron/build.mjs"], baseDir, {
+        CHT_CLIENT_DIR: clientDir ? path.resolve(root, clientDir) : ""
+    });
 }
 
 /**
@@ -870,7 +876,7 @@ async function runDev(client) {
         packaged: false
     });
 
-    compileElectron(baseDir);
+    compileElectron(baseDir, root, resolved);
     const configPath = writeRuntimeConfig(baseDir, runtimeConfig);
     freePorts([port]);
 
@@ -988,7 +994,7 @@ function runBuild(client, target, shouldPublish, bump) {
         }
     });
 
-    compileElectron(baseDir);
+    compileElectron(baseDir, root, resolved);
     writeRuntimeConfig(baseDir, runtimeConfig);
 
     const backendAbsDir =

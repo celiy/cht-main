@@ -1,76 +1,70 @@
 # Contribuir
 
-Este ficheiro é o contrato de contribuição do workspace CHT (`cht-main` e os repositórios irmãos `cht-base`, `cht-design-system`, `cht-shared`, clientes e backends).
+Este guia vale para o `cht-main` e para os repositórios irmãos: `cht-base`, `cht-design-system`, `cht-shared`, os clientes e os backends. Leia antes de mexer em código, componentes, scripts ou docs.
 
-Lê este documento **antes** de alterar código, componentes, scripts ou docs de componente, seja à mão, em PR ou com um agente de IA. Não inventes um estilo paralelo.
+## Onde fica cada coisa
 
-## Onde vive o quê
+| Repositório                      | Serve para                                              |
+| -------------------------------- | ------------------------------------------------------- |
+| `cht-main`                       | Orquestração: `install`, runner, Electron e workspaces. |
+| `cht-base`                       | Boot Vue e Vite, rotas e documentação (`src/devApp`).   |
+| `cht-design-system`              | Componentes e tokens visuais.                           |
+| `cht-shared`                     | Utilitários compartilhados, sem UI de cliente.          |
+| `cht-client-*` e `cht-backend-*` | Código de um cliente específico.                        |
 
-| Sítio                            | Serve para                                                        |
-| -------------------------------- | ----------------------------------------------------------------- |
-| `cht-main`                       | Orquestração: `install`, runner, Electron, packs em `workspaces/` |
-| `cht-base`                       | Boot Vue/Vite, router, docs (`src/devApp`)                        |
-| `cht-design-system`              | Componentes e tokens visuais                                      |
-| `cht-shared`                     | Utilitários partilhados, sem UI de cliente                        |
-| `cht-client-*` / `cht-backend-*` | Código **desse** cliente                                          |
+`cht-base`, `cht-main` e `cht-design-system` nunca importam cliente. O cliente depende do núcleo, e não o contrário.
 
-`cht-base`, `cht-main` e `cht-design-system` **não** importam clientes. Clientes dependem do núcleo, nunca o contrário. Se a separação completa não for possível (um util partilhado que precisa mesmo da forma do cliente), pára e discute: alternativas são inversão de controlo, hook público ou duplicar no cliente. Mapeamentos temporários de path (`@client`) só valem em config local, nunca commitada.
+Se a separação não for possível, por exemplo porque um util compartilhado precisa da forma de um cliente, pare e discuta. As saídas são inversão de controle, um hook público ou duplicar o código no cliente.
 
-Não faças mudanças no núcleo “só porque o Mecarvit precisa”. Extraí um hook público ou mete a lógica no cliente.
+Não mexa no núcleo só porque um cliente precisa. Crie um hook público ou coloque a lógica no cliente.
+
+Um alias temporário de path, como `@client`, só pode existir numa config local que não vai para o git.
 
 ## Qualidade esperada
 
-- Diff mínimo. Cada linha tem de responder ao pedido. Sem refactors de vizinhos, sem abstrações para um único uso, sem dependência nova se o stdlib ou o que já está instalado chega.
-- Options API nos componentes do design system. Identificadores e comentários técnicos em **inglês**; cópia de UI em **português**.
-- Aspas duplas, `;` no fim das instruções, `{}` em todos os `if` / `for` / `while` / `else`, `camelCase`. Encadeamento: uma chamada por linha.
-- TypeScript com `noUncheckedIndexedAccess`: `arr[i]` é `T | undefined`.
-- Timers, listeners, observers e subscriptions limpos no unmount (ver abaixo).
-- Cada ficheiro `.ts` começa com um JSDoc de módulo em inglês (ver abaixo). Comentários **inline** só no que não é óbvio. A página de docs do componente **é** o contrato de uso: os exemplos têm de continuar a funcionar.
-- UI: verifica no browser o fluxo real (não chega um screenshot). Acessibilidade e estados vazios/erro fazem parte do trabalho, não são extra.
-- Lógica não trivial deixa **um** check executável (ficheiro `*.check.mjs` ou teste do backend). Front hoje não tem runner de testes; o gate é `vue-tsc`, lint, format e o check que adicionares.
-- Commit e push **só** se o dono do repo pedir. Terminar uma tarefa não é pedido de commit.
+- Faça o diff mínimo. Cada linha precisa responder ao pedido.
+- Não crie abstração para um uso só, nem dependência nova quando a biblioteca padrão ou o que já está instalado resolve.
+- Os componentes do design system usam Options API.
+- Identificadores e comentários técnicos ficam em inglês. O texto da interface fica em português.
+- Limpe timers, listeners, observers e subscriptions no unmount. Veja o exemplo abaixo.
+- Todo `.ts` começa com um cabeçalho JSDoc de duas linhas, antes dos imports.
+- A página de docs de um componente é o contrato de uso. Os exemplos dela precisam continuar funcionando.
+- Teste a interface no browser. Screenshot não basta. Estados vazios, erro e acessibilidade fazem parte do trabalho.
+- Lógica não trivial deixa um check executável, como um `*.check.mjs`. O front não tem runner de testes, então o gate é o `vue-tsc`, o lint, o format e o check que você adicionou.
+- Commit e push só quando o dono do repositório pedir. Terminar uma tarefa não é pedido de commit.
 
-Antes de dizer que acabaste, corre o gate (type-check, lint, format e o check que adicionaste). Alterações de API pública: revê se há breaking change. Auth, segredos, HTTP e uploads: revê a segurança.
+Antes de dizer que terminou, rode o gate: type-check, lint, format e o seu check. Se você mudou uma API pública, confira se houve breaking change. Se mexeu em auth, segredos, HTTP ou upload, revise a segurança.
 
 ## Estilo de código
 
-Código (identificadores, comentários técnicos) em **inglês**. Strings de UI no idioma do produto (português neste projeto).
-
 ### Aspas e pontuação
 
-- Preferir aspas duplas (`"`). Aspas simples só quando necessário.
-- Usar `;` no fim de instruções em JavaScript/TypeScript.
-- Encadeamento: cada chamada na sua linha; `;` só na última.
+- Use aspas duplas. Aspas simples só quando for necessário.
+- Coloque `;` no fim das instruções JavaScript e TypeScript.
+- Em encadeamento, cada chamada fica na sua linha. O `;` vai só na última.
+- Sempre use `{}` em `if`, `for`, `while` e `else`.
 
-### Vue: ordem de atributos
+### Ordem dos atributos no Vue
 
-1. Estruturais: `v-if`, `v-for`, `v-show`, `key`, `ref`
-2. Estáticos: `class`, `id`, `type`, …
-3. Props dinâmicas: `:prop`, `v-model`
-4. Eventos: `@click`, …
+1. Estruturais: `v-if`, `v-for`, `v-show`, `key` e `ref`.
+2. Estáticos: `class`, `id`, `type` e similares.
+3. Props dinâmicas: `:prop` e `v-model`.
+4. Eventos: `@click` e similares.
 
-Grupos separados por linha em branco quando o elemento tem vários atributos.
+Separe os grupos com uma linha em branco quando o elemento tiver vários atributos.
 
-### Tailwind: bordas
+### Tailwind e bordas
 
-Não usar `border-border`. Classes de largura (`border`, `border-b`, `border-x`, …) já recebem a cor de borda do tema. Classes de cor (`border-primary`, `border-b-muted`, `border-red-500`, …) já pintam borda 1px no lado correspondente. Combo tamanho+cor: `border-1-primary`, `border-b-2-red-500`; largura arbitrária: `border-[1rem]/muted`, `border-b-[4px]/primary` (barra — o Tailwind não aceita token depois de `]`).
+Não use `border-border`. As classes de largura, como `border`, `border-b` e `border-x`, já pegam a cor do tema. As classes de cor, como `border-primary`, já pintam 1px no lado certo.
 
-Em `<style scoped>` de Vue, não uses `@apply` sem `@reference "tailwindcss";` no topo do bloco. Prefere classes utilitárias no template quando bastarem.
+Para tamanho e cor juntos, use `border-1-primary` ou `border-b-2-red-500`. Para largura arbitrária, use a barra: `border-[1rem]/muted`. O Tailwind não aceita um token depois de `]`.
 
-### Espaçamento e fluxo
-
-- Linha em branco entre blocos lógicos e entre funções.
-- Sempre `{}` em `if` / `for` / `while` / `else`.
-
-### Nomenclatura
-
-- `camelCase` para identificadores.
-- Constantes globais imutáveis: `UPPER_SNAKE_CASE` quando for convenção.
+Em `<style scoped>`, não use `@apply` sem `@reference "tailwindcss";` no topo do bloco. Quando der, prefira classes utilitárias no template.
 
 ### TypeScript
 
-- `noUncheckedIndexedAccess`: `array[i]` é `T | undefined`. Não indexar sem guarda.
-- Cada ficheiro `.ts` / `.d.ts` (não `.vue`) começa, **antes** dos imports, com um JSDoc de módulo de duas linhas em inglês:
+- Ative `noUncheckedIndexedAccess`. Assim `array[i]` vira `T | undefined`, e você precisa checar antes de usar.
+- Todo `.ts` e `.d.ts` começa com um cabeçalho como este, antes dos imports:
 
 ```ts
 /**
@@ -79,19 +73,15 @@ Em `<style scoped>` de Vue, não uses `@apply` sem `@reference "tailwindcss";` n
  */
 ```
 
-Sem `@file`, sem tags extra. Ficheiro novo: o cabeçalho entra no mesmo patch. Ficheiro editado sem cabeçalho: acrescenta-o.
+Arquivo novo leva o cabeçalho no mesmo patch. Arquivo antigo, quando for editado, ganha o cabeçalho na mesma mudança.
 
-### Vue e design system
+### Plugins Vue
 
-- Primitivos em `cht-design-system/src/components/*.vue`; compostos em `components/custom/*.vue`. Ambos são globais (`designSystemPlugin` em `main.ts`); `components/internal` usa import local.
-- Docs do DS: `cht-base/src/devApp/pages/docs/` + rota em `devApp/routes.ts` + item em `devApp/ts/componentsNav.ts`.
-- Hosts globais (Toast, futuros overlays) montam-se **uma vez no layout**, não em cada página.
-- Tokens de cor: `success`, `info`, `warning`, `destructive` (e `*-foreground`) em `cht-base/src/css/style.css`. Ícones: Font Awesome `fa-solid`.
-- Plugins Vue: objeto `{ install(app, options?) { ... } }` **sem** anotar como `Plugin` / `Plugin<T>` (o `app.use` do Vue 3.5 falha nessas anotações). API em `app.config.globalProperties`; tipos em `cht-base/src/env.d.ts` e `cht-design-system/src/types/vue-globals.d.ts`.
+Instale plugins com um objeto `{ install(app, options?) { ... } }`. Não anote o tipo como `Plugin`, porque o `app.use` do Vue 3.5 falha com essa anotação. A API vai em `app.config.globalProperties`, e os tipos em `cht-base/src/env.d.ts` e em `cht-design-system/src/types/vue-globals.d.ts`.
 
 ### Timers e subscriptions
 
-`setTimeout`, `setInterval`, `requestAnimationFrame`, `addEventListener`, observers e subscriptions (`$toast.on`, etc.) criados num componente **têm** de ser cancelados no unmount. Guarda o id/handle, limpa em `beforeUnmount` (Options API) e limpa o anterior antes de agendar de novo.
+Quem cria um timer, listener, observer ou subscription num componente precisa cancelá-lo no unmount. Guarde o id, limpe em `beforeUnmount` e limpe o anterior antes de agendar outro.
 
 ```ts
 data() {
@@ -123,49 +113,51 @@ methods: {
 }
 ```
 
-O mesmo para `clearInterval`, `cancelAnimationFrame`, `removeEventListener`, `AbortController.abort()`, `observer.disconnect()` e `unsubscribe()`.
+O mesmo vale para `clearInterval`, `cancelAnimationFrame`, `removeEventListener`, `AbortController.abort()`, `observer.disconnect()` e `unsubscribe()`.
 
-### Documentação
+## Documentação
 
-- Referência técnica (JSDoc, READMEs de módulo) em inglês; cópia de UI no idioma do produto.
-- Documenta só o **não óbvio**, o sensível a erro ou o contraintuitivo. Não documentes cada método trivial, cada campo de `data()`, nem linhas que já se leem sozinhas.
-- APIs públicas de plugins (`$toast`, `$project`): os tipos TypeScript são a fonte da verdade; JSDoc só se o contrato não for claro pelos tipos.
-- Quando fizer falta, JSDoc curto com `@param` e `@returns`; sem hífens longos nem parênteses desnecessários.
-- Vue: `props` só com JSDoc se o nome não for autoexplicativo; `emits`, `components` e `name` normalmente sem; `methods` / `computed` só trechos não triviais.
+- Escreva a referência técnica, como JSDoc e READMEs de módulo, em inglês. O texto da interface vai em português.
+- Documente só o que não é óbvio, o que é sensível a erro e o que contraria a intuição. Não documente método trivial nem campo de `data()`.
+- Para APIs públicas de plugin, como `$toast` e `$project`, os tipos são a fonte da verdade. Use JSDoc só quando os tipos não bastarem.
+- Vue: `props` só levam JSDoc quando o nome não se explica sozinho. `emits`, `components` e `name` normalmente não levam nada.
 
 ## Componentes do design system
 
-A funcionalidade **base** de um componente não se reescreve. Aceita-se acrescentar (prop opcional, variante, melhoria que os hosts atuais ignoram sem mudar). Não se aceita um corte profundo que:
+Não reescreva a funcionalidade base de um componente. Você pode acrescentar: uma prop opcional, uma variante ou uma melhoria que os hosts atuais ignoram.
 
-- mude o comportamento por omissão;
-- obrigue código que já usa o componente a ser alterado (rename de prop/emit/slot, prop a passar a required, tipo mais estreito, evento com outro payload);
-- parta os casos de uso da documentação em `cht-base/src/devApp/pages/docs/`.
+Não aceite um corte profundo que:
 
-O `Select` é o exemplo: está pronto. Um PR que force todos os `<Select>` existentes a mudar **não entra**.
+- mude o comportamento padrão;
+- obrigue quem já usa o componente a mudar, como renomear prop, emit ou slot, ou tornar prop obrigatória;
+- quebre os casos da documentação em `cht-base/src/devApp/pages/docs/`.
 
-### Estado (fonte: docs)
+O `Select` é o exemplo. Ele está pronto, então um PR que force todos os `<Select>` existentes a mudar não é aceito.
 
-O banner na página do componente vem de `cht-base/src/devApp/data/componentReadiness.json` (textos em `ts/componentReadiness.ts`):
+### Estados de prontidão
 
-| Estado no docs   | Chave         | Contrato                                                                                                                  |
-| ---------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Pronto para uso  | `success`     | API estável. Só aditivo. Breaking change recusado.                                                                        |
-| Implementado     | `info`        | Preferir aditivo. Pode ainda não cobrir todos os cenários reais; breaking só com pedido explícito e atualização dos docs. |
-| Em evolução      | `warning`     | Exceção: podes mexer na base se for preciso completar o componente. Atualiza docs e exemplos no mesmo PR.                 |
-| Em implementação | `destructive` | Exceção: ainda não está para produção. Mudanças profundas ok, desde que a página de docs acompanhe.                       |
+O banner da página de docs vem de `cht-base/src/devApp/data/componentReadiness.json`. Se o estado não bater com o código, corrija o JSON. Não ignore o banner.
 
-Se o estado não bater certo com o código, corrige o JSON — não ignores o banner.
+| Estado           | Chave         | Contrato                                                                                         |
+| ---------------- | ------------- | ------------------------------------------------------------------------------------------------ |
+| Pronto para uso  | `success`     | API estável. Só mudanças aditivas. Breaking change é recusada.                                   |
+| Implementado     | `info`        | Prefira mudanças aditivas. Breaking só com pedido explícito e docs atualizados.                  |
+| Em evolução      | `warning`     | Você pode mexer na base para completar o componente. Atualize docs e exemplos no mesmo PR.       |
+| Em implementação | `destructive` | Ainda não vai para produção. Mudanças profundas são aceitas, desde que a documentação acompanhe. |
 
-Componente novo: inclui página de docs, rota, item de nav e entrada de prontidão. Não inventes marca visual; usa tokens e padrões que já existem.
+Componente novo precisa de página de docs, rota, item de navegação e entrada de prontidão. Use os tokens e os padrões que já existem.
 
-## Scripts e tooling da raiz
+Primitivos ficam em `cht-design-system/src/components/*.vue` e compostos em `components/custom/*.vue`. Os dois são globais. Hosts globais, como o Toast, são montados uma vez no layout, e não em cada página.
 
-Ficheiros de tooling na raiz do `cht-main` são **cópia local** (gitignore + manifesto `.cht-workspace.json`). A fonte é o pack (`workspaces/devApp/` ou `<cliente>/workspace/`). `--workspace` / `--workspace-clean` copiam ou apagam **qualquer** ficheiro do pack. O wizard `--new` só oferece as opções pré-configuradas.
+Para cores, use os tokens `success`, `info`, `warning` e `destructive` (com os `*-foreground`), definidos em `cht-base/src/css/style.css`. Ícones são Font Awesome `fa-solid`.
 
-Flags: `--new`, `--workspace:<nome>`, `--workspace-clean`. Ver o README.
+## Tooling da raiz
 
-## O que não fazer
+Os arquivos de tooling na raiz do `cht-main` são cópias locais. A fonte está no pack, em `workspaces/devApp/` ou em `<cliente>/workspace/`. Use `--workspace` e `--workspace-clean` para copiar ou apagar esses arquivos. O `--new` só oferece as opções pré-configuradas.
 
-- Cliente a vazar para `cht-base` / `cht-design-system` / `cht-shared`.
-- Comentários que repetem o código, ou docs de UI em inglês.
-- Expandir o âmbito porque “ficava mais completo”.
+## O que evitar
+
+- Código de cliente vazando para `cht-base`, `cht-design-system` ou `cht-shared`.
+- Comentários que repetem o que o código já diz.
+- Docs de interface em inglês.
+- Expandir o escopo porque o resultado "ficaria mais completo".
