@@ -192,6 +192,15 @@ npx chtmain dev --client:<name>
 
 A sintaxe é genérica: para qualquer pasta irmã com `cht.config.json`, basta `--client:<name>` (o valor de `name` no ficheiro).
 
+Cliente fora do `cht-main`: passe o caminho da pasta, relativo ao `cht-main` ou absoluto. Não há nada para registrar. O comando lê o `name` do `cht.config` da pasta.
+
+```bash
+npx chtmain dev ../meu-projeto/meu-cliente
+npx chtmain dev ..                # o cht-main está dentro da pasta do cliente
+```
+
+O mesmo caminho vale em `--client:<caminho>`, `build` e `electron`. Para criar um cliente numa pasta externa: `npx chtmain create <nome> ../meu-projeto/meu-cliente`. Num cliente externo, `backend.dir` é relativo à pasta do cliente.
+
 O runner abre um TUI estilo htop com tabs por processo.
 
 ### 3) Build e app desktop
@@ -244,6 +253,7 @@ Todos os comandos seguem `npx chtmain <comando> [args...]` (ou `npm run cht -- <
 | `install`        | `--workspace:<name>`          | Aplica o pack de workspace (`devApp` ou nome de cliente), apagando antes o que o pack anterior deixou.                                                                                               |
 | `install`        | `--workspace-clean`           | Só remove os ficheiros de tooling da raiz (manifesto `.cht-workspace.json` e nomes do assistente).                                                                                                   |
 | `dev`            | `--client:<name>`             | Sobe o runner TUI (frontend + backend) do cliente. Sem cliente, usa o modo `dev` do `cht-base`.                                                                                                      |
+| `dev`            | `<name \| caminho>`           | Igual a `--client:`, mas posicional. Um caminho (`../cliente`, `..`, absoluto) roda um cliente fora do `cht-main`. Também vale em `build` e `electron`.                                              |
 | `dev`            | `--no-backend`                | Sobe só o frontend (e a documentação), sem o processo do backend.                                                                                                                                    |
 | `build`          | `<name>`                      | Builda o frontend do cliente com o `cht-base` e exporta para `builds/<name>/dist` (apaga a pasta antes). Aceita `dev` como nome.                                                                     |
 | `build`          | `--bump [repo]`               | Incrementa a versão antes do build. Sem `repo`, usa o arquivo de versão do cliente; com `repo` (sem o prefixo `cht-`), bumpa outro repo.                                                             |
