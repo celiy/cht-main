@@ -176,7 +176,8 @@ Clientes existentes são descobertos no disco: qualquer pasta irmã com `cht.con
 - `cht.config.json` ⇒ `name`, `siteTitle`, `frontend.repo`, bloco `backend` opcional.
 - `frontend.dir` ⇒ `cht-base` (a app shell).
 - `frontend.cmd` ⇒ `dev:client` com `CLIENT=<name>`.
-- `frontend.clientDir` ⇒ pasta onde o `cht.config.json` foi encontrado.
+- `frontend.clientDir` ⇒ pasta onde o `cht.config.json` foi encontrado (nome da pasta irmã, ou caminho absoluto para cliente externo).
+- Cliente fora do `cht-main`: passar o caminho da pasta no comando (`npx chtmain dev ../cliente`, `npx chtmain dev ..`), sem registrar nada. O caminho vira `CHT_CLIENT_DIRS`, que o Vite do `cht-base` também lê. Num cliente externo, `backend.dir` é relativo à pasta do cliente.
 - `backend.dir` ⇒ pasta do backend (obrigatória se houver `backend`).
 - `backend.cmd` ⇒ comando a correr nessa pasta (Node, Maven, …). Sem `cmd`, usa `npm run` + `backend.script` (padrão `dev`).
 - `backend.packageWithElectron` ⇒ default `true`; `false` omite o backend do instalador Electron.

@@ -357,7 +357,7 @@ function resolvePublish(entry) {
  */
 function resolveAppIcon(root, resolved) {
     const clientDir = resolved.frontend?.clientDir
-        ? path.join(root, resolved.frontend.clientDir)
+        ? path.resolve(root, resolved.frontend.clientDir)
         : null;
 
     if (!clientDir) {
@@ -393,7 +393,7 @@ function resolveAppIcon(root, resolved) {
  */
 function resolveTrayIcon(root, resolved) {
     const clientDir = resolved.frontend?.clientDir
-        ? path.join(root, resolved.frontend.clientDir)
+        ? path.resolve(root, resolved.frontend.clientDir)
         : null;
 
     if (!clientDir) {
@@ -477,7 +477,7 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
             Number(backendEntry?.portScanLimit) ||
             Number(entry?.apiPortScanLimit) ||
             DEFAULT_PORT_SCAN_LIMIT;
-        const backendDir = packaged ? "backend" : path.join(root, resolved.backend.dir);
+        const backendDir = packaged ? "backend" : path.resolve(root, resolved.backend.dir);
 
         backend = {
             dir: backendDir,
@@ -523,12 +523,18 @@ function writeRuntimeConfig(baseDir, config) {
 }
 
 /**
- * Compile the Electron
+ * Compile the Electron main and preload, bundling the client hooks in `<client>/electron/`
  * @param {string} baseDir The base directory.
+ * @param {string} root The workspace root.
+ * @param {Object} resolved The resolved client.
  * @returns {void}
  */
-function compileElectron(baseDir) {
-    run("node", ["electron/build.mjs"], baseDir);
+function compileElectron(baseDir, root, resolved) {
+    const clientDir = resolved.frontend?.clientDir;
+
+    run("node", ["electron/build.mjs"], baseDir, {
+        CHT_CLIENT_DIR: clientDir ? path.resolve(root, clientDir) : ""
+    });
 }
 
 /**
@@ -870,7 +876,7 @@ async function runDev(client) {
         packaged: false
     });
 
-    compileElectron(baseDir);
+    compileElectron(baseDir, root, resolved);
     const configPath = writeRuntimeConfig(baseDir, runtimeConfig);
     freePorts([port]);
 
@@ -988,12 +994,12 @@ function runBuild(client, target, shouldPublish, bump) {
         }
     });
 
-    compileElectron(baseDir);
+    compileElectron(baseDir, root, resolved);
     writeRuntimeConfig(baseDir, runtimeConfig);
 
     const backendAbsDir =
         resolved.backend && resolved.backend.packageWithElectron
-            ? path.join(root, resolved.backend.dir)
+            ? path.resolve(root, resolved.backend.dir)
             : null;
 
     if (backendAbsDir && !fs.existsSync(backendAbsDir)) {

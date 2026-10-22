@@ -205,7 +205,10 @@ function main() {
         }
     }
 
-    console.log("Seguinte: npx chtmain dev --client:" + kebab);
+    const inRoot = path.dirname(dest) === ROOT_DIR;
+    const target = inRoot ? kebab : path.relative(ROOT_DIR, dest) || ".";
+
+    console.log("Seguinte: npx chtmain dev " + target);
 }
 
 main();

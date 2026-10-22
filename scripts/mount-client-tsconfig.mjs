@@ -33,7 +33,18 @@ function resolveClientPath(client) {
         return "./src/devApp/*";
     }
 
-    return `../${getClientDir(name)}/src/*`;
+    return `${clientDirFromBase(name)}/src/*`;
+}
+
+/**
+ * Client folder relative to cht-base, in POSIX form (external clients included).
+ * @param {string} name The client.
+ * @returns {string} The relative folder, e.g. `../cht-client-x`.
+ */
+function clientDirFromBase(name) {
+    const abs = path.resolve(ROOT_DIR, getClientDir(name));
+
+    return path.relative(path.join(ROOT_DIR, "cht-base"), abs).split(path.sep).join("/");
 }
 
 /**
@@ -48,7 +59,7 @@ function resolveClientDtsInclude(client) {
         return null;
     }
 
-    return `../${getClientDir(name)}/src/**/*.d.ts`;
+    return `${clientDirFromBase(name)}/src/**/*.d.ts`;
 }
 
 /**
