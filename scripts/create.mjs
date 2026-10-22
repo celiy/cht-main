@@ -5,7 +5,8 @@ import { spawnSyncInherit } from "./lib/runCommand.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(HERE, "..");
-const TEMPLATE_DIR = path.join(ROOT_DIR, "cht-base", "template", "client-template");
+const TEMPLATES_ROOT = path.join(ROOT_DIR, "cht-base", "template");
+const DEFAULT_TEMPLATE_DIR = path.join(TEMPLATES_ROOT, "client-template");
 
 const SKIP_NAMES = new Set(["node_modules", ".git", "package-lock.json"]);
 
@@ -25,12 +26,35 @@ const TEXT_EXT = new Set([
  * @returns {void}
  */
 function printUsage() {
-    console.log("Usage: npx chtmain create <nome> <pasta>");
+    console.log("Usage: npx chtmain create <nome> <pasta> [--template:<template>]");
     console.log("");
-    console.log("  nome   Identificador kebab-case (cht.config.ts / cht.config.json → name)");
-    console.log("  pasta  Destino relativo ao cwd, ou caminho absoluto");
+    console.log("  nome        Identificador kebab-case (cht.config.ts / cht.config.json → name)");
+    console.log("  pasta       Destino relativo ao cwd, ou caminho absoluto");
+    console.log(
+        `  --template  Um de: ${listTemplates().join(", ") || "(nenhum)"}. Sem a flag, usa o template padrão.`
+    );
     console.log("");
     console.log("Se a pasta já existir, os ficheiros são copiados para dentro (o .git mantém-se).");
+}
+
+/**
+ * List the optional templates (`cht-base/template/client-<name>`, except the default)
+ * @returns {string[]} The template names.
+ */
+function listTemplates() {
+    if (!fs.existsSync(TEMPLATES_ROOT)) {
+        return [];
+    }
+
+    return fs
+        .readdirSync(TEMPLATES_ROOT, { withFileTypes: true })
+        .filter(
+            (entry) =>
+                entry.isDirectory() &&
+                entry.name.startsWith("client-") &&
+                entry.name !== "client-template"
+        )
+        .map((entry) => entry.name.slice("client-".length));
 }
 
 /**
@@ -151,7 +175,9 @@ function copyTemplate(fromDir, toDir, tokens) {
  * @returns {Promise<void>}
  */
 function main() {
-    const args = process.argv.slice(2).filter((arg) => arg !== "--");
+    const argv = process.argv.slice(2).filter((arg) => arg !== "--");
+    const templateArg = argv.find((arg) => arg.startsWith("--template:"));
+    const args = argv.filter((arg) => arg !== templateArg);
 
     if (args.includes("-h") || args.includes("--help") || args.length < 2) {
         printUsage();
@@ -171,8 +197,21 @@ function main() {
         process.exit(1);
     }
 
-    if (!fs.existsSync(TEMPLATE_DIR)) {
-        console.error(`Template em falta: ${TEMPLATE_DIR}`);
+    const templateName = templateArg ? templateArg.slice("--template:".length) : "";
+
+    if (templateArg && !listTemplates().includes(templateName)) {
+        console.error(
+            `Template desconhecido: "${templateName}". Disponíveis: ${listTemplates().join(", ")}`
+        );
+        process.exit(1);
+    }
+
+    const templateDir = templateName
+        ? path.join(TEMPLATES_ROOT, `client-${templateName}`)
+        : DEFAULT_TEMPLATE_DIR;
+
+    if (!fs.existsSync(templateDir)) {
+        console.error(`Template em falta: ${templateDir}`);
         process.exit(1);
     }
 
@@ -191,7 +230,7 @@ function main() {
         __APP_NAME__: `${toPascal(kebab)}App`.replace(/AppApp$/, "App")
     };
 
-    copyTemplate(TEMPLATE_DIR, dest, tokens);
+    copyTemplate(templateDir, dest, tokens);
 
     console.log(existed ? `Ficheiros copiados para ${dest}` : `Cliente criado em ${dest}`);
     console.log(`name: ${tokens.__CLIENT_NAME__}`);

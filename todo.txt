@@ -1,8 +1,1 @@
-Deixar o Toggleable mais bonito
-
-Fazer o link da sidebar um componente separado, estilo os do discord
-    Chip
-
-Transformar os clientes de teste em templates
-
 Criar uma repo shared separada para as funções do Mecarvit
