@@ -11,6 +11,7 @@ import {
     getSharedRepos,
     listCataloguedClientNames,
     listClientNames,
+    listExternalClientDirs,
     parseClientFlag,
     resolveClient
 } from "./lib/clients.mjs";
@@ -354,6 +355,11 @@ function addClientRepoSpecs(list, name) {
     try {
         const resolved = resolveClient(name);
 
+        // External clients (path argument) are checked out by the user.
+        if (path.isAbsolute(resolved.frontend.clientDir)) {
+            return;
+        }
+
         addRepoSpec(list, parseRepoSpec(resolved.frontend?.repo, resolved.frontend?.ref));
         addRepoSpec(list, parseRepoSpec(resolved.backend?.repo, resolved.backend?.ref));
     } catch {
@@ -650,7 +656,10 @@ async function main() {
             npmInstall(root);
         }
 
-        const subRepos = listSubReposWithPackageJson(root);
+        const subRepos = [
+            ...listSubReposWithPackageJson(root),
+            ...listExternalClientDirs().filter((dir) => fs.existsSync(path.join(dir, "package.json")))
+        ];
 
         for (const dir of subRepos) {
             npmInstall(dir);

@@ -357,7 +357,7 @@ function resolvePublish(entry) {
  */
 function resolveAppIcon(root, resolved) {
     const clientDir = resolved.frontend?.clientDir
-        ? path.join(root, resolved.frontend.clientDir)
+        ? path.resolve(root, resolved.frontend.clientDir)
         : null;
 
     if (!clientDir) {
@@ -393,7 +393,7 @@ function resolveAppIcon(root, resolved) {
  */
 function resolveTrayIcon(root, resolved) {
     const clientDir = resolved.frontend?.clientDir
-        ? path.join(root, resolved.frontend.clientDir)
+        ? path.resolve(root, resolved.frontend.clientDir)
         : null;
 
     if (!clientDir) {
@@ -477,7 +477,7 @@ function buildRuntimeConfig({ root, resolved, isDev, packaged }) {
             Number(backendEntry?.portScanLimit) ||
             Number(entry?.apiPortScanLimit) ||
             DEFAULT_PORT_SCAN_LIMIT;
-        const backendDir = packaged ? "backend" : path.join(root, resolved.backend.dir);
+        const backendDir = packaged ? "backend" : path.resolve(root, resolved.backend.dir);
 
         backend = {
             dir: backendDir,
@@ -999,7 +999,7 @@ function runBuild(client, target, shouldPublish, bump) {
 
     const backendAbsDir =
         resolved.backend && resolved.backend.packageWithElectron
-            ? path.join(root, resolved.backend.dir)
+            ? path.resolve(root, resolved.backend.dir)
             : null;
 
     if (backendAbsDir && !fs.existsSync(backendAbsDir)) {

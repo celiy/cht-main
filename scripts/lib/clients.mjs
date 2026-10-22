@@ -10,6 +10,7 @@ import {
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(HERE, "..", "..");
 const CLIENTS_FILE = path.join(ROOT_DIR, "clients.json");
+const CLIENT_DIRS_ENV = "CHT_CLIENT_DIRS";
 const CLIENT_CONFIG_FILE = "cht.config.json";
 
 const DEFAULT_FRONTEND_BASE_DIR = "cht-base";
@@ -83,7 +84,7 @@ export function getClientDir(name) {
     if (!found) {
         throw new Error(
             `[clients] No cht.config.ts or cht.config.json found for "${name}". ` +
-                `Place the file in a sibling folder of cht-main. Known: ${["dev", ...listClientNames()].join(", ")}.`
+                `Place the file in a subfolder of cht-main or pass the client folder path. Known: ${["dev", ...listClientNames()].join(", ")}.`
         );
     }
 
@@ -163,8 +164,22 @@ export function listCataloguedClientNames() {
 }
 
 /**
- * Discover sibling folders that contain `cht.config.ts` or `cht.config.json`.
+ * Client folders outside the workspace root, from `CHT_CLIENT_DIRS` (path-delimiter list).
+ * It is set by `resolveClientArg` when a command receives a folder path.
+ *
+ * @returns {string[]} Absolute folders
+ */
+export function listExternalClientDirs() {
+    const dirs = (process.env[CLIENT_DIRS_ENV] || "").split(path.delimiter).filter(Boolean);
+
+    return [...new Set(dirs.map((dir) => path.resolve(ROOT_DIR, dir.trim())))];
+}
+
+/**
+ * Discover sibling folders that contain `cht.config.ts` or `cht.config.json`,
+ * plus the external folders from `listExternalClientDirs`.
  * The folder name is free; the client id comes from `name` in that file.
+ * `dir` is the folder name for siblings and an absolute path for external clients.
  *
  * @returns {Map<string, { dir: string, configPath: string, config: object }>}
  */
@@ -174,19 +189,28 @@ function discoverClients() {
     }
 
     const found = new Map();
+    const candidates = [];
 
-    if (!fs.existsSync(ROOT_DIR)) {
-        cachedClients = found;
+    if (fs.existsSync(ROOT_DIR)) {
+        for (const entry of fs.readdirSync(ROOT_DIR, { withFileTypes: true })) {
+            if (!entry.isDirectory() || SKIP_DISCOVERY_DIRS.has(entry.name) || entry.name.startsWith(".")) {
+                continue;
+            }
 
-        return cachedClients;
+            candidates.push(entry.name);
+        }
     }
 
-    for (const entry of fs.readdirSync(ROOT_DIR, { withFileTypes: true })) {
-        if (!entry.isDirectory() || SKIP_DISCOVERY_DIRS.has(entry.name) || entry.name.startsWith(".")) {
-            continue;
+    for (const dir of listExternalClientDirs()) {
+        if (!findClientConfigPath(dir)) {
+            throw new Error(`[clients] No cht.config.ts or cht.config.json in external client folder ${dir}.`);
         }
 
-        const dirPath = path.join(ROOT_DIR, entry.name);
+        candidates.push(dir);
+    }
+
+    for (const dir of candidates) {
+        const dirPath = path.resolve(ROOT_DIR, dir);
 
         if (!findClientConfigPath(dirPath)) {
             continue;
@@ -202,13 +226,17 @@ function discoverClients() {
         const existing = found.get(name);
 
         if (existing) {
+            if (path.resolve(ROOT_DIR, existing.dir) === dirPath) {
+                continue;
+            }
+
             throw new Error(
-                `[clients] Duplicate client name "${name}" in ${existing.dir}/ and ${entry.name}/.`
+                `[clients] Duplicate client name "${name}" in ${existing.dir}/ and ${dir}/.`
             );
         }
 
         found.set(name, {
-            dir: entry.name,
+            dir,
             configPath: loaded.configPath,
             config: loaded.config
         });
@@ -217,6 +245,39 @@ function discoverClients() {
     cachedClients = found;
 
     return cachedClients;
+}
+
+/**
+ * Turns a client argument into a client id. A path (`../client`, `..`, `/abs/client`)
+ * is resolved from cht-main, registered in `CHT_CLIENT_DIRS` so child processes
+ * (cht-base Vite) find it too, and replaced by the `name` in its cht.config.
+ *
+ * @param {string | null} value Client id or folder path
+ * @returns {string | null} Client id
+ */
+export function resolveClientArg(value) {
+    if (!value || !(value.startsWith(".") || path.isAbsolute(value) || /[\\/]/.test(value))) {
+        return value;
+    }
+
+    const dir = path.resolve(ROOT_DIR, value);
+
+    if (!findClientConfigPath(dir)) {
+        throw new Error(`[clients] No cht.config.ts or cht.config.json in ${dir}.`);
+    }
+
+    const name = loadClientConfigFromDir(dir).config.name;
+
+    if (typeof name !== "string" || !name.trim()) {
+        throw new Error(`[clients] Missing "name" in the cht.config of ${dir}.`);
+    }
+
+    const current = (process.env[CLIENT_DIRS_ENV] || "").split(path.delimiter).filter(Boolean);
+
+    process.env[CLIENT_DIRS_ENV] = [...current, dir].join(path.delimiter);
+    clearClientDiscoveryCache();
+
+    return name.trim();
 }
 
 /**
@@ -264,7 +325,7 @@ export function resolveBackendConfig(backend, name) {
     if (!dir) {
         throw new Error(
             `[clients] "${name}" has a backend block but no "backend.dir". ` +
-                `Set the folder relative to the workspace root (example: "my-api").`
+                `Set the folder relative to the workspace root, or to the client folder for external clients (example: "my-api").`
         );
     }
 
@@ -360,13 +421,20 @@ export function resolveClient(name) {
             : null
     };
 
+    const backend = resolveBackendConfig(entry.backend, name);
+
+    // External clients carry their own layout: `backend.dir` is relative to the client folder.
+    if (backend && path.isAbsolute(frontend.clientDir)) {
+        backend.dir = path.resolve(frontend.clientDir, backend.dir);
+    }
+
     return {
         name,
         isDev: false,
         siteTitle: entry.siteTitle || name,
         lan: entry.lan !== false,
         frontend,
-        backend: resolveBackendConfig(entry.backend, name)
+        backend
     };
 }
 
@@ -402,7 +470,7 @@ export function parseClientFlag(argv) {
         rest.push(arg);
     }
 
-    return { client, rest };
+    return { client: resolveClientArg(client), rest };
 }
 
 /**
@@ -415,7 +483,7 @@ export function parseClientFlag(argv) {
 export function parsePositionalClientArg(argv) {
     const args = argv.filter((arg) => !!arg && !arg.startsWith("-"));
 
-    return args[0] || null;
+    return resolveClientArg(args[0] || null);
 }
 
 /**
@@ -501,7 +569,7 @@ export function buildProcessList(resolved, options = {}) {
         procs.push({
             id: "back-end",
             name: "back-end",
-            dir: path.join(ROOT_DIR, resolved.backend.dir),
+            dir: path.resolve(ROOT_DIR, resolved.backend.dir),
             cmd: resolved.backend.cmd,
             subtitle: resolved.backend.dir
         });

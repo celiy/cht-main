@@ -1,6 +1,13 @@
 import React from "react";
 import { render } from "ink";
-import { parseClientFlag, resolveClient, buildProcessList, getVitePorts, listClientNames } from "../lib/clients.mjs";
+import {
+    parseClientFlag,
+    parsePositionalClientArg,
+    resolveClient,
+    buildProcessList,
+    getVitePorts,
+    listClientNames
+} from "../lib/clients.mjs";
 import { ProcessManager, freePorts } from "../lib/procManager.mjs";
 import { findFreePort } from "../lib/ports.mjs";
 import { App } from "./App.jsx";
@@ -16,6 +23,7 @@ function printHelp() {
     console.log("");
     console.log("Usage:");
     console.log("  node scripts/runner/index.jsx --client:<name> [--no-backend]");
+    console.log("  node scripts/runner/index.jsx <name | ../client-folder> [--no-backend]");
     console.log("");
     console.log("Flags:");
     console.log("  --no-backend   Skip the backend process (front-end + docs only).");
@@ -36,7 +44,8 @@ async function main() {
     }
 
     const noBackend = argv.includes("--no-backend");
-    const { client } = parseClientFlag(argv);
+    const { client: flagClient, rest } = parseClientFlag(argv);
+    const client = flagClient ?? parsePositionalClientArg(rest);
     const resolved = resolveClient(client);
     const vitePorts = getVitePorts();
     const clientPort = vitePorts[0] ?? 5173;
