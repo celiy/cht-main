@@ -7,7 +7,8 @@ import {
     coreBumpCommitMessage,
     extraChangePaths,
     git,
-    mainPinsCommitMessage
+    mainPinsCommitMessage,
+    selectCoreRepos
 } from "./bumpCore.mjs";
 import { findVersionFile, parseVersionFileText, readVersion } from "./version.mjs";
 
@@ -275,3 +276,47 @@ fs.rmSync(beta, { recursive: true, force: true });
 fs.rmSync(tmp, { recursive: true, force: true });
 
 console.log("bumpCore.check.mjs ok");
+
+assert(selectCoreRepos(undefined).length === 3, "no --only selects all core repos");
+assert(selectCoreRepos(["cht-base"]).join(",") === "cht-base", "--only selects one repo");
+assert(
+    selectCoreRepos(["cht-design-system", "cht-base"]).join(",") === "cht-base,cht-design-system",
+    "--only keeps core order"
+);
+
+let unknownFailed = false;
+
+try {
+    selectCoreRepos(["cht-client-x"]);
+} catch {
+    unknownFailed = true;
+}
+
+assert(unknownFailed, "--only rejects unknown repo");
+
+const onlyTmp = fs.mkdtempSync(path.join(os.tmpdir(), "cht-bump-only-"));
+
+gitInit(onlyTmp, "init main", {
+    ".gitignore": "/cht-*\n",
+    version: "version 1.0.1\ncht-shared 1.0.1\ncht-base 1.0.1\ncht-design-system 1.0.1\n"
+});
+gitInit(path.join(onlyTmp, "cht-shared"), "init shared", { version: "version 1.0.1\n" });
+gitInit(path.join(onlyTmp, "cht-base"), "init base", { version: "version 1.0.1\n" });
+gitInit(path.join(onlyTmp, "cht-design-system"), "init ds", { version: "version 1.0.1\n" });
+
+const onlyDry = await bumpCoreAndPush(onlyTmp, {
+    branch: "main",
+    dryRun: true,
+    fetch: false,
+    push: false,
+    only: ["cht-base"]
+});
+
+assert(onlyDry.bumps.map((item) => item.repo).join(",") === "cht-base", "dry --only bumps base only");
+assert(onlyDry.pins["cht-shared"] === "1.0.1", "dry pins keep unselected repos");
+
+await bumpCoreAndPush(onlyTmp, { branch: "main", fetch: false, push: false, only: ["cht-base", "cht-design-system"] });
+
+assert(readVersion(path.join(onlyTmp, "cht-base")).version === "1.0.2", "--only base bumped");
+assert(readVersion(path.join(onlyTmp, "cht-design-system")).version === "1.0.2", "--only ds bumped");
+assert(readVersion(path.join(onlyTmp, "cht-shared")).version === "1.0.1", "--only left shared alone");
