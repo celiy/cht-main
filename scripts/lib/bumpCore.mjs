@@ -294,6 +294,28 @@ export function mainPinsCommitMessage(pins) {
 }
 
 /**
+ * Picks the core repos to bump. Without `only`, all of them.
+ *
+ * @param {string[]} [only]
+ * @returns {string[]}
+ */
+export function selectCoreRepos(only) {
+    if (only === undefined) {
+        return [...CORE_WORKSPACE_REPOS];
+    }
+
+    const unknown = only.filter((repo) => !CORE_WORKSPACE_REPOS.includes(repo));
+
+    if (unknown.length > 0 || only.length === 0) {
+        throw new Error(
+            `--only needs core repos (${CORE_WORKSPACE_REPOS.join(", ")}), got: ${only.join(", ") || "nothing"}`
+        );
+    }
+
+    return CORE_WORKSPACE_REPOS.filter((repo) => only.includes(repo));
+}
+
+/**
  * Bump core repos, rewrite cht-main pins from those local versions, commit, push.
  * Without `options.branch`, each repo commits and pushes on the branch it already has checked out.
  *
@@ -305,6 +327,7 @@ export function mainPinsCommitMessage(pins) {
  *   push?: boolean,
  *   all?: boolean,
  *   manualCommitMessage?: boolean,
+ *   only?: string[],
  *   askCommitMessage?: (repo: string, extras: string[]) => string | Promise<string>
  * }} [options]
  */
@@ -315,7 +338,7 @@ export async function bumpCoreAndPush(root, options = {}) {
     const manualCommitMessage = Boolean(options.manualCommitMessage);
     const doFetch = options.fetch !== false && !dryRun;
     const doPush = options.push !== false && !dryRun;
-    const dirs = CORE_WORKSPACE_REPOS.map((repo) => ({
+    const dirs = selectCoreRepos(options.only).map((repo) => ({
         repo,
         dir: path.join(root, repo)
     }));
@@ -378,7 +401,10 @@ export async function bumpCoreAndPush(root, options = {}) {
     }
 
     const pins = dryRun
-        ? Object.fromEntries(bumps.map((item) => [item.repo, item.to]))
+        ? {
+              ...readCoreLocalVersions(root),
+              ...Object.fromEntries(bumps.map((item) => [item.repo, item.to]))
+          }
         : readCoreLocalVersions(root);
 
     const pinResult = writeCoreVersionPins(root, pins, { dryRun });
