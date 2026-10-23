@@ -1,1 +1,3 @@
 Criar uma repo shared separada para as funções do Mecarvit
+
+Salvar um orçamento invés de só fechar o modal, o modal de cadastro se torna uma visualização do orçamento a recem salvo

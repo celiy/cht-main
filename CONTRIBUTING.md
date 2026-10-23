@@ -121,6 +121,7 @@ O mesmo vale para `clearInterval`, `cancelAnimationFrame`, `removeEventListener`
 - Documente só o que não é óbvio, o que é sensível a erro e o que contraria a intuição. Não documente método trivial nem campo de `data()`.
 - Para APIs públicas de plugin, como `$toast` e `$project`, os tipos são a fonte da verdade. Use JSDoc só quando os tipos não bastarem.
 - Vue: `props` só levam JSDoc quando o nome não se explica sozinho. `emits`, `components` e `name` normalmente não levam nada.
+- Exemplos em `DocsExample`: o aba Code mostra só o template do slot. Por isso, não passe dados vindos de `data()` ao exemplo. Escreva os arrays, as opções e as configurações literalmente no template, mesmo que fique repetido. Estado que muda ao clicar, como contadores e o último item clicado, pode continuar em `data()`.
 
 ## Componentes do design system
 
@@ -136,7 +137,7 @@ O `Select` é o exemplo. Ele está pronto, então um PR que force todos os `<Sel
 
 ### Estados de prontidão
 
-O banner da página de docs vem de `cht-base/src/devApp/data/componentReadiness.json`. Se o estado não bater com o código, corrija o JSON. Não ignore o banner.
+O banner da página de docs vem do campo `readiness` de cada entrada em `cht-base/src/devApp/ts/docsPages.ts`. Se o estado não bater com o código, corrija essa entrada. Não ignore o banner.
 
 | Estado           | Chave         | Contrato                                                                                         |
 | ---------------- | ------------- | ------------------------------------------------------------------------------------------------ |

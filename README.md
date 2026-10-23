@@ -137,8 +137,6 @@ npx chtmain install --new
 npx chtmain install --workspace-clean
 ```
 
-`--new` precisa de TTY. Em CI usa `--workspace:<name>`.
-
 ### 2) Rodar ambiente de desenvolvimento
 
 Modo dev padrão (Documentação atual):
@@ -154,18 +152,16 @@ npx chtmain dev --client:<name>
 # <name> campo "name" do cht.config.json
 ```
 
-A sintaxe é genérica: para qualquer pasta irmã com `cht.config.json`, basta `--client:<name>` (o valor de `name` no ficheiro).
+A sintaxe é genérica: para qualquer pasta irmã com `cht.config.json`, basta `--client:<name>` (o valor de `name` no `cht-config.json`).
 
-Cliente fora do `cht-main`: passe o caminho da pasta, relativo ao `cht-main` ou absoluto. Não há nada para registrar. O comando lê o `name` do `cht.config` da pasta.
+Cliente fora do `cht-main`: passe o caminho da pasta, relativo ao `cht-main` ou absoluto.
 
 ```bash
 npx chtmain dev ../meu-projeto/meu-cliente
-npx chtmain dev ..                # o cht-main está dentro da pasta do cliente
+npx chtmain dev .. # o cht-main está dentro da pasta do cliente
 ```
 
 O mesmo caminho vale em `--client:<caminho>`, `build` e `electron`. Para criar um cliente numa pasta externa: `npx chtmain create <nome> ../meu-projeto/meu-cliente`. Num cliente externo, `backend.dir` é relativo à pasta do cliente.
-
-O runner abre um TUI estilo htop com tabs por processo.
 
 ### 3) Build e app desktop
 
@@ -181,8 +177,6 @@ O script executa o build do `cht-base` para o cliente informado e exporta o arte
 builds/<name>/dist
 ```
 
-Se `builds/<name>/dist` já existir, ele é removido e recriado.
-
 #### App desktop (Electron)
 
 Modo desenvolvimento:
@@ -191,17 +185,14 @@ Modo desenvolvimento:
 npx chtmain electron <name>
 ```
 
-Empacotar para o sistema hospedeiro (`AppImage`, `deb` e diretório `dir` no Linux):
+Empacotar para o sistema hospedeiro (`AppImage` e `deb`):
 
 ```bash
 npx chtmain electron build <name>
-npx chtmain electron build <name> --win      # Windows (nsis)
-npx chtmain electron build <name> --publish  # envia para o GitHub Releases
+npx chtmain electron build <name> --linux # Linux (AppImage/deb)
+npx chtmain electron build <name> --win   # Windows (nsis)
+npx chtmain electron build <name> --mac   # Mac (dmg/zip)
 ```
-
-Os artefatos saem em `builds/<name>/desktop`. Alvos disponíveis: `--win` (`nsis`), `--linux` (`AppImage`/`deb`) e `--mac` (`dmg`/`zip`).
-
-Instaladores e atualização automática via GitHub Releases: veja [`workspaces/devApp/ai/docs/desktop-release.md`](./workspaces/devApp/ai/docs/desktop-release.md).
 
 ### 4) Referência de comandos
 
@@ -238,7 +229,7 @@ Todos os comandos seguem `npx chtmain <comando> [args...]` (ou `npm run cht -- <
 | `merge-core`     | `--no-push`                   | Faz só o merge local, sem `push` para `origin`.                                                                                                                                                      |
 | `sync-deps`      | —                             | Normaliza as versões de dependências compartilhadas entre os repos, usando o `common-dependencies.json` como fonte da verdade. Alias: `sync:deps`.                                                   |
 
-### 5) Integrar branch nas repos principais (`merge-core`)
+### 5) Integrar branch nas repos principais
 
 Para levar o trabalho de uma branch de integração (por omissão **`beta`**) para a branch estável (**`main`**) em todas as repos do núcleo, na ordem:
 
@@ -253,16 +244,3 @@ npx chtmain merge-core --dry-run
 npx chtmain merge-core --no-push
 npx chtmain merge-core beta main
 ```
-
-Por omissão faz `fetch`, checkout da branch de destino, `pull --ff-only` (quando `origin/<destino>` existir), merge de `origin/<origem>` com mensagem `Merge branch '<origem>' into <destino>` e `push` para `origin`. Use `--no-push` para só merge local. Use `--dry-run` para validar o merge sem alterar commits nem exigir working tree limpa (faz merge de prova e aborta em cada repo).
-
-Requisitos (sem `--dry-run`): cada pasta tem de ser um repositório Git com remoto `origin`, a branch de origem tem de existir em `origin`, e a working tree rastreada tem de estar limpa. Se um repo já contém a origem, o comando imprime _already up to date_ e segue. Em conflito, o processo para e indica em qual repo resolver.
-
-Fluxo típico após validar em `beta`: `npx chtmain merge-core --dry-run`, depois `npx chtmain merge-core`. Em seguida costuma-se correr `npx chtmain bump-core` na `main` se ainda precisares de subir versões e pins.
-
-## Observações rápidas
-
-- Se você editar manualmente `common-dependencies.json`, a próxima execução do sync respeita esse arquivo.
-- Para detalhes completos da sincronização de dependências, veja [`workspaces/devApp/ai/docs/deps_sync.md`](./workspaces/devApp/ai/docs/deps_sync.md).
-- Contexto do monorepo (aliases, runner, cliente novo): [`workspaces/devApp/ai/docs/context.md`](./workspaces/devApp/ai/docs/context.md).
-- Contribuir (estilo, qualidade, estabilidade de componentes): [`CONTRIBUTING.md`](./CONTRIBUTING.md).

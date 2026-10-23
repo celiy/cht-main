@@ -187,8 +187,9 @@ Clientes existentes são descobertos no disco: qualquer pasta irmã com `cht.con
 
 ### devApp (documentação de componentes)
 
-- Páginas em `cht-base/src/devApp/pages/docs/components/*.vue`; nav em `ts/componentsNav.ts`.
-- **Estado de prontidão:** `devApp/data/componentReadiness.json` (slug da rota → `success` | `info` | `warning` | `destructive`). `DocsOutline` mostra `DocsComponentStatus` (`Item` tipo alert) acima do conteúdo; textos em `ts/componentReadiness.ts`.
+- Páginas em `cht-base/src/devApp/pages/docs/components/*.vue`. Rotas, nav e prontidão saem todas de um só registro: `devApp/ts/docsPages.ts` (`DOCS_PAGES`). Nova página = nova entrada ali; `routes.ts` e `ts/componentsNav.ts` se atualizam sozinhos.
+- **Estado de prontidão:** campo `readiness` da entrada (`success` | `info` | `warning` | `destructive`). `DocsOutline` mostra `DocsComponentStatus` (`Item` tipo alert) acima do conteúdo; textos em `ts/componentReadiness.ts`.
+- **Exemplos (`DocsExample`):** o aba Code mostra só o template do slot. Não passe dados de `data()` ao exemplo. Escreva arrays, opções e configurações literalmente no template, mesmo repetidos. Estado que muda na interação (contadores, último item clicado) pode continuar em `data()`.
 
 ### Design system: Select com “cadastrar” no painel
 

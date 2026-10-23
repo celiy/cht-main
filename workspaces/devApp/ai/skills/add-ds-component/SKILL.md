@@ -29,9 +29,8 @@ description: >-
 ## Docs (devApp)
 
 1. Page: `cht-base/src/devApp/pages/docs/components/<kebab-name>.vue` with `DocsExample`.
-2. Route in `cht-base/src/devApp/routes.ts`.
-3. Nav item in `cht-base/src/devApp/ts/componentsNav.ts`.
-4. Exercise the page in the browser before finishing.
-5. Se a página é de componente (não fundamento): entrada em `cht-base/src/devApp/data/componentReadiness.json` e texto em `ts/componentReadiness.ts` (banner `DocsComponentStatus` é automático via `DocsOutline`).
+2. Entrada em `cht-base/src/devApp/ts/docsPages.ts` (gera rota e item de nav).
+3. Exercise the page in the browser before finishing.
+4. Se a página é de componente (não fundamento): entrada em `cht-base/src/devApp/ts/docsPages.ts` (campo `readiness`) e texto em `ts/componentReadiness.ts` (banner `DocsComponentStatus` é automático via `DocsOutline`).
 
 Do not add a `custom/` stub and a primitive stub for the same component unless both are intentional.
