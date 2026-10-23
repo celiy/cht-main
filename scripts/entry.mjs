@@ -61,7 +61,7 @@ function printUsage() {
     console.log("                   --no-backend  --client:<name>  [<name> | ../client-folder]");
     console.log("  build          Build a client frontend into builds/<client>/dist.");
     console.log("  electron       Open or package a client as a desktop app.");
-    console.log("  create         Scaffold a client frontend from the cht-base template.");
+    console.log("  create         Scaffold a client frontend from a cht-base template (--template:<name>).");
     console.log("  bump           Bump the version file of one workspace repo.");
     console.log("  bump-core      Bump core repos, sync cht-main pins, commit and push.");
     console.log("                   [branch]  --dry-run  --all  --manual-commit-message");

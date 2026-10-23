@@ -1,8 +1,3 @@
-Deixar o Toggleable mais bonito
-
-Fazer o link da sidebar um componente separado, estilo os do discord
-    Chip
-
-Transformar os clientes de teste em templates
-
 Criar uma repo shared separada para as funções do Mecarvit
+
+Salvar um orçamento invés de só fechar o modal, o modal de cadastro se torna uma visualização do orçamento a recem salvo
