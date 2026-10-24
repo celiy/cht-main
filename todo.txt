@@ -47,7 +47,7 @@ Table:
 
     A seleção das tables pode ser Checkbox ou Radio
 
-    Uma header pode agora ter agrupagem. Permitiria fazer algo assim:
+    Uma header pode agora ter agrupagem. Permitiria fazer algo assim (também fazer com que linhas agora possam ter span onde elas ocupam mais de uma row):
         -------------------------------------------------------------
         /         /                     header que cobre o restante /
         /         /-------------------------/---------------------- /
@@ -57,11 +57,9 @@ Table:
         /-----------------------------------------------------------/
         /linha    / linha                   / linha                 /
         /linha    / linha                   / linha                 /
-        /linha    / linha                   / linha                 /
+        /linha    / linha                                           /
         -------------------------------------------------------------
-    aqui de exemplo um header (header que cobre o restante) pode receber se ele fica no inicio/centro/fim verticalmente/horizontalmente
-
-    Fazer com que linhas agora possam ter span onde elas ocupam mais de uma row
+    aqui de exemplo um header/linha (header que cobre o restante) pode receber se ele fica no inicio/centro/fim verticalmente/horizontalmente
 
     Novos slots para colocar conteúdo dentro da table
         Slot para colocar conteúdo no inicio da table (no caso antes da table em si), mesma coisa mas no fim
@@ -74,16 +72,43 @@ Tabs:
 
     Tabs podem aparece nos polos ou lados, e dado isso, pode aparecer em baixo, em cima, na direita ou esquerda, adaptar visualmente os estilos pra encaixar bem com essas mudanças de lados
 
+Incluir mais slots e customizações em outros componentes
+
 Novo componente:
     Cascade:
         Botão customizavel que faz o trabalho do cascade da sidebar/ aproveitar e substituir o da sidebar
 
-Tui:
-    Remover o card com borda que engloba os runners ativos (frontend, docs, etc) e deixar apenas o texto de front-end · ● running · 0% 356M e etc.
-
-    Permitir scrollar com o mouse nas mensagens de cada runner
-
 Seguindo a mesma ideia de uma table com props, incluir uma table para slots. Achar um jeito de fazer o componente exportar algo que define os slots juntamente com suas descrições
+    Resumo, tratando slots como props: declarados, tipados e consultáveis.
+
+    1. Declarar os slots com defineSlots (tipo, como o defineProps)
+
+    <script setup lang="ts">
+    defineSlots<{
+    default?: () => any;
+    footer?: (props: { close: () => void }) => any;
+    }>();
+    </script>
+    2. Expor a lista em tempo de execução, como uma constante ao lado do componente
+
+    export const SLOT_NAMES = ["default", "footer"] as const;
+    Como defineSlots é só tipo, essa constante é a única forma de ter a lista em runtime. Ela precisa ser mantida em sincronia com o defineSlots.
+
+    3. Consultar o que o pai passou, sem depender de reatividade
+
+    import { useSlots } from "vue";
+
+    const slots = useSlots();
+    const hasSlot = (name: string) => !!slots[name];
+
+    4. Opcional: expor pelo componente para quem usa ref
+
+    defineExpose({ slotNames: SLOT_NAMES });
+    Pontos de atenção
+
+    hasSlot deve ser chamado no template ou na função de render, não em computed.
+    Para a documentação do cht-design-system, a fonte da verdade é o defineSlots. A constante serve só se a página de docs precisar da lista em runtime.
+    Como o defineProps, mantenha os nomes em inglês no código e os textos de UI em português.
 
 Mecarvit
     Salvar um orçamento invés de só fechar o modal, o modal de cadastro se torna uma visualização do orçamento a recem salvo
