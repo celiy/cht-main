@@ -110,6 +110,34 @@ npx chtmain install --client:mecarvit
 
 Flags extra: `--skip-git`, `--force-git`, `--skip-npm-install`.
 
+#### Instalar o cht-main dentro do repo de um cliente externo via git submodule (recomendado)
+
+Quando o cliente vive no seu **próprio** repositório Git, em vez de manter o `cht-main` como um clone solto ao lado, você pode registrá-lo como **submodule** dentro do repo do cliente.
+
+```bash
+# dentro do repo do cliente, na pasta onde o cht-main deve ficar
+git submodule add git@github.com:celiy/cht-main.git cht-main
+git commit -m "chore: add cht-main as submodule"
+```
+
+Quem clonar o repo do cliente depois precisa trazer o conteúdo do submodule explicitamente:
+
+```bash
+git clone --recurse-submodules <url-do-repo-do-cliente>
+# ou, num clone já existente:
+git submodule update --init
+```
+
+Para atualizar o `cht-main` para um commit mais novo:
+
+```bash
+cd cht-main
+git pull
+cd ..
+git add cht-main
+git commit -m "chore: bump cht-main submodule"
+```
+
 #### Workspace de editor / IA
 
 Ficheiros de tooling na **raiz** do `cht-main` não vão no Git. A fonte é um pack: **qualquer ficheiro** no topo do pack é copiado. O assistente `--new` continua limitado às opções pré-configuradas.
