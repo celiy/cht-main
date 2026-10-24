@@ -33,10 +33,11 @@ const SCRIPT_COMMANDS = {
     "sync-deps": "sync-common-deps.mjs"
 };
 
-/** Accepted aliases so `npm run sync:deps` can forward its own name. */
+/** Accepted aliases so `npm run sync:deps` can forward its own name. `update` runs `install` unchanged. */
 const COMMAND_ALIASES = {
     "sync:deps": "sync-deps",
     "install:repos": "install",
+    update: "install",
     "version:bump": "bump"
 };
 
@@ -57,9 +58,11 @@ function printUsage() {
     console.log("  install        Clone/pull workspace repos and install dependencies.");
     console.log("                   --skip-git  --force-git  --skip-npm-install  --client:<name>");
     console.log("                   --new  --workspace:<name>  --workspace-clean");
+    console.log("  update         Same as install (same flags), for updating repos later.");
     console.log("  dev            Start the dev runner (frontend + backend per client).");
     console.log("                   --no-backend  --client:<name>  [<name> | ../client-folder]");
     console.log("  build          Build a client frontend into builds/<client>/dist.");
+    console.log("                   --out:<dir>  [<name> | ../client-folder]");
     console.log("  electron       Open or package a client as a desktop app.");
     console.log("  create         Scaffold a client frontend from a cht-base template (--template:<name>).");
     console.log("  bump           Bump the version file of one workspace repo.");

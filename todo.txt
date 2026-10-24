@@ -2,6 +2,89 @@ Criar uma repo shared separada para as funções do Mecarvit
 
 Olhar o https://www.naiveui.com/en-US/os-theme/components para mais inspirações de componentes/visuais/ideias e etc
 
+Avatar:
+    Implementar lazy e intersection-observer-options: Basicamente um Avatar pode receber lazy e apenas carregar a imagem quando aparecer. Nos docs fazer um exemplo disso onde tem uma scrollar que esconde uns avatares no fundo do scroll que só carregam ao aparecer na tela
+
+    Adicionar badge e ditar em que posição ela fica
+Button:
+    Variantes transparent (parecido com destructive):
+        Primary, Success, Warning, Info
+
+    Variantes outline (borda e texto da cor):
+        Primary, Success, Warning, Info, destructive
+
+    Estado loading: Cursor fica com estado de loading ao hover
+
+    Efeito de click: Ao clicar ring aparece e cresce de tamanho e some com fading
+
+    Badge: Adicionar uma badge e ditar em que posição ela fica
+Carousel:
+    Prop que define se as imagens aparecem no carousel verticalmente ou horizontalmente.
+
+    Prop que define onde os pontinhos de indicador de página aparecem (top, bottom, left, right)
+
+    Setas de antes e depois ficam no topo e em baixo quando é scroll vertical
+Marker:
+    Separator com label pode mostrar essa label na inicio, centro (ja existe) e fim
+Input:
+    Melhorar a estrutura HTML do Input e adicionar customização a tudo
+Select:
+    O select multiplo quando mostra as opções selecionadas dentro do select, mostrar elas dentro de um container com border e um X pequeno do lado que exclui a opção. Neste select o item quebra de linha quando o conteudo é maior que o container invés de só sumir no final com ...
+Global para Select, Dropdown e OptionList:
+    Uma opção do Option e OptionList pode ser disabled e não ser clicavel
+
+    Slot estilo o que fica no fim do OptionList mas no inicio
+ProgressBar / Slider:
+    A tooltip do valor atual deve seguir a bolinha
+
+    Uma ProgressBar agora pode ter marks, no caso por exemplo eu passo um valor que esta no range tipo 30, e no variante horizontal, aparece uma label pequena em baixo da onde é o valor passado. Esse mark pode ser customizado
+
+    Novas customizações: o usuário pode customizar tudo do ProgressBar
+
+    O variante vertical pode começar com a bolinha descendo de cima pra baixo e de baixo pra cima, e no caso o progresso reflete isso, podendo começar de um topo ou baixo
+Table:
+    A seleção de linhas deve ter como fazer um item ser disabled então tipo o usuário não pode checar uma linha então por exemplo pode ter 5 linhas na table, a segunda é disabled e não pode ser selecionada
+
+    A seleção das tables pode ser Checkbox ou Radio
+
+    Uma header pode agora ter agrupagem. Permitiria fazer algo assim:
+        -------------------------------------------------------------
+        /         /                     header que cobre o restante /
+        /         /-------------------------/---------------------- /
+        /header 1 / header 2                /           /           /
+        /         / ------------------------/ header 3  /  header 4 /
+        /         / header 2-1 / header 2-2 /           /           /
+        /-----------------------------------------------------------/
+        /linha    / linha                   / linha                 /
+        /linha    / linha                   / linha                 /
+        /linha    / linha                   / linha                 /
+        -------------------------------------------------------------
+    aqui de exemplo um header (header que cobre o restante) pode receber se ele fica no inicio/centro/fim verticalmente/horizontalmente
+
+    Fazer com que linhas agora possam ter span onde elas ocupam mais de uma row
+
+    Novos slots para colocar conteúdo dentro da table
+        Slot para colocar conteúdo no inicio da table (no caso antes da table em si), mesma coisa mas no fim
+
+        Slot para colocar conteúdo em um header ou linha
+Tabs:
+    Emitir qual tab está ativa
+
+    Abrir tab ao dar hover
+
+    Tabs podem aparece nos polos ou lados, e dado isso, pode aparecer em baixo, em cima, na direita ou esquerda, adaptar visualmente os estilos pra encaixar bem com essas mudanças de lados
+
+Novo componente:
+    Cascade:
+        Botão customizavel que faz o trabalho do cascade da sidebar/ aproveitar e substituir o da sidebar
+
+Tui:
+    Remover o card com borda que engloba os runners ativos (frontend, docs, etc) e deixar apenas o texto de front-end · ● running · 0% 356M e etc.
+
+    Permitir scrollar com o mouse nas mensagens de cada runner
+
+Seguindo a mesma ideia de uma table com props, incluir uma table para slots. Achar um jeito de fazer o componente exportar algo que define os slots juntamente com suas descrições
+
 Mecarvit
     Salvar um orçamento invés de só fechar o modal, o modal de cadastro se torna uma visualização do orçamento a recem salvo
 
