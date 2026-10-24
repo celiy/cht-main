@@ -1,3 +1,12 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Salvar um orçamento invés de só fechar o modal, o modal de cadastro se torna uma visualização do orçamento a recem salvo
+Olhar o https://www.naiveui.com/en-US/os-theme/components para mais inspirações de componentes/visuais/ideias e etc
+
+Mecarvit
+    Salvar um orçamento invés de só fechar o modal, o modal de cadastro se torna uma visualização do orçamento a recem salvo
+
+    Botão de filtro de data "6 Meses" é mais alto que o toggleable de diferença e conjunto quando devem ser da mesma altura
+
+    Fazer o botão de filtro nos mini cards dos registros transparente
+
+    Atualizar as prints do TCC com o visual novo
