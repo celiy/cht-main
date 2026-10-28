@@ -5,7 +5,8 @@ Olhar o https://www.naiveui.com/en-US/os-theme/components para mais inspiraçõe
 Avatar:
     Implementar lazy e intersection-observer-options: Basicamente um Avatar pode receber lazy e apenas carregar a imagem quando aparecer. Nos docs fazer um exemplo disso onde tem uma scrollar que esconde uns avatares no fundo do scroll que só carregam ao aparecer na tela
 
-    Adicionar badge e ditar em que posição ela fica
+    Implementar tamanho customizado:
+        size="20rem" converte para w-20rem e h-20rem
 Button:
     Variantes transparent (parecido com destructive):
         Primary, Success, Warning, Info
@@ -15,19 +16,31 @@ Button:
 
     Estado loading: Cursor fica com estado de loading ao hover
 
-    Efeito de click: Ao clicar ring aparece e cresce de tamanho e some com fading
-
     Badge: Adicionar uma badge e ditar em que posição ela fica
+
+    No Button atual, para ele ter um visual onde o padding parece o mesmo em todo os lados ele usa paddin x e y differentes por causa da line height do texto, então se eu usar um Icon que é perfeitamente quadrado, o padding do botão fica errado, e então se eu fazer o texto sem leading, o texto que tem uma letra que fica mais pra baixo tipo G fica cortado. Existe uma maneira de se corrigir isso?
 Carousel:
     Prop que define se as imagens aparecem no carousel verticalmente ou horizontalmente.
 
     Prop que define onde os pontinhos de indicador de página aparecem (top, bottom, left, right)
 
     Setas de antes e depois ficam no topo e em baixo quando é scroll vertical
+
+    Slot para inserir os próprios botões de trocar de página
+
+    Automaticamente passar pelo os itens
+        Prop que por default true que se o usuário der hover, o carousel para de avançar Automaticamente
+
+        Poder configurar o timing/velocidade da troca
+
+    Animações diferentes de transição (apenas fade de transparencia)
+        Poder customizar mais as animações com suporte a mudança de velocidade
 Marker:
     Separator com label pode mostrar essa label na inicio, centro (ja existe) e fim
 Input:
     Melhorar a estrutura HTML do Input e adicionar customização a tudo
+
+    Implementar tamanhos, garantir que funciona com o OTP
 Select:
     O select multiplo quando mostra as opções selecionadas dentro do select, mostrar elas dentro de um container com border e um X pequeno do lado que exclui a opção. Neste select o item quebra de linha quando o conteudo é maior que o container invés de só sumir no final com ...
 Global para Select, Dropdown e OptionList:
@@ -70,15 +83,35 @@ Tabs:
 
     Abrir tab ao dar hover
 
+    Slot para inserir qualquer botão que quiser na parte de botão de troca de tabs
+
     Tabs podem aparece nos polos ou lados, e dado isso, pode aparecer em baixo, em cima, na direita ou esquerda, adaptar visualmente os estilos pra encaixar bem com essas mudanças de lados
+Item:
+    Variante que é uma cor sólida, sem borda que tem o mesmo layout do alert: solid-alert
 
 Incluir mais slots e customizações em outros componentes
+
+Scrollable:
+    Opção de lembrar onde o usuário estava na pagina. Isso pode ser usado com conteúdo dinamico e estático. No caso deve ter um jeito de lidar com isso, onde ele sabe onde scrollar quando o conteúdo é gerado ou é estático
 
 Novo componente:
     Cascade:
         Botão customizavel que faz o trabalho do cascade da sidebar/ aproveitar e substituir o da sidebar
 
-Seguindo a mesma ideia de uma table com props, incluir uma table para slots. Achar um jeito de fazer o componente exportar algo que define os slots juntamente com suas descrições
+Fazer os cht-shared/design/base serem submodulos git do cht-main, fazer o comando de install/update ter integração com isso
+
+Adicionar ao readme:
+    ## Repositórios do ecossistema
+
+    | Repositório | Papel |
+    | --- | --- |
+    | [cht-main](https://github.com/celiy/cht-main) | [desc] |
+    | [cht-base](https://github.com/celiy/cht-base) | [desc] |
+    | [cht-design-system](https://github.com/celiy/cht-design-system) | [desc] |
+    | [cht-shared](https://github.com/celiy/cht-shared) | [desc] |
+
+
+Seguindo a mesma ideia de uma table com props em cada componente no docs, incluir uma table para slots. Achar um jeito de fazer o componente exportar algo que define os slots juntamente com suas descrições
     Resumo, tratando slots como props: declarados, tipados e consultáveis.
 
     1. Declarar os slots com defineSlots (tipo, como o defineProps)
@@ -118,3 +151,5 @@ Mecarvit
     Fazer o botão de filtro nos mini cards dos registros transparente
 
     Atualizar as prints do TCC com o visual novo
+
+    Incluir prints do sistema no github do cliente
