@@ -1,24 +1,5 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Olhar o https://www.naiveui.com/en-US/os-theme/components para mais inspirações de componentes/visuais/ideias e etc
-
-Avatar:
-    Implementar lazy e intersection-observer-options: Basicamente um Avatar pode receber lazy e apenas carregar a imagem quando aparecer. Nos docs fazer um exemplo disso onde tem uma scrollar que esconde uns avatares no fundo do scroll que só carregam ao aparecer na tela
-
-    Implementar tamanho customizado:
-        size="20rem" converte para w-20rem e h-20rem
-Button:
-    Variantes transparent (parecido com destructive):
-        Primary, Success, Warning, Info
-
-    Variantes outline (borda e texto da cor):
-        Primary, Success, Warning, Info, destructive
-
-    Estado loading: Cursor fica com estado de loading ao hover
-
-    Badge: Adicionar uma badge e ditar em que posição ela fica
-
-    No Button atual, para ele ter um visual onde o padding parece o mesmo em todo os lados ele usa paddin x e y differentes por causa da line height do texto, então se eu usar um Icon que é perfeitamente quadrado, o padding do botão fica errado, e então se eu fazer o texto sem leading, o texto que tem uma letra que fica mais pra baixo tipo G fica cortado. Existe uma maneira de se corrigir isso?
 Carousel:
     Prop que define se as imagens aparecem no carousel verticalmente ou horizontalmente.
 
@@ -35,6 +16,14 @@ Carousel:
 
     Animações diferentes de transição (apenas fade de transparencia)
         Poder customizar mais as animações com suporte a mudança de velocidade
+Chip:
+    Mais variações
+
+    Tamanhos diferentes
+
+    Implementar customização de fundo, fonte e etc.
+
+    Criar classe chip-group css onde os chips podem ficar stackados lado a lado ou em cima um do outro e ficarem conectados, no caso similar ao btn group só que para o chip onde a unica coisa que muda é o radius de cada lado e tem suporte vertical
 Marker:
     Separator com label pode mostrar essa label na inicio, centro (ja existe) e fim
 Input:
