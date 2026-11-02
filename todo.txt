@@ -1,19 +1,9 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
 Input:
-    Melhorar a estrutura HTML do Input e adicionar customização a tudo
+    Adicionar customização a tudo
 
     Implementar tamanhos, garantir que funciona com o OTP
-Tabs:
-    Emitir qual tab está ativa
-
-    Prop default false: Abrir tab ao dar hover
-
-    Slot para inserir qualquer botão que quiser na parte de botão de troca de tabs
-
-    Tabs podem aparece nos polos ou lados, e dado isso, pode aparecer em baixo, em cima, na direita ou esquerda, adaptar visualmente os estilos pra encaixar bem com essas mudanças de lados
-Item:
-    Variante que é uma cor sólida, sem borda que tem o mesmo layout do alert: solid-alert
 
 Incluir mais slots e customizações em outros componentes
 
