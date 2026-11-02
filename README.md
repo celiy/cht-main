@@ -109,9 +109,20 @@ Incluindo repositórios de um cliente específico (ex.: mecarvit):
 npx chtmain install --client:mecarvit
 ```
 
-Flags extra: `--skip-git`, `--force-git`, `--skip-npm-install`.
+Flags extra: `--skip-git`, `--force-git`, `--pinned`, `--skip-npm-install`.
 
 Para atualizar os repositórios depois, use `npx chtmain update`.
+
+#### Repos do núcleo como submodules
+
+`cht-base`, `cht-design-system` e `cht-shared` são submodules do `cht-main` (veja `.gitmodules`, que também diz qual branch cada um segue). O `cht-main` guarda o commit de cada um, e `install`/`update` cuidam do resto:
+
+- **Pasta ainda não inicializada** (clone novo do `cht-main`): roda `git submodule update --init` e depois vai para a branch do `.gitmodules`, como um clone normal faria.
+- **Pasta já existente**: continua com `fetch` + `pull --ff-only` na branch em que ela está, então o seu trabalho local não é movido.
+- **`--pinned`**: leva cada submodule exatamente ao commit que o `cht-main` registra, em HEAD solto. É o que serve para CI e builds reproduzíveis.
+- **`bump-core`**: depois de dar bump em cada repo, o commit de pins no `cht-main` também atualiza o ponteiro dos submodules.
+
+Num clone novo, `git clone --recurse-submodules` já traz os três de uma vez.
 
 #### Instalar o cht-main dentro do repo de um cliente externo via git submodule (recomendado)
 
@@ -240,6 +251,7 @@ Todos os comandos seguem `npx chtmain <comando> [args...]` (ou `npm run cht -- <
 | `install`        | `--client:<name>`             | Clona (ou faz `fetch` + `pull --ff-only`) os repos compartilhados e os do cliente, e roda `npm install` na raiz e nas pastas irmãs. Alias: `install:repos`.                                                                         |
 | `install`        | `--skip-git`                  | Não clona nem atualiza repos; só instala dependências.                                                                                                                                                                              |
 | `install`        | `--force-git`                 | Faz `fetch` e `git reset --hard origin/<ref>` nos repos. **Descarta alterações locais** não commitadas. Não pode ser usado com `--skip-git`.                                                                                        |
+| `install`        | `--pinned`                    | Leva os submodules do núcleo (`cht-base`, `cht-design-system`, `cht-shared`) ao commit que o `cht-main` registra, em HEAD solto, em vez de seguir a branch.                                                                         |
 | `install`        | `--skip-npm-install`          | Clona/atualiza os repos, mas não roda `npm install`.                                                                                                                                                                                |
 | `install`        | `--new`                       | Abre o assistente interativo de workspace de IDE/IA (exige TTY).                                                                                                                                                                    |
 | `install`        | `--workspace:<name>`          | Aplica o pack de workspace (`devApp` ou nome de cliente), apagando antes o que o pack anterior deixou.                                                                                                                              |

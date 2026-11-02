@@ -9,6 +9,7 @@ import {
     readCoreLocalVersions,
     writeCoreVersionPins
 } from "./version.mjs";
+import { listSubmodules } from "./submodules.mjs";
 
 /**
  * Execute a git command
@@ -259,6 +260,10 @@ function commitChanges(dir, message, options = {}) {
         gitOrThrow(dir, ["add", "--", relative], `git add ${relative} in ${dir}`);
     }
 
+    if (options.extraPaths?.length) {
+        gitOrThrow(dir, ["add", "--", ...options.extraPaths], `git add ${options.extraPaths} in ${dir}`);
+    }
+
     gitOrThrow(dir, ["commit", "-m", message], `git commit in ${dir}`);
 }
 
@@ -410,12 +415,18 @@ export async function bumpCoreAndPush(root, options = {}) {
     const pinResult = writeCoreVersionPins(root, pins, { dryRun });
     const extraMainMessage = extraMessages["cht-main"];
 
-    if (!dryRun && (pinResult.changed || includeAll || extraMainMessage)) {
+    // The bump commits above moved each core repo; the submodule pointers in cht-main follow.
+    const submodulePaths = listSubmodules(root).map((entry) => entry.path);
+    const pointersMoved =
+        submodulePaths.length > 0 && git(root, ["diff", "--quiet", "--", ...submodulePaths]).status !== 0;
+
+    if (!dryRun && (pinResult.changed || pointersMoved || includeAll || extraMainMessage)) {
         const filePath = pinResult.filePath || findVersionFile(root);
 
         commitChanges(root, extraMainMessage || mainPinsCommitMessage(pins), {
             all: includeAll || Boolean(extraMainMessage),
-            filePath
+            filePath,
+            extraPaths: submodulePaths
         });
     }
 
