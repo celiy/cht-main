@@ -4,10 +4,6 @@ Input:
     Melhorar a estrutura HTML do Input e adicionar customização a tudo
 
     Implementar tamanhos, garantir que funciona com o OTP
-Global para Select, Dropdown e OptionList:
-    Uma opção do Option e OptionList pode ser disabled e não ser clicavel
-
-    Slot estilo o que fica no fim do OptionList mas no inicio
 ProgressBar / Slider:
     A tooltip do valor atual deve seguir a bolinha
 
