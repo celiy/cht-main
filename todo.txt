@@ -4,8 +4,6 @@ Input:
     Melhorar a estrutura HTML do Input e adicionar customização a tudo
 
     Implementar tamanhos, garantir que funciona com o OTP
-Select:
-    O select multiplo quando mostra as opções selecionadas dentro do select, mostrar elas dentro de um container com border e um X pequeno do lado que exclui a opção. Neste select o item quebra de linha quando o conteudo é maior que o container invés de só sumir no final com ...
 Global para Select, Dropdown e OptionList:
     Uma opção do Option e OptionList pode ser disabled e não ser clicavel
 
@@ -28,12 +26,13 @@ Table:
         /         /                     header que cobre o restante /
         /         /-------------------------/---------------------- /
         /header 1 / header 2                /           /           /
-        /         / ------------------------/ header 3  /  header 4 /
-        /         / header 2-1 / header 2-2 /           /           /
+        /         / ------------------------/ header 3  /           /
+        /         / header 2-1 / header 2-2 /           /  header 4 /
         /-----------------------------------------------------------/
         /linha    / linha                   / linha                 /
         /linha    / linha                   / linha                 /
         /linha    / linha                                           /
+        /linha    /                                           linha /
         -------------------------------------------------------------
     aqui de exemplo um header/linha (header que cobre o restante) pode receber se ele fica no inicio/centro/fim verticalmente/horizontalmente
 
