@@ -1,21 +1,5 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Carousel:
-    Prop que define se as imagens aparecem no carousel verticalmente ou horizontalmente.
-
-    Prop que define onde os pontinhos de indicador de página aparecem (top, bottom, left, right)
-
-    Setas de antes e depois ficam no topo e em baixo quando é scroll vertical
-
-    Slot para inserir os próprios botões de trocar de página
-
-    Automaticamente passar pelo os itens
-        Prop que por default true que se o usuário der hover, o carousel para de avançar Automaticamente
-
-        Poder configurar o timing/velocidade da troca
-
-    Animações diferentes de transição (apenas fade de transparencia)
-        Poder customizar mais as animações com suporte a mudança de velocidade
 Chip:
     Mais variações
 
@@ -88,6 +72,8 @@ Novo componente:
         Botão customizavel que faz o trabalho do cascade da sidebar/ aproveitar e substituir o da sidebar
 
 Fazer os cht-shared/design/base serem submodulos git do cht-main, fazer o comando de install/update ter integração com isso
+
+Tabela de props não mostra o valor true/false na tabela de um prop
 
 Adicionar ao readme:
     ## Repositórios do ecossistema
