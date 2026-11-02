@@ -52,6 +52,17 @@ O `cht-main` centraliza e facilita o desenvolvimento de aplicações por cliente
 - `cht-design-system`: componentes e padrões visuais reutilizáveis.
 - `cht-shared`: código compartilhado (helpers, utilitários, etc.).
 
+## Repositórios do ecossistema
+
+| Repositório                                                     | Papel                                                   |
+| --------------------------------------------------------------- | ------------------------------------------------------- |
+| [cht-main](https://github.com/celiy/cht-main)                   | Orquestração: `install`, runner, Electron e workspaces. |
+| [cht-base](https://github.com/celiy/cht-base)                   | Boot Vue e Vite, rotas e documentação (`src/devApp`).   |
+| [cht-design-system](https://github.com/celiy/cht-design-system) | Componentes e tokens visuais.                           |
+| [cht-shared](https://github.com/celiy/cht-shared)               | Utilitários compartilhados.                             |
+
+Os clientes (`cht-client-*`) e backends (`cht-backend-*`) ficam fora do núcleo: dependem dele, nunca o contrário.
+
 ## Clientes
 
 Clientes existentes são pastas irmãs com `cht.config.json` na raiz. O catálogo em [`clients.json`](./clients.json) permite clonar um cliente na primeira instalação. Atualmente:
