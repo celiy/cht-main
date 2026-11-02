@@ -16,6 +16,7 @@ import {
     resolveClient
 } from "./lib/clients.mjs";
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
+import { listSubmodules } from "./lib/submodules.mjs";
 import {
     applyWorkspaceChoices,
     clearRootWorkspace,
@@ -78,6 +79,7 @@ function looksLikeCommitSha(ref) {
  *   client: string | null,
  *   skipGit: boolean,
  *   forceGit: boolean,
+ *   pinned: boolean,
  *   skipNpmInstall: boolean,
  *   isNew: boolean,
  *   workspace: string | null,
@@ -88,6 +90,7 @@ function parseInstallFlags(argv) {
     const { client, rest } = parseClientFlag(argv);
     let skipGit = false;
     let forceGit = false;
+    let pinned = false;
     let skipNpmInstall = false;
     let isNew = false;
     let workspace = null;
@@ -101,6 +104,8 @@ function parseInstallFlags(argv) {
             skipGit = true;
         } else if (arg === "--force-git") {
             forceGit = true;
+        } else if (arg === "--pinned") {
+            pinned = true;
         } else if (arg === "--skip-npm-install") {
             skipNpmInstall = true;
         } else if (arg === "--new") {
@@ -120,7 +125,7 @@ function parseInstallFlags(argv) {
     if (unknown.length > 0) {
         throw new Error(
             `[install] Unknown flag(s): ${unknown.join(", ")}. ` +
-                "Supported: --skip-git, --force-git, --skip-npm-install, --client:<name>, " +
+                "Supported: --skip-git, --force-git, --pinned, --skip-npm-install, --client:<name>, " +
                 "--new, --workspace:<name>, --workspace-clean"
         );
     }
@@ -141,6 +146,7 @@ function parseInstallFlags(argv) {
         client,
         skipGit,
         forceGit,
+        pinned,
         skipNpmInstall,
         isNew,
         workspace: workspace ? workspace.trim() : null,
@@ -291,16 +297,55 @@ function gitCheckoutRef(dir, label, ref, forceGit) {
 }
 
 /**
+ * Initialize a submodule of cht-main, which clones it when the folder is empty or missing.
+ * Without `pinned` it then follows the branch from `.gitmodules`, like a plain clone would;
+ * with `pinned` it stays on the commit cht-main records (detached HEAD).
+ *
+ * @param {{ path: string, branch?: string }} submodule The submodule.
+ * @param {string} cwd The cht-main directory.
+ * @param {boolean} forceGit Whether to force the checkout.
+ * @param {boolean} pinned Whether to stay on the recorded commit.
+ * @returns {void}
+ */
+function gitInitSubmodule(submodule, cwd, forceGit, pinned) {
+    const name = submodule.path;
+
+    console.log(`[install] git submodule update --init ${name}${pinned ? " (pinned commit)" : ""}`);
+    assertGitOk(
+        spawnSyncInherit("git", ["submodule", "sync", "--", name], { cwd }),
+        `git submodule sync failed for ${name}`
+    );
+    assertGitOk(
+        spawnSyncInherit("git", ["submodule", "update", "--init", "--", name], { cwd }),
+        `git submodule update failed for ${name}`
+    );
+
+    if (!pinned && submodule.branch) {
+        gitCheckoutRef(path.join(cwd, name), name, submodule.branch, forceGit);
+    }
+}
+
+/**
  * Sync a repository
  * @param {Object} spec The repository specification.
  * @param {string} cwd The current working directory.
  * @param {boolean} forceGit Whether to force the checkout.
+ * @param {{ submodules?: { path: string, branch?: string }[], pinned?: boolean }} [options]
+ *   Submodules of cht-main. They are cloned by `git submodule update --init`; an existing
+ *   checkout keeps the fetch + pull below, unless `pinned` moves it to the recorded commit.
  * @returns {void}
  */
-function gitSyncRepo(spec, cwd, forceGit) {
+function gitSyncRepo(spec, cwd, forceGit, options = {}) {
     const { url, ref } = spec;
     const name = repoNameFromUrl(url);
     const dest = path.join(cwd, name);
+    const submodule = options.submodules?.find((entry) => entry.path === name);
+
+    if (submodule && !ref && (options.pinned || !isGitRepo(dest))) {
+        gitInitSubmodule(submodule, cwd, forceGit, Boolean(options.pinned));
+
+        return;
+    }
 
     if (fs.existsSync(dest)) {
         if (!isGitRepo(dest)) {
@@ -616,7 +661,7 @@ async function applyWorkspaceFlags(root, { isNew, workspace, workspaceClean }) {
  * @returns {Promise<void>}
  */
 async function main() {
-    const { client, skipGit, forceGit, skipNpmInstall, isNew, workspace, workspaceClean } =
+    const { client, skipGit, forceGit, pinned, skipNpmInstall, isNew, workspace, workspaceClean } =
         parseInstallFlags(process.argv.slice(2));
     const root = getRootDir();
 
@@ -632,18 +677,17 @@ async function main() {
     } else {
         syncRootGit(root, forceGit);
 
-        const repoSpecs = collectInstallRepos(client);
+        // Read after the root pull: it can bring in a newer .gitmodules or gitlinks.
+        const syncOptions = { submodules: listSubmodules(root), pinned };
 
-        for (const spec of repoSpecs) {
-            gitSyncRepo(spec, root, forceGit);
+        for (const spec of collectInstallRepos(client)) {
+            gitSyncRepo(spec, root, forceGit, syncOptions);
         }
 
         clearClientDiscoveryCache();
 
-        const afterCloneSpecs = collectInstallRepos(client);
-
-        for (const spec of afterCloneSpecs) {
-            gitSyncRepo(spec, root, forceGit);
+        for (const spec of collectInstallRepos(client)) {
+            gitSyncRepo(spec, root, forceGit, syncOptions);
         }
     }
 
