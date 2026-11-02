@@ -1,7 +1,5 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Marker:
-    Separator com label pode mostrar essa label na inicio, centro (ja existe) e fim
 Input:
     Melhorar a estrutura HTML do Input e adicionar customização a tudo
 
