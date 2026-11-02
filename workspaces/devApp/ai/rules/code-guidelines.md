@@ -24,7 +24,7 @@ Grupos separados por linha em branco quando o elemento tem vários atributos.
 
 ## Tailwind: bordas
 
-Não usar `border-border`. Classes de largura (`border`, `border-b`, `border-x`, …) já recebem a cor de borda do tema. Classes de cor (`border-primary`, `border-b-muted`, `border-red-500`, …) já pintam borda 1px no lado correspondente. Combo tamanho+cor: `border-1-primary`, `border-b-2-red-500`; largura arbitrária: `border-[1rem]/muted`, `border-b-[4px]/primary` (barra — o Tailwind não aceita token depois de `]`).
+Não usar `border-border`. Classes de largura (`border`, `border-b`, `border-x`, …) já recebem a cor de borda do tema. Classes de cor (`border-primary`, `border-b-muted`, `border-red-500`, …) já pintam borda 1px no lado correspondente. Combo tamanho+cor: `border-1-primary`, `border-b-2-red-500`; largura arbitrária: `border-[1rem]/muted`, `border-b-[4px]/primary` (barra — o Tailwind não aceita token depois de `]`). Transparência: `border-t-primary/50` numa cor, `border-t/50`, `border/50` ou `border-b-2/40` na cor padrão da borda (em vez de `border-t border-border/50`).
 
 ## Espaçamento e fluxo
 
