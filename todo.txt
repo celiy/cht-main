@@ -1,13 +1,5 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Chip:
-    Mais variações
-
-    Tamanhos diferentes
-
-    Implementar customização de fundo, fonte e etc.
-
-    Criar classe chip-group css onde os chips podem ficar stackados lado a lado ou em cima um do outro e ficarem conectados, no caso similar ao btn group só que para o chip onde a unica coisa que muda é o radius de cada lado e tem suporte vertical
 Marker:
     Separator com label pode mostrar essa label na inicio, centro (ja existe) e fim
 Input:
