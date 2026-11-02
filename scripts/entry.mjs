@@ -56,7 +56,7 @@ function printUsage() {
     console.log("");
     console.log("Commands:");
     console.log("  install        Clone/pull workspace repos and install dependencies.");
-    console.log("                   --skip-git  --force-git  --skip-npm-install  --client:<name>");
+    console.log("                   --skip-git  --force-git  --pinned  --skip-npm-install  --client:<name>");
     console.log("                   --new  --workspace:<name>  --workspace-clean");
     console.log("  update         Same as install (same flags), for updating repos later.");
     console.log("  dev            Start the dev runner (frontend + backend per client).");
