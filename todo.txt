@@ -5,18 +5,12 @@ Input:
 
     Implementar tamanhos, garantir que funciona com o OTP
 
-Incluir mais slots e customizações em outros componentes
-
 Scrollable:
     Opção de lembrar onde o usuário estava na pagina. Isso pode ser usado com conteúdo dinamico e estático. No caso deve ter um jeito de lidar com isso, onde ele sabe onde scrollar quando o conteúdo é gerado ou é estático
 
-Novo componente:
-    Cascade:
-        Botão customizavel que faz o trabalho do cascade da sidebar/ aproveitar e substituir o da sidebar
-
 Fazer os cht-shared/design/base serem submodulos git do cht-main, fazer o comando de install/update ter integração com isso
 
-Tabela de props não mostra o valor true/false na tabela de um prop
+Tabela de Props no docs não mostra o valor true/false na tabela de um prop
 
 Adicionar ao readme:
     ## Repositórios do ecossistema
