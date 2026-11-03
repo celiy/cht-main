@@ -22,22 +22,27 @@ function Hint({ keyLabel, action }) {
  * Status bar component
  * @param {Object} props
  * @param {Object[]} props.linkGroups The link groups.
+ * @param {string} props.info Active process subtitle or visible line range.
  * @returns {React.ReactNode} The status bar component.
  */
-export function StatusBar({ linkGroups }) {
+export function StatusBar({ linkGroups, info }) {
     const groups = linkGroups ?? [];
 
     return (
         <Box flexDirection="column" paddingX={1}>
-            <Box flexDirection="row" flexWrap="wrap">
-                <Hint keyLabel="←/→" action="switch tab" />
-                <Hint keyLabel="↑/↓" action="scroll" />
-                <Hint keyLabel="Home/End" action="top/bot" />
-                <Hint keyLabel="PgUp/Dn" action="page" />
-                <Hint keyLabel="S-PgUp" action="×5" />
-                <Hint keyLabel="r" action="restart" />
-                <Hint keyLabel="c" action="clear" />
-                <Hint keyLabel="q" action="quit" />
+            <Box flexDirection="row" justifyContent="space-between">
+                <Box flexDirection="row" flexWrap="wrap">
+                    <Hint keyLabel="←/→" action="switch tab" />
+                    <Hint keyLabel="↑/↓" action="scroll" />
+                    <Hint keyLabel="Home/End" action="top/bot" />
+                    <Hint keyLabel="PgUp/Dn" action="page" />
+                    <Hint keyLabel="S-PgUp" action="×5" />
+                    <Hint keyLabel="r" action="restart" />
+                    <Hint keyLabel="c" action="clear" />
+                    <Hint keyLabel="q" action="quit" />
+                </Box>
+
+                <Text dimColor>{info}</Text>
             </Box>
 
             {groups.map((group) => (

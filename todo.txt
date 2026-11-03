@@ -1,12 +1,9 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Olhar o https://www.naiveui.com/en-US/os-theme/components para mais inspirações de componentes/visuais/ideias e etc
+Input:
+    Adicionar customização a tudo
 
-Mecarvit
-    Salvar um orçamento invés de só fechar o modal, o modal de cadastro se torna uma visualização do orçamento a recem salvo
+    Implementar tamanhos, garantir que funciona com o OTP
 
-    Botão de filtro de data "6 Meses" é mais alto que o toggleable de diferença e conjunto quando devem ser da mesma altura
-
-    Fazer o botão de filtro nos mini cards dos registros transparente
-
-    Atualizar as prints do TCC com o visual novo
+Scrollable:
+    Opção de lembrar onde o usuário estava na pagina. Isso pode ser usado com conteúdo dinamico e estático. No caso deve ter um jeito de lidar com isso, onde ele sabe onde scrollar quando o conteúdo é gerado ou é estático
