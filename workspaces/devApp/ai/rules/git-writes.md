@@ -42,6 +42,12 @@ Depois informe o que está pendente e pergunte se deve commitar — ou, se o usu
 
 Comandos de leitura continuam liberados: `status`, `diff`, `log`, `show`, `branch`, `remote -v`, `check-ignore`, `stash list`.
 
+## Autoria dos commits e PRs
+
+Agentes de IA não se colocam como co-autores. Commits e PRs levam só o usuário como autor: sem trailer de co-autor de IA (`Co-Authored-By: Claude …` ou equivalente) e sem rodapé como "Generated with Claude Code", mesmo que a ferramenta do agente peça. A exceção é o usuário pedir isso de forma explícita naquela mensagem. O trailer faz o assistente aparecer como contribuidor no GitHub, e tirar depois exige reescrever o histórico e dar force push.
+
+Antes do push, confira a mensagem com `git log -1 --format=%B`.
+
 ## Nunca faça por iniciativa própria
 
 - `git add -A` / `git add .` seguido de commit;
