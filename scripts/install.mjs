@@ -9,7 +9,6 @@ import {
     getClientDir,
     getRootDir,
     getSharedRepos,
-    listCataloguedClientNames,
     listClientNames,
     listExternalClientDirs,
     parseClientFlag,
@@ -430,9 +429,7 @@ function collectInstallRepos(client) {
         return list;
     }
 
-    const names = new Set([...listClientNames(), ...listCataloguedClientNames()]);
-
-    for (const name of names) {
+    for (const name of listClientNames()) {
         addClientRepoSpecs(list, name);
     }
 
