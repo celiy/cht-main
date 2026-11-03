@@ -2,10 +2,14 @@
 /builds
 **/*.pyc
 **/*__pycache__
-/cht-*
 
-# Só a raiz: clones cht-* e cópias de workspace caem aqui.
+# Só a raiz: clones de clientes (cht-client-*, cht-backend-*) e cópias de workspace caem aqui.
+# Os repos do núcleo são submodules e entram pela lista abaixo.
 /*
+!/cht-base
+!/cht-design-system
+!/cht-shared
+!/.gitmodules
 !/eslint-rules
 !/prettier-plugins
 !/scripts

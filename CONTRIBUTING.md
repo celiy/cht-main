@@ -59,6 +59,8 @@ Não use `border-border`. As classes de largura, como `border`, `border-b` e `bo
 
 Para tamanho e cor juntos, use `border-1-primary` ou `border-b-2-red-500`. Para largura arbitrária, use a barra: `border-[1rem]/muted`. O Tailwind não aceita um token depois de `]`.
 
+Para transparência, use a barra com um número. Numa cor: `border-t-primary/50`. Na cor padrão da borda: `border-t/50`, `border/50` ou `border-b-2/40`. Prefira `border-t/50` a `border-t border-border/50`.
+
 Em `<style scoped>`, não use `@apply` sem `@reference "tailwindcss";` no topo do bloco. Quando der, prefira classes utilitárias no template.
 
 ### TypeScript

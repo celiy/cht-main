@@ -82,7 +82,7 @@ export function App({ manager, clientName, onQuit }) {
 
     const linkGroups = useMemo(() => urlsByProcess(processes), [processes, tick]);
 
-    const headerHeight = 4;
+    const headerHeight = 2;
     const statusHeight = 2 + Math.max(1, linkGroups.length);
     const logHeight = Math.max(5, rows - headerHeight - statusHeight);
     const logViewHeight = getLogViewHeight(logHeight);
@@ -95,6 +95,12 @@ export function App({ manager, clientName, onQuit }) {
         lineCount,
         logViewHeight
     );
+
+    const info = !activeProc
+        ? ""
+        : follow || lineCount <= logViewHeight
+            ? (activeProc.subtitle || activeProc.dir)
+            : `${start + 1}-${Math.min(lineCount, start + logViewHeight)} / ${lineCount}`;
 
     const restartActive = () => {
         const proc = manager.get(activeIdx);
@@ -143,12 +149,10 @@ export function App({ manager, clientName, onQuit }) {
                     height={logHeight}
                     width={columns}
                     start={start}
-                    follow={follow}
-                    totalLines={lineCount}
                 />
             )}
 
-            <StatusBar linkGroups={linkGroups} />
+            <StatusBar linkGroups={linkGroups} info={info} />
         </Box>
     );
 }

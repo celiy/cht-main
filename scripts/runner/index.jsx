@@ -118,7 +118,7 @@ async function main() {
             clientName={resolved.name}
             onQuit={cleanup}
         />,
-        { exitOnCtrlC: false }
+        { exitOnCtrlC: false, alternateScreen: true }
     );
 
     try {

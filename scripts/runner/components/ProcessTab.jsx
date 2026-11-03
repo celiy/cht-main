@@ -64,12 +64,7 @@ export function ProcessTab({ proc, usage, active }) {
     const usageLabel = formatUsage(usage);
 
     return (
-        <Box
-            borderStyle={active ? "round" : "single"}
-            borderColor={active ? "cyan" : "gray"}
-            paddingX={1}
-            marginRight={1}
-        >
+        <Box marginRight={2}>
             <Text bold={active} color={active ? "cyan" : undefined}>
                 {proc.name}
             </Text>
