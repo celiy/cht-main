@@ -44,9 +44,7 @@ const WORKSPACE_SKIP = new Set([
     ".gitattributes",
     "scripts",
     "workspaces",
-    "builds",
-    "eslint-rules",
-    "prettier-plugins"
+    "builds"
 ]);
 
 /**

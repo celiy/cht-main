@@ -10,8 +10,6 @@
 !/cht-design-system
 !/cht-shared
 !/.gitmodules
-!/eslint-rules
-!/prettier-plugins
 !/scripts
 !/workspaces
 !/.gitignore
