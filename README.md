@@ -230,7 +230,7 @@ O script executa o build do `cht-base` para o cliente informado e exporta o arte
 builds/<name>/dist
 ```
 
-Para exportar em outra pasta, por exemplo dentro do projeto do cliente, use `--out:<pasta>` (relativa ao `cht-main`, ou absoluta). A pasta é apagada antes da cópia:
+Para exportar em outra pasta, por exemplo dentro do projeto do cliente, use `--out:<pasta>` (relativa ao `cht-main`, ou absoluta). A pasta é apagada antes da cópia, então o comando recusa a raiz do disco, a home, o próprio `cht-main`, as pastas do `cht-base`, `cht-design-system`, `cht-shared` e `scripts`, qualquer pasta de cliente (ou que contenha uma) e qualquer repositório git. Use uma subpasta própria para o resultado, como `dist`:
 
 ```bash
 npx chtmain build ../meu-projeto/meu-cliente --out:../meu-projeto/web/dist
@@ -272,7 +272,7 @@ Todos os comandos seguem `npx chtmain <comando> [args...]` (ou `npm run cht -- <
 | `dev`            | `<name \| caminho>`           | Igual a `--client:`, mas posicional. Um caminho (`../cliente`, `..`, absoluto) roda um cliente fora do `cht-main`. Também vale em `build` e `electron`.                                                                             |
 | `dev`            | `--no-backend`                | Sobe só o frontend (e a documentação), sem o processo do backend.                                                                                                                                                                   |
 | `build`          | `<name>`                      | Builda o frontend do cliente com o `cht-base` e exporta para `builds/<name>/dist` (apaga a pasta antes). Aceita `dev` como nome.                                                                                                    |
-| `build`          | `--out:<pasta>`               | Exporta o artefato direto em `<pasta>` (relativa ao `cht-main`, ou absoluta) em vez de `builds/<name>/dist`. A pasta é apagada antes da cópia; o comando recusa a raiz do disco, a home e qualquer pasta que contenha o `cht-main`. |
+| `build`          | `--out:<pasta>`               | Exporta o artefato direto em `<pasta>` (relativa ao `cht-main`, ou absoluta) em vez de `builds/<name>/dist`. A pasta é apagada antes da cópia; o comando recusa a raiz do disco, a home, o `cht-main`, as pastas de código do workspace, qualquer pasta de cliente (ou que contenha uma) e repositórios git. |
 | `build`          | `--bump [repo]`               | Incrementa a versão antes do build. Sem `repo`, usa o arquivo de versão do cliente; com `repo` (sem o prefixo `cht-`), bumpa outro repo.                                                                                            |
 | `electron`       | `<name>`                      | Abre o cliente no Electron em modo desenvolvimento (backend + frontend).                                                                                                                                                            |
 | `electron build` | `<name>`                      | Empacota o app desktop em `builds/<name>/desktop`. Alvo padrão: o sistema hospedeiro.                                                                                                                                               |
