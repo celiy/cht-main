@@ -1,5 +1,7 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
+Criar página para documentar o docsmarkdown como componente reusavel em outros clientes
+
 Input:
     Adicionar customização a tudo
 

@@ -62,7 +62,7 @@ function printUsage() {
     console.log("  dev            Start the dev runner (frontend + backend per client).");
     console.log("                   --no-backend  --client:<name>  [<name> | ../client-folder]");
     console.log("  build          Build a client frontend into builds/<client>/dist.");
-    console.log("                   --out:<dir>  [<name> | ../client-folder]");
+    console.log("                   --out:<dir>  --skip-version-bump  [<name> | ../client-folder]");
     console.log("  electron       Open or package a client as a desktop app.");
     console.log("  create         Scaffold a client frontend from a cht-base template (--template:<name>).");
     console.log("  bump           Bump the version file of one workspace repo.");

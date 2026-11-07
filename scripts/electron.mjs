@@ -12,7 +12,7 @@ import {
 } from "./lib/clients.mjs";
 import { freePorts } from "./lib/procManager.mjs";
 import { localBinPath, spawnSyncInherit, spawnWithPipes } from "./lib/runCommand.mjs";
-import { bumpVersionDir, resolveRepoDir } from "./lib/version.mjs";
+import { bumpVersionDir } from "./lib/version.mjs";
 import { withClientTsconfig } from "./mount-client-tsconfig.mjs";
 
 const DEFAULT_BACKEND_HOST = "127.0.0.1";
@@ -52,9 +52,7 @@ function printUsage() {
     console.log("Flags:");
     console.log("  --win|--linux|--mac  Packaging target (defaults to the host OS).");
     console.log("  --publish            Upload artifacts + latest.yml to the release feed.");
-    console.log("  --bump [repo]        Bump the app version before building. Defaults to");
-    console.log("                       the client's version file; pass a repo name (without");
-    console.log("                       the `cht-` prefix) to bump another one.");
+    console.log("  --bump               Bump the client's version file before building.");
     console.log("");
     console.log(`Known clients: ${known || "(none)"}`);
 }
@@ -78,52 +76,19 @@ function run(command, args, cwd, extraEnv = {}) {
 /**
  * Parse the arguments
  * @param {string[]} argv The arguments.
- * @returns {Object} The parsed arguments (isBuild, client, target, shouldPublish, shouldBump, bumpRepo).
+ * @returns {Object} The parsed arguments (isBuild, client, target, shouldPublish, shouldBump).
  */
 function parseArgs(argv) {
-    const withoutBuild = argv.filter((arg) => arg !== "build");
     const isBuild = argv.includes("build");
-    const { shouldBump, bumpRepo, rest } = parseBumpArg(withoutBuild);
-    const client = parsePositionalClientArg(rest);
+    const client = parsePositionalClientArg(argv.filter((arg) => arg !== "build"));
 
     return {
         isBuild,
         client,
         target: parseTarget(argv),
         shouldPublish: argv.includes("--publish"),
-        shouldBump,
-        bumpRepo
+        shouldBump: argv.includes("--bump")
     };
-}
-
-/**
- * `--bump` bumps the version of the client being built. `--bump <repo>` bumps a
- * named repo instead, where the name omits the `cht-` prefix. The value is
- * consumed so it is not mistaken for the positional client argument.
- *
- * @param {string[]} argv Arguments without the `build` subcommand.
- * @returns {{ shouldBump: boolean, bumpRepo: string | null, rest: string[] }}
- */
-function parseBumpArg(argv) {
-    const index = argv.indexOf("--bump");
-
-    if (index === -1) {
-        return { shouldBump: false, bumpRepo: null, rest: argv };
-    }
-
-    const rest = [...argv];
-
-    rest.splice(index, 1);
-
-    const candidate = rest[index];
-    let bumpRepo = null;
-
-    if (candidate && !candidate.startsWith("-")) {
-        bumpRepo = candidate;
-        rest.splice(index, 1);
-    }
-
-    return { shouldBump: true, bumpRepo, rest };
 }
 
 /**
@@ -236,21 +201,14 @@ function resolveClientVersion(resolved) {
 /**
  * Bump the version before the build reads it, so the installer, the updater
  * feed and `app.getVersion()` all carry the new number.
- *
- * `--bump` targets the client being built; `--bump <repo>` targets a named repo
- * (name without the `cht-` prefix).
+
  *
  * @param {string} root Workspace root.
  * @param {object} resolved Resolved client entry.
- * @param {string | null} bumpRepo Explicit repo name, when given.
  */
-function applyVersionBump(root, resolved, bumpRepo) {
+function applyVersionBump(root, resolved) {
     const clientDir = resolved.frontend?.clientDir;
-    const dir = bumpRepo
-        ? resolveRepoDir(root, bumpRepo)
-        : clientDir
-          ? path.resolve(root, clientDir)
-          : null;
+    const dir = clientDir ? path.resolve(root, clientDir) : null;
 
     if (!dir) {
         console.warn("[electron] --bump ignored: no version file for this client.");
@@ -969,7 +927,7 @@ function runBuild(client, target, shouldPublish, bump) {
     const entry = resolved.isDev ? null : loadClientConfig(resolved.name);
 
     if (bump?.shouldBump) {
-        applyVersionBump(root, resolved, bump.bumpRepo);
+        applyVersionBump(root, resolved);
     }
 
     const appVersion =
@@ -1067,7 +1025,7 @@ async function main() {
         process.exit(0);
     }
 
-    const { isBuild, client, target, shouldPublish, shouldBump, bumpRepo } = parseArgs(argv);
+    const { isBuild, client, target, shouldPublish, shouldBump } = parseArgs(argv);
 
     if (!client) {
         printUsage();
@@ -1077,7 +1035,7 @@ async function main() {
     assertKnownClient(client);
 
     if (isBuild) {
-        runBuild(client, target, shouldPublish, { shouldBump, bumpRepo });
+        runBuild(client, target, shouldPublish, { shouldBump });
         return;
     }
 
