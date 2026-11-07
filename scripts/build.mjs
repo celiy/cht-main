@@ -9,6 +9,7 @@ import {
 } from "./lib/clients.mjs";
 import { findUnsafeOutDir } from "./lib/outDir.mjs";
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
+import { bumpVersionDir, syncClientVersionFile } from "./lib/version.mjs";
 import { withClientTsconfig } from "./mount-client-tsconfig.mjs";
 
 /**
@@ -21,11 +22,14 @@ function printUsage() {
     console.log("Build/export frontend artifact for one client.");
     console.log("");
     console.log("Usage:");
-    console.log("  npx chtmain build <client> [--out:<dir>]");
+    console.log("  npx chtmain build <client> [--out:<dir>] [--bump] [--skip-version-bump]");
     console.log("  npm run build -- <client>");
     console.log("");
     console.log("  --out:<dir>  Export the artifact straight into <dir> (replaced on every build),");
     console.log("               relative to cht-main. Default: builds/<client>/dist.");
+    console.log("  --bump       Bump the client's version file before building.");
+    console.log("  --skip-version-bump  Do not create the client version file nor write the");
+    console.log("               cht-shared, cht-base and cht-design-system versions into it.");
     console.log("");
     console.log(`Known clients: ${known || "(none)"}`);
 }
@@ -108,6 +112,31 @@ function resolveOutDist(root, client, argv) {
 }
 
 /**
+ * Create the client version file if missing and write the local core versions into it
+ * @param {string} root The cht-main directory.
+ * @param {string} client The client id.
+ * @returns {void}
+ */
+function syncClientVersion(root, client) {
+    const clientDir = path.resolve(root, getClientDir(client));
+
+    try {
+        const result = syncClientVersionFile(root, clientDir);
+        const relative = path.relative(root, result.filePath);
+
+        if (result.skipped) {
+            console.warn(`[build] ${relative} not updated: ${result.skipped}.`);
+        } else if (result.created) {
+            console.log(`[build] Created ${relative} with the core versions.`);
+        } else if (result.changed) {
+            console.log(`[build] Updated the core versions in ${relative}.`);
+        }
+    } catch (error) {
+        console.warn(`[build] Client version file not updated: ${error.message}`);
+    }
+}
+
+/**
  * Main function
  * @returns {Promise<void>}
  */
@@ -131,6 +160,14 @@ function main() {
 
     const outDist = resolveOutDist(root, client, process.argv.slice(2));
 
+    if (process.argv.includes("--bump") && client !== "dev") {
+        const result = bumpVersionDir(path.resolve(root, getClientDir(client)));
+
+        console.log(
+            `[build] Bumped ${path.relative(root, result.filePath)}: ${result.from} -> ${result.to}`
+        );
+    }
+
     console.log(`[build] Building client "${client}" in cht-base...`);
 
     withClientTsconfig(client === "dev" ? "dev" : client, () => {
@@ -147,6 +184,10 @@ function main() {
 
         console.log(`[build] Exported artifact to ${path.relative(root, outDist)}`);
     });
+
+    if (client !== "dev" && !process.argv.includes("--skip-version-bump")) {
+        syncClientVersion(root, client);
+    }
 }
 
 main();

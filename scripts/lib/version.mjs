@@ -367,7 +367,7 @@ export function writeCoreVersionPins(root, pins, options = {}) {
         }
 
         const escaped = repo.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const linePattern = new RegExp(`^(${escaped}[:\\s=]+)\\d+\\.\\d+\\.\\d+\\s*$`, "im");
+        const linePattern = new RegExp(`^(${escaped}[:\\s=]+)\\d+\\.\\d+\\.\\d+[ \\t]*$`, "im");
 
         if (linePattern.test(raw)) {
             raw = raw.replace(linePattern, `$1${version}`);
@@ -385,4 +385,59 @@ export function writeCoreVersionPins(root, pins, options = {}) {
     fs.writeFileSync(filePath, raw, "utf8");
 
     return { filePath, written: true, changed };
+}
+
+/**
+ * Create the client `version` file when it is missing and write the local core
+ * versions as `cht-* x.y.z` pins. Existing pin lines are updated in place, so a
+ * repo is never listed twice. A `version.json` is left untouched.
+ *
+ * @param {string} root Workspace root.
+ * @param {string} clientDir Absolute client folder.
+ * @returns {{ filePath: string, created: boolean, changed: boolean, skipped?: string }}
+ */
+export function syncClientVersionFile(root, clientDir) {
+    const pins = readCoreLocalVersions(root);
+    let filePath = findVersionFile(clientDir);
+    let created = false;
+
+    if (filePath && path.extname(filePath) === ".json") {
+        return { filePath, created, changed: false, skipped: "version.json is not supported" };
+    }
+
+    if (!filePath) {
+        filePath = path.join(clientDir, "version");
+        fs.writeFileSync(filePath, "version 1.0.0\n", "utf8");
+        created = true;
+    }
+
+    const { changed } = writeCoreVersionPins(clientDir, pins);
+
+    return { filePath, created, changed: created || changed };
+}
+
+/**
+ * Pair each core repo's pin in the client `version` file with its local version.
+ *
+ * @param {string} root Workspace root.
+ * @param {string} clientDir Absolute client folder.
+ * @returns {Array<{ repo: string, pinned: string | null, local: string | null }>}
+ */
+export function readClientCoreVersions(root, clientDir) {
+    const filePath = findVersionFile(clientDir);
+    let raw = "";
+
+    try {
+        raw = filePath ? fs.readFileSync(filePath, "utf8") : "";
+    } catch {
+        raw = "";
+    }
+
+    const { requirements } = parseVersionFileText(raw);
+
+    return CORE_WORKSPACE_REPOS.map((repo) => ({
+        repo,
+        pinned: requirements[repo] ?? null,
+        local: readVersion(path.join(root, repo))?.version ?? null
+    }));
 }
