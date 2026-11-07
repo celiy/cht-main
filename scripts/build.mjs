@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
-import { getRootDir, listClientNames, parsePositionalClientArg } from "./lib/clients.mjs";
+import {
+    getClientDir,
+    getRootDir,
+    listClientNames,
+    parsePositionalClientArg
+} from "./lib/clients.mjs";
+import { findUnsafeOutDir } from "./lib/outDir.mjs";
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
 import { withClientTsconfig } from "./mount-client-tsconfig.mjs";
 
@@ -90,12 +95,12 @@ function resolveOutDist(root, client, argv) {
 
     const outDist = path.resolve(root, value);
 
-    // The folder is wiped before the copy, so it must never contain the workspace or the home.
-    const relativeRoot = path.relative(outDist, root);
-    const holdsWorkspace = !relativeRoot.startsWith("..") && !path.isAbsolute(relativeRoot);
+    // The folder is wiped before the copy, so it must never hold source.
+    const clientDirs = listClientNames().map((name) => path.resolve(root, getClientDir(name)));
+    const unsafe = findUnsafeOutDir(outDist, root, clientDirs);
 
-    if (holdsWorkspace || outDist === path.parse(outDist).root || outDist === os.homedir()) {
-        console.error(`[build] Refusing --out:${value}, it would wipe ${outDist}.`);
+    if (unsafe) {
+        console.error(`[build] Refusing --out:${value}, ${unsafe}. It would wipe ${outDist}.`);
         process.exit(2);
     }
 
