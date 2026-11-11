@@ -1,6 +1,8 @@
 Criar uma repo shared separada para as funções do Mecarvit
 
-Criar página para documentar o docsmarkdown como componente reusavel em outros clientes
+Item:
+    Novo variante: Chip
+        Parecido com chip, mas é apenas borda
 
 Input:
     Adicionar customização a tudo
