@@ -9,7 +9,7 @@ import {
 } from "./lib/clients.mjs";
 import { findUnsafeOutDir } from "./lib/outDir.mjs";
 import { spawnSyncInherit } from "./lib/runCommand.mjs";
-import { bumpVersionDir, syncClientVersionFile } from "./lib/version.mjs";
+import { bumpVersionDir, findVersionFile, syncClientVersionFile } from "./lib/version.mjs";
 import { withClientTsconfig } from "./mount-client-tsconfig.mjs";
 
 /**
@@ -160,8 +160,15 @@ function main() {
 
     const outDist = resolveOutDist(root, client, process.argv.slice(2));
 
+    let rollbackBump = null;
+
     if (process.argv.includes("--bump") && client !== "dev") {
-        const result = bumpVersionDir(path.resolve(root, getClientDir(client)));
+        const clientDir = path.resolve(root, getClientDir(client));
+        const versionFile = findVersionFile(clientDir);
+        const original = versionFile ? fs.readFileSync(versionFile, "utf8") : null;
+        const result = bumpVersionDir(clientDir);
+
+        rollbackBump = () => fs.writeFileSync(result.filePath, original, "utf8");
 
         console.log(
             `[build] Bumped ${path.relative(root, result.filePath)}: ${result.from} -> ${result.to}`
@@ -170,20 +177,29 @@ function main() {
 
     console.log(`[build] Building client "${client}" in cht-base...`);
 
-    withClientTsconfig(client === "dev" ? "dev" : client, () => {
-        if (client === "dev") {
-            run("npm", ["run", "build"], baseDir);
-        } else {
-            run("npm", ["run", "build:client"], baseDir, { CLIENT: client });
+    try {
+        withClientTsconfig(client === "dev" ? "dev" : client, () => {
+            if (client === "dev") {
+                run("npm", ["run", "build"], baseDir);
+            } else {
+                run("npm", ["run", "build:client"], baseDir, { CLIENT: client });
+            }
+
+            const distSrc = path.join(baseDir, "dist");
+            fs.rmSync(outDist, { recursive: true, force: true });
+            fs.mkdirSync(path.dirname(outDist), { recursive: true });
+            copyDirRecursive(distSrc, outDist);
+
+            console.log(`[build] Exported artifact to ${path.relative(root, outDist)}`);
+        });
+    } catch (error) {
+        if (rollbackBump) {
+            rollbackBump();
+            console.error("[build] Build failed: version bump reverted.");
         }
 
-        const distSrc = path.join(baseDir, "dist");
-        fs.rmSync(outDist, { recursive: true, force: true });
-        fs.mkdirSync(path.dirname(outDist), { recursive: true });
-        copyDirRecursive(distSrc, outDist);
-
-        console.log(`[build] Exported artifact to ${path.relative(root, outDist)}`);
-    });
+        throw error;
+    }
 
     if (client !== "dev" && !process.argv.includes("--skip-version-bump")) {
         syncClientVersion(root, client);
