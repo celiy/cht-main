@@ -4,6 +4,9 @@ Item:
     Novo variante: Chip
         Parecido com chip, mas é apenas borda
 
+Button:
+    Novo variante contrast
+
 Input:
     Adicionar customização a tudo
 
